@@ -1,0 +1,529 @@
+$color-separator: #343A45;
+$border-radius: 15px;
+$border-width: 3px;
+$border-style: #{$border-width} solid #{$color-separator};
+
+$color-active: #04AA6D;
+$color-background-1: #23272f;
+$color-background-1-overlay: hsl(210, 15%, 26%);
+$color-background-2: #04aa6d63;
+$color-background-2-overlay: hsl(148, 95%, 24%);
+// $color-background-2: #343a459f;
+$color-text-1: #F6F7F9;
+$color-text-2: #109FAB;
+
+$height-navbar-top: 4rem;
+
+$margin-left: 10px;
+$margin-navbarTop: 5px;
+$margin-small: 3px;
+
+$padding-x: 10px;
+$padding-y: 8px;
+
+$width-screen-medium: 768px;
+
+:export {
+    borderWidth: $border-width;
+}
+
+@font-face {
+    font-family: "Optimistic Display";
+    font-display: swap;
+    font-style: normal;
+    font-weight: 100;
+    src: url(https://react.dev/fonts/Optimistic_Display_Viet_W_Bd.woff2) format("woff2");
+}
+
+//
+//
+//
+
+//
+// TODO
+//
+
+.active {
+    background-color: $color-active !important;
+    border-radius: $border-radius;
+    color: white;
+    text-align: var // border-width: 10px;
+}
+
+.flex-container {
+    display: flex;
+    flex-wrap: wrap;
+    border: 1px solid black;
+
+    align-items: stretch;
+}
+
+@media (hover: none) {
+    .desktop {
+        display: none;
+    }
+}
+
+@media (hover: hover) {
+    .mobile {
+        display: none;
+    }
+}
+
+.flex-item {
+    flex-grow: 1;
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+    /* Horizontally center the content */
+    background-color: lightblue;
+    border: 1px solid red;
+    /* Just for visualization */
+    box-sizing: border-box;
+    /* Include padding and border in the element's total width and height */
+    padding: 10px;
+    /* Optional: Add padding for visual clarity */
+    text-align: center;
+    /* Center the content horizontally */
+    text-decoration: none;
+    /* Remove underline for links */
+    color: black;
+    /* Set text color */
+    margin: 5px;
+    /* Optional: Add margin for spacing between items */
+}
+
+.block {
+    display: block;
+}
+
+.hidden {
+    display: none;
+    // transform: translateX(-1000px);
+
+    // only delays; it is still abrupt;
+    // transition: visibility 1s ease;
+    // transform: rotateX(100deg)
+}
+
+
+
+.desktop-dropdown {
+    // background-color: #be2828;
+    display: inline-block;
+    // margin: 10px;
+    position: relative;
+    // width: 10%;
+    // width: fit-content;
+
+    @media (hover: hover) {
+        &:hover .desktop-dropdown-content {
+            display: block;
+        }
+    }
+}
+
+.desktop-dropdown-content {
+    background-color: $color-background-1-overlay;
+    // background-color: rgba(86, 148, 38, 0.685);
+    // opacity: 100%;
+    display: none;
+    margin: 0px;
+    position: absolute;
+    box-sizing: border-box;
+    // width: 100%;
+    z-index: 1000;
+
+    > a {
+        display: block;
+        margin: 3px;
+    }
+}
+
+
+// @media (hover: none) {
+//     .dropdown.active .dropdown-content {
+//         display: block;
+//     }
+// }
+
+//
+//
+//
+
+.desktop-navbar {
+    background-color: aqua;
+}
+
+.mobile-sidebar {
+    background-color: $color-background-1-overlay;
+    height: 100vh;
+    position: fixed;
+    width: min(500px, 70vw);
+    z-index: 100;
+    left: max(-500px, -70vw);
+    // offset: -min(500px, 70vw);
+    overflow-y: scroll;
+
+
+    // transition: cubic-bezier(0.075, 0.82, 0.165, 1) 1s;
+    // transition: transform 0.5s ease-out 0s;
+    // transition-property: "";
+
+    > button {
+        background-color: $color-background-1;
+        color: $color-text-1;
+        text-align: left;
+        width: 100%;
+    }
+
+    a {
+        margin-left: 20px;
+        transform: -min(500px, 70vw);
+        margin-bottom: 40px;
+    }
+}
+
+.sticky {
+    top: 0;
+    position: sticky;
+}
+
+footer {
+    height: 50px;
+}
+
+.mobile-topbar {
+    background-color: $color-background-1-overlay;
+}
+
+// large
+@media (min-width: 992px) {
+    .lg-flex {
+        display: flex;
+    }
+}
+
+//orientation; TODO?;
+//hover
+@media (hover: none) {
+    .desktop-dropdown, .desktop-navbar {
+        display: none;
+    }
+}
+
+@media (hover: hover) {
+    .mobile-dropdown, .mobile-topbar {
+        display: none;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .md-flex {
+        display: flex;
+    }
+}
+
+// small
+@media (max-width: 767px) {}
+
+//
+//
+//
+
+.bg-color {
+    background-color: $color-background-1;
+}
+
+@mixin block {
+    display: block;
+}
+
+.block-inline {
+    display: inline-block
+}
+
+.border-bottom {
+    border-bottom: $border-style;
+}
+
+.border-right {
+    border-right: $border-style;
+}
+
+.border-left {
+    border-left: $border-style;
+}
+
+.border-top {
+    border-top: $border-style;
+}
+
+// .fixed-border-bottom {
+//     position: fixed;
+//     height: calc(100vh - $border-width);
+//     width: 100vw;
+// }
+
+.flex {
+    display: flex;
+}
+
+.flex-column {
+    flex-flow: column; // sets flow-direction as well;
+}
+
+.flex-row {
+    flex-flow: row;
+}
+
+.flex-column > .flex,
+.flex-row > .flex {
+    margin: $margin-small;
+}
+
+.flex-cross-center {
+    justify-content: center;
+}
+
+.flex-main-center {
+    align-items: center;
+}
+
+.flex-main-stretch {
+    align-items: stretch;
+}
+
+// align-items // single-line
+// justify-content // flex multi-line
+// justify-items // grid not flex
+// align-content // single-line
+// text-align // inner html text block
+// flex-wrap
+// word-wrap
+
+
+// .flex-item-grow {
+//     display: flex;
+//     flex: 1;
+// }
+
+.flex-self-center {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.hover-style-1:hover {
+    background-color: $color-background-2;
+    border-color: $color-background-2;
+    border-radius: $border-radius;
+}
+
+.hover-style-2:hover {
+    background-color: $color-background-2;
+    border-color: $color-background-2;
+    border-bottom-right-radius: $border-radius;
+    border-top-right-radius: $border-radius;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.height-full {
+    min-height: 100%;
+}
+
+.heightfull {
+    min-height: 100%;
+}
+
+// .items-center-1 {
+//     align-items: center;
+// }
+
+.flex-center {
+    align-items: center;
+}
+
+.flex-start {
+    align-items: flex-start;
+}
+
+// only for grid;
+// .items-center-2 {
+//     justify-items: center;
+// }
+
+// .items-start {
+//     align-items: flex-start;
+// }
+
+.margin-left {
+    margin-left: $margin-left;
+}
+
+.margin-left-2 {
+    margin-left: 2 * $margin-left;
+}
+
+.margin-empty {
+    margin: 0%;
+}
+
+.media-flex {
+    display: none;
+}
+
+.padding-empty {
+    padding: 0%;
+}
+
+.self-center {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}
+
+.self-right {
+    margin-left: auto !important;
+}
+
+.sticky {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0px;
+    z-index: 100;
+}
+
+.sticky-offset {
+    top: $height-navbar-top
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-nowrap {
+    text-wrap: nowrap;
+}
+
+.text-wrap {
+    text-wrap: wrap;
+}
+
+.width-full {
+    min-width: 100%;
+}
+
+// // webkit is not available on all browsers;
+// ::-webkit-scrollbar {
+//     width: 12px;
+// }
+// 
+// ::-webkit-scrollbar-thumb {
+//     background: #555;
+//     border-radius: 6px;
+// }
+// 
+// ::-webkit-scrollbar-thumb:hover {
+//     background: #888;
+// }
+
+//
+//TODO
+//
+
+//
+// based on types;
+//
+
+
+
+//TODO
+a, button {
+    border: 3px solid aqua;
+
+    // outside of the element box;
+    // outline: 3px solid powderblue;
+    border-style: groove;
+
+    // what is a line box?; TODO;
+    // vertical-align: center;
+}
+
+a {
+    color: $color-text-1;
+    text-decoration: none;
+}
+
+a:hover, a:visited {
+    color: $color-text-1;
+}
+
+body {
+    background-color: $color-background-1;
+    color: $color-text-1;
+    // font-family: "Optimistic Display";
+    font-size: 1em; // otherwise looks bad on mobile;
+    margin: 0px;
+    overflow-y: scroll;
+    overscroll-behavior: contain; // prevent side-effects like a site refresh?;
+    padding: 0px;
+
+    // bug?; otherwise, makes it still scroll a pixel or so; no it is because top 
+    // does not account for borders; it scrolls the border-width amount;
+    // border-top: 0px; 
+    // border-bottom: 0px;
+}
+
+html {
+    scrollbar-color: hsl(0, 0%, 50%) transparent;
+    scrollbar-gutter: stable both-edges;
+}
+
+main {
+    margin-left: 30px;
+    margin-right: 60px
+}
+
+// ul, li {
+//     display: flex;
+// }
+
+li a {
+    @include block;
+    padding-bottom: $padding-y;
+    padding-left: $padding-x;
+    padding-right: $padding-x;
+    padding-top: $padding-y;
+    width: 100%; // otherwise, border might be outside of the hover effect;
+}
+
+// pre {
+//     text-wrap: wrap;
+//     overflow-wrap: anywhere; // does nothing?;
+// }
+
+strong {
+    // font-weight: 800
+    font-family: math;
+}
+
+ul {
+    // padding: 0;
+    // margin: $margin-navbarTop;
+    // margin-inline-start: $margin-left;
+    // margin-bottom: 5px;
+    list-style: "- ";
+    // margin-top: 20px;
+    // font-size: 1.6em;
+}
+
+li {
+    line-height: 1.5em;
+    margin-bottom: 10px;
+    // font-size: 0.625em;
+}
