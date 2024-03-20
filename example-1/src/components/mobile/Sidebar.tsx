@@ -1,235 +1,154 @@
-import { useContext, useEffect } from "react"
-import MobileDropdown1Component from "./Dropdown1"
-import { SidebarContext, TopbarContext } from "../Layout"
-import MobileDropdown2Component from "./Dropdown2"
-import Hammer, { DIRECTION_HORIZONTAL } from "hammerjs"
+import { useContext, useEffect, useMemo } from 'react'
+import MobileDropdown1Component from './Dropdown1'
+import { SidebarContext, mainElement } from '../Layout'
+import MobileDropdown2Component from './Dropdown2'
+import Hammer from 'hammerjs'
+import { buttonElement } from './Topbar'
+
+let sidebarElement: HTMLElement | null = null
 
 function MobileSidebarComponent() {
     const sidebarContext = useContext(SidebarContext)
-    const topbarContext = useContext(TopbarContext)
+    const bodyElement = document.querySelector('main')
 
-    const applySidebarState = (sidebar: HTMLElement | undefined, isOpen: boolean) => {
-        if (sidebar == null) return
-        console.log("update sidebar state")
-        // sidebar.style.transition = "transform 0.5s ease"
-        sidebar.style.transition = "transform 0.5s ease-out 0s"
+    const manager = useMemo(() => {
+        return bodyElement != null ? new Hammer.Manager(bodyElement) : undefined
+    }, [bodyElement])
+    const recognizer = useMemo(() => new Hammer.Pan(), [])
 
-        if (isOpen) {
-            console.log("open")
-            // sidebar.classList.remove("hidden")
-            sidebar.style.transform = 'translateX(' + sidebar.offsetWidth + 'px)'
-            return
-        }
-
-        console.log("closed")
-        sidebar.style.transform = "translateX(0)"
-    }
+    //
+    // swipe
+    //
 
     // apply current sidebar state;
     useEffect(() => {
-        // "== null" checks for null and undefined;
         if (sidebarContext == null) return
-        const sidebar = sidebarContext.sidebarState?.sidebar
-        applySidebarState(sidebar, sidebarContext.openState.isOpen)
-        // const classList = sidebarContext.sidebarState?.sidebar?.classList
-        // if (classList == null) return
+        if (manager == null) return
+        if (sidebarElement == null) return
+        if (mainElement == null) return
 
+        const disableTouchEvents = () => {
+            console.log('disableTouchEvents')
+            manager.remove(recognizer)
+        }
 
-        // const width = -Math.min(500, visualViewport?.width ?? 500) - 50
-        // sidebar.style.transform = 'translateX(' + width.toString() + 'px)'
-        // sidebar.classList.add("hidden")
-    }, [sidebarContext])
+        const enableTouchEvents = () => {
+            console.log('enableTouchEvents')
+            manager.add(recognizer)
+            var startX = 0
+            var currentX = 0
 
-    // close side when clicking outside;
+            manager.on('panstart', (event) => {
+                console.log('panstart')
+                // console.log('target ' + event.target)
+                startX = 0
+                currentX = 0
+            })
+
+            manager.on('panmove', (event) => {
+                if (sidebarElement == null) return
+                // console.log('panmove')
+                var deltaX = event.deltaX
+                currentX = startX + deltaX
+                if (currentX >= 0) return
+
+                sidebarElement.style.transition = 'transform 0s ease'
+                const currentOffset = sidebarElement.offsetWidth + currentX
+                sidebarElement.style.transform = `translateX(${currentOffset}px)`
+            })
+
+            manager.on('panend', () => {
+                if (sidebarElement == null) return
+                console.log('panend')
+
+                if (currentX < -0.5 * sidebarElement.offsetWidth) {
+                    // isOpen is not updated immediately;
+                    // this is enough since the isOpen state is changed; hence, applySidebarState()
+                    // is called automatically;
+                    sidebarContext.openState.setIsOpen(false)
+                    return
+                }
+
+                // not needed; the isOpen state is not changed;
+                // sidebarContext.openState.setIsOpen(true)
+
+                // cannot call applySidebarState() for this since it depends on this function, i.e. enableTouchEvents();
+                sidebarElement.style.transition = 'transform 0.5s ease-out 0s'
+                sidebarElement.style.transform = `translateX(${sidebarElement.offsetWidth}px)`
+            })
+        }
+
+        console.log('update sidebar state')
+        // sidebar.style.transition = 'transform 0.5s ease'
+        sidebarElement.style.transition = 'transform 0.5s ease-out 0s'
+
+        if (sidebarContext.openState.isOpen) {
+            console.log('open')
+            // sidebar.classList.remove('hidden')
+            mainElement.style.backgroundColor = "hsla(0, 0%, 0%, 0.3)"
+            sidebarElement.style.transform = `translateX(${sidebarElement.offsetWidth}px)`
+            enableTouchEvents()
+            return
+        }
+
+        console.log('closed')
+        mainElement.style.backgroundColor = "hsla(0, 0%, 0%, 0)"
+        sidebarElement.style.transform = 'translateX(0)'
+        disableTouchEvents()
+    }, [manager, recognizer, sidebarContext])
+
+    //
+    // click
+    //
+
     useEffect(() => {
-        if (sidebarContext == null) return
-        if (topbarContext == null) return
-
         const handleClickOutside = (event: MouseEvent) => {
+            if (sidebarContext == null) return
+            console.log('isOpen ' + sidebarContext.openState.isOpen)
             if (!sidebarContext.openState.isOpen) return
-            const sidebar = sidebarContext.sidebarState.sidebar
-            if (sidebar == null) return
-            // console.log(event.target)
-            // console.log(sidebar.contains(event.target as Node))
-            if (sidebar.contains(event.target as Node)) return
+            if (sidebarElement == null) return
+            if (sidebarElement.contains(event.target as Node)) return
 
             // const topbar = topbarContext?.topbarState.topbar
             // if (topbar == null) return
             // if (topbar.contains(event.target as Node)) return
 
-            const button = topbarContext?.buttonState.button
-            if (button == null) return
-            if (button.contains(event.target as Node)) return
+            if (buttonElement == null) return
+            if (buttonElement.contains(event.target as Node)) return
 
-            console.log("close sidebar because clicked outside")
+            console.log('close sidebar because clicked outside')
             sidebarContext.openState.setIsOpen(false)
         }
 
-        document.addEventListener('click', (event) => handleClickOutside(event))
-        return () => {
-            document.removeEventListener('click', (event) => handleClickOutside(event))
-        }
-    }, [sidebarContext, topbarContext])
+        document.addEventListener('click', handleClickOutside)
+        return () => { document.removeEventListener('click', handleClickOutside) }
 
-    // close sidebar when swiping left;
-    //     useEffect(() => {
-    //         let touchStartX: number | null = null
-    //         let touchEndX: number | null = null
-    // 
-    //         const handleTouchStart = (event: TouchEvent) => {
-    //             console.log("1")
-    //             touchStartX = event.touches[0].clientX
-    //         }
-    // 
-    //         const handleTouchMove = (event: TouchEvent) => {
-    //             touchEndX = event.touches[0].clientX
-    //             // event.touches[0].
-    //         }
-    // 
-    //         const handleTouchEnd = () => {
-    //             if (touchStartX == null) {
-    //                 touchEndX = null
-    //                 return
-    //             }
-    // 
-    //             if (touchEndX == null) {
-    //                 touchStartX = null
-    //                 return
-    //             }
-    // 
-    //             const deltaX = touchEndX - touchStartX
-    //             if (deltaX < -50) {
-    //                 // swipe left to close the sidebar;
-    //                 console.log("swipe left with deltaX " + deltaX)
-    //                 sidebarContext?.openState.setIsOpen(false)
-    //             }
-    //         }
-    // 
-    //         document.addEventListener('touchstart', (event) => handleTouchStart(event))
-    //         document.addEventListener('touchmove', (event) => handleTouchMove(event))
-    //         document.addEventListener('touchend', () => handleTouchEnd())
-    // 
-    //         return () => {
-    //             document.removeEventListener('touchstart', (event) => handleTouchStart(event))
-    //             document.removeEventListener('touchmove', (event) => handleTouchMove(event))
-    //             document.removeEventListener('touchend', () => handleTouchEnd())
-    //         }
-    //     }, [sidebarContext])
-
-    //     close sidebar when swiping left
-    //     useEffect(() => {
-    //         // let body = document.querySelector('body')
-    //         // if (body == null) return
-    //         if (sidebarContext == null) return
-    //         const sidebar = sidebarContext.sidebarState.sidebar
-    //         if (sidebar == null) return
-    // 
-    //         let manager = new Hammer.Manager(sidebar)
-    //         // let manager = new Hammer.Manager(body)
-    //         let swipe = new Hammer.Swipe()
-    //         manager.add(swipe)
-    //         // let deltaX = 0
-    // 
-    //         const handleSwipeLeft = (event: HammerInput) => {
-    //             // deltaX = deltaX + event.deltaX
-    //             // let direction = event.offsetDirection
-    // 
-    //             // if (direction === DIRECTION_LEFT) {
-    //             // console.log("deltaX" + deltaX) //TODO
-    //             sidebarContext?.openState.setIsOpen(false)
-    //             // }
-    //         }
-    // 
-    //         manager.on('swipeleft', (event) => { handleSwipeLeft(event) })
-    //         return () => { manager.destroy() }
-    //     }, [sidebarContext])
-
-    // move sidebar when panning left
-    useEffect(() => {
-        if (sidebarContext == null) return
-        const sidebar = sidebarContext.sidebarState.sidebar
-        console.log("aaa")
-        if (sidebar == null) return
-        console.log("bbb")
-        var manager = new Hammer.Manager(sidebar)
-        manager.add(new Hammer.Pan({ direction: DIRECTION_HORIZONTAL }))
-        // const a: RecognizerOptions
-
-        var startX = 0
-        var currentX = 0
-
-        manager.on('panstart', function (event) {
-            // console.log("111")
-            startX = 0
-            currentX = 0
-            // startX = event.
-            // startX = sidebar.offsetLeft
-        })
-
-        manager.on('panmove', function (event) {
-            // console.log("222")
-            var deltaX = event.deltaX
-            currentX = startX + deltaX
-            if (currentX < 0) {
-                sidebar.style.transition = "transform 0s ease"
-                // console.log("offsetWidth " + sidebar.offsetWidth)
-                // console.log("currentX " + currentX)
-                const currentOffset = sidebar.offsetWidth + currentX
-                // console.log("currentX " + currentOffset)
-                sidebar.style.transform = 'translateX(' + currentOffset + 'px)'
-            }
-        })
-
-        manager.on('panend', function (event) {
-            // const width = -Math.min(500, visualViewport?.width ?? 500)
-            // sidebar.style.transition = "transform 0.5s ease-out 0s;"
-            // console.log("panend ")
-            // console.log("width " + sidebar.clientWidth)
-            // console.log("width " + sidebar.offsetWidth)
-            // console.log("currentX " + currentX)
-            // console.log("currentX " + (-0.5 * sidebar.offsetWidth))
-
-            if (currentX < -0.5 * sidebar.offsetWidth) {
-                // console.log("1")
-                // sidebar.style.transform = 'translateX(' + width.toString() + 'px)'
-                // the apply effects seems to run first and might leave these not reset the changes
-                // made to transition;
-                sidebarContext.openState.setIsOpen(false)
-                applySidebarState(sidebar, false)
-                // sidebar.style.transform = 'translateX(0)'
-
-                // sidebar.style.transform = 'translateX(-200px)'
-                // const temp = -Math.min(500, visualViewport?.width ?? 500) - 50
-                return
-            }
-
-            // console.log("2")
-            sidebarContext.openState.setIsOpen(true)
-            applySidebarState(sidebar, true)
-            // sidebar.style.transform = 'translateX(0)'
-        })
-
-        //TODO
-        // manager.off("panstart")
-        // manager.off("panmove")
-        // manager.off("panend")
+        // this is bad; arrow functions override the "this" keyword; normally it would
+        // refer to document; this way the listener changes and is registered multiple times;
+        // document.addEventListener('click', (event) => handleClickOutside(event))
+        // return () => { document.removeEventListener('click', (event) => handleClickOutside(event)) }
     }, [sidebarContext])
 
     //
     //
     //
 
-    const initializeSidebar = (sidebar: HTMLElement | null) => {
-        if (sidebar == null) return
-        sidebarContext?.sidebarState.setSidebar(sidebar)
+    // this is called when the component mounts or unmounts; and called when it re-renders;
+    const initializeSidebarReference = (element: HTMLElement | null) => {
+        if (sidebarElement != null) return
+        if (element == null) return // should never happen!!;
+        console.log('initializeSidebarReference')
+        sidebarElement = element
+        Object.freeze(sidebarElement)
     }
 
-    return (<nav ref={(element) => initializeSidebar(element)} className="mobile-sidebar">
-        <a className="block" href="/home" target="_self">Link 1</a>
-        <a className="block" href="/home">Link 2</a>
+    return (<nav ref={initializeSidebarReference} className="mobile-sidebar">
+        <a href="/home">Link 1</a>
+        <a href="/home">Link 2</a>
         <MobileDropdown1Component />
         <MobileDropdown2Component />
     </nav>)
 }
 
 export default MobileSidebarComponent
+export { sidebarElement }

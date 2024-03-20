@@ -1,4 +1,4 @@
-import DesktopDropdown1Component from "./Dropdown1"
+import DesktopDropdown1Component from './Dropdown1'
 
 function DesktopTopbarComponent() {
     return (<nav className="desktop-navbar">

@@ -9,34 +9,27 @@ interface SidebarState {
         isOpen: boolean
         setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
     }
-    sidebarState: {
-        sidebar: HTMLElement | undefined
-        setSidebar: React.Dispatch<React.SetStateAction<HTMLElement | undefined>>
-    }
-}
-
-interface TopbarContextData {
-    // maybe split in burger and X;
-    buttonState: {
-        button: HTMLButtonElement | undefined
-        setButton: React.Dispatch<React.SetStateAction<HTMLButtonElement | undefined>>
-    }
-    topbarState: {
-        topbar: HTMLElement | undefined
-        setTopbar: React.Dispatch<React.SetStateAction<HTMLElement | undefined>>
-    }
 }
 
 // createContext<>(undefined) is weird; I read that undefined mean to default value; yet
 // I have to set a default value and "undefined" is accepted as one; :/
 const SidebarContext = React.createContext<SidebarState | undefined>(undefined)
-const TopbarContext = React.createContext<TopbarContextData | undefined>(undefined)
+let mainElement: HTMLElement | null = null
 
 function LayoutComponent() {
-    const [button, setButton] = useState<HTMLButtonElement | undefined>()
     const [isOpen, setIsOpen] = useState(false)
-    const [sidebar, setSidebar] = useState<HTMLElement | undefined>()
-    const [topbar, setTopbar] = useState<HTMLElement | undefined>()
+    // const [sidebar, setSidebar] = useState<HTMLElement | undefined>()
+    // const [topbar, setTopbar] = useState<HTMLElement | undefined>()
+
+    const initializeMainReference = (element: HTMLElement | null) => {
+        if (mainElement != null) return
+        if (element == null) return
+        console.log('initializeMainReference')
+        mainElement = element
+
+        // only accounts for properties; the reference can still be changed;
+        // Object.freeze(mainElement)
+    }
 
     return (<>
         <div className="desktop sticky">
@@ -46,35 +39,27 @@ function LayoutComponent() {
         </div>
 
         <div className="mobile sticky">
-            <TopbarContext.Provider value={{
-                buttonState: { button, setButton },
-                topbarState: { topbar, setTopbar }
+            <SidebarContext.Provider value={{
+                openState: { isOpen, setIsOpen },
+                // sidebarState: { sidebar, setSidebar }
             }}>
-                <SidebarContext.Provider value={{
-                    openState: { isOpen, setIsOpen },
-                    sidebarState: { sidebar, setSidebar }
-                }}>
-                    <header>
-                        <MobileTopbarComponent />
-                    </header>
-                    <aside>
-                        <MobileSidebarComponent />
-                    </aside>
-                </SidebarContext.Provider>
-            </TopbarContext.Provider>
+                <header>
+                    <MobileTopbarComponent />
+                </header>
+                <aside>
+                    <MobileSidebarComponent />
+                </aside>
+            </SidebarContext.Provider>
         </div >
 
-        <main>
+        <main ref={initializeMainReference}>
             <Outlet />
+            <footer />
         </main>
-
-        <footer>
-
-        </footer>
     </>)
 }
 
 export default LayoutComponent
 export type { SidebarState }
 export { SidebarContext }
-export { TopbarContext }
+export { mainElement }

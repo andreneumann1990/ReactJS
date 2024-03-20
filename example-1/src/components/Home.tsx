@@ -13,6 +13,8 @@ function HomeComponent() {
             <li>animations;</li>
             <li>user login;</li>
             <li>search bar;</li>
+            <li>use Node.js?; back-end?;</li>
+            <li>use icons sheets</li>
         </ul>
 
         <h2>Content:</h2>
@@ -27,7 +29,7 @@ function HomeComponent() {
 
         <h2>Context:</h2>
         <ul>
-            <li>somewhat inspired by the Steam website;</li>
+            <li>similar to some features on the Steam website;</li>
             <li>it has a static desktop page (header) with dropdown menues;</li>
             <li>it has a mobile version where that stuff is in a sidebar;</li>
             <li>you can close the sidebar by swiping or panning outside;</li>

@@ -19,10 +19,10 @@ function MobileDropdown2Component() {
     }
 
     return (<>
-        <button className="mobile-dropdown block" onPointerUp={toggleContent}>Dropdown 2</button>
-        <div ref={content} className="mobile-dropdown-content block hidden">
-            <a className="block" href="/home">Link 9</a>
-            <a className="block" href="/home">Link 10</a>
+        <button className="mobile-dropdown" onPointerUp={toggleContent}>Dropdown 2</button>
+        <div ref={content} className="mobile-dropdown-content hidden">
+            <a href="/home">Link 9</a>
+            <a href="/home">Link 10</a>
         </div>
     </>)
 }

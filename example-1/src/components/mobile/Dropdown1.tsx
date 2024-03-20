@@ -19,14 +19,20 @@ function MobileDropdown1Component() {
     }
 
     return (<>
-        <button className="mobile-dropdown block" onPointerUp={toggleContent}>Dropdown 1</button>
-        <div ref={content} className="mobile-dropdown-content block hidden">
-            <a className="block" href="/home">Link 3</a>
-            <a className="block" href="/home">Link 4</a>
-            <a className="block" href="/home">Link 5</a>
-            <a className="block" href="/home">Link 6</a>
-            <a className="block" href="/home">Link 7</a>
-            <a className="block" href="/home">Link 8</a>
+        <button className="mobile-dropdown" onPointerUp={toggleContent}>
+            <div className="grid grid-row-80-20">
+                Dropdown 1
+                <i className="material-icons grid-row-fit-right">computer</i>
+                <i className="material-icons grid-row-fit-right hidden">traffic</i>
+            </div>
+        </button>
+        <div ref={content} className="mobile-dropdown-content hidden">
+            <a href="/home">Link 3</a>
+            <a href="/home">Link 4</a>
+            <a href="/home">Link 5</a>
+            <a href="/home">Link 6</a>
+            <a href="/home">Link 7</a>
+            <a href="/home">Link 8</a>
         </div>
     </>)
 }
