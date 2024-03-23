@@ -2,7 +2,9 @@ import { Outlet } from "react-router-dom"
 import DesktopTopbarComponent from "./desktop/Topbar"
 import MobileTopbarComponent from "./mobile/Topbar"
 import MobileSidebarComponent from "./mobile/Sidebar"
-import React, { useState } from "react"
+import React, { useEffect, useState } from "react"
+import tinycolor from 'tinycolor2'
+
 
 interface SidebarState {
     openState: {
@@ -17,6 +19,45 @@ const SidebarContext = React.createContext<SidebarState | undefined>(undefined)
 let mainElement: HTMLElement | null = null
 
 function LayoutComponent() {
+
+    //TODO
+    useEffect(() => {
+        const clickElement = function (event: PointerEvent) {
+            const target = event.target as HTMLElement | null
+            if (target == null) return
+
+            const getAnchorContainer = function (target: HTMLElement): HTMLAnchorElement | null {
+                if (target instanceof HTMLAnchorElement) return target
+                if (target.parentElement == null) return null
+                return getAnchorContainer(target.parentElement)
+            }
+
+            const anchorElement = getAnchorContainer(target)
+            if (anchorElement == null) return
+            // console.log(`target 1 ${event.target}`)
+            // console.log(`target 2 ${event.currentTarget}`)
+            // event.curre
+            // if (!(target instanceof HTMLAnchorElement)) return
+            // if (target.classList == null) return
+            const backgroundColorString = anchorElement.style.backgroundColor
+            const backgroundColor = tinycolor(anchorElement.style.backgroundColor)
+            // const alpha = 0.3
+            // target.style.
+            anchorElement.animate({ backgroundColor: [backgroundColorString, backgroundColor.brighten(50).toString(), backgroundColorString] }, 300)
+            // target.classList.add('clicked')
+
+            // Remove the 'clicked' class after the animation finishes
+            // setTimeout(() => {
+            // target.classList.remove('clicked')
+            // }, 300)
+
+        }
+
+        document.addEventListener('pointerup', clickElement)
+        return () => { document.removeEventListener('pointerup', clickElement) }
+    }, [])
+
+
     const [isOpen, setIsOpen] = useState(false)
     // const [sidebar, setSidebar] = useState<HTMLElement | undefined>()
     // const [topbar, setTopbar] = useState<HTMLElement | undefined>()
@@ -52,10 +93,13 @@ function LayoutComponent() {
             </SidebarContext.Provider>
         </div >
 
-        <main ref={initializeMainReference}>
-            <Outlet />
-            <footer />
-        </main>
+        <div className="overlay-anchor">
+            <div className="overlay-transparent overlay-front" />
+            <main ref={initializeMainReference} tabIndex={1}>
+                <Outlet />
+                <footer />
+            </main>
+        </div>
     </>)
 }
 

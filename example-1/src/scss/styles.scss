@@ -1,26 +1,44 @@
 $color-active: #04AA6D;
 
-$color-background-1: #23272f;
-$color-background-1-opague: hsla(220, 15%, 16%, 0.7);
-$color-background-1-overlay: hsl(210, 15%, 26%);
+// $color-background-1: #23272f;
+// $color-background-2: #04aa6d63;
 
-$color-background-2: #04aa6d63;
-$color-background-2-overlay: hsl(148, 95%, 24%);
+$color-hover-dark: hsla(0, 0%, 0%, 0.2);
+$color-hover-light: hsla(0, 0%, 100%, 0.2);
+$color-same: hsla(0, 0%, 0%, 0);
 
 $color-separator: #343A45;
 
-$color-text-1: #F6F7F9;
+$color-text-1: hsl(0, 0%, 100%);
+$color-text-active: hsl(0, 0%, 100%);
+$color-text-inactive: hsl(0, 0%, 70%);
+// $color-text-1: hsl(220, 20%, 97%);
 $color-text-2: #109FAB;
+
+// color scheme?
+$color-dark-1: hsl(220, 15%, 16%);
+$color-dark-2: hsl(186, 89%, 21%); //TODO
+$color-light-1: hsl(220, 30%, 30%);
+$color-light-2: hsl(99, 23%, 39%); //TODO
+$color-light-3: hsl(51, 94%, 27%); //TODO
+
+$width-scrollbar: 17px;
+$height-mobile-topbar: 40px;
+
 
 //
 // TODO
 //
 
-//TODO; debug;
-a, button {
-    border: 3px solid aqua;
-    border-style: groove;
+* {
+    box-sizing: border-box;
 }
+
+//TODO; debug;
+// a, button {
+// border: 3px solid aqua;
+// border-style: groove;
+// }
 
 // .desktop-navbar {
 //     background-color: aqua;
@@ -97,10 +115,6 @@ a, button {
 // based on class;
 //
 
-.hidden {
-    display: none;
-}
-
 .flex {
     display: flex;
 }
@@ -157,102 +171,157 @@ a, button {
 }
 
 .grid-row-fit-right {
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
     width: fit-content;
     margin-left: auto !important;
 }
 
-.mobile-sidebar {
-    position: fixed;
+.hidden {
+    display: none;
+}
 
-    // fill out the whole left side;
-    height: calc(100vh - 50px);
-    // height: 100%;
+.icon {
+    align-content: center;
+    font-size: calc($height-mobile-topbar - 10px);
+    transition: all 0.3s ease-out;
+}
 
-    background-color: $color-background-1-overlay;
-    line-height: 2.5em;
+.mobile-dropdown {
+    &.active {
+        background-color: $color-light-1;
+        color: $color-text-active
+    }
 
-    overflow-y: scroll;
-    scrollbar-color: hsl(0, 0%, 50%) transparent;
-    scrollbar-gutter: stable;
-    overflow-x: hidden;
-
-    width: min(500px, 70vw);
-    left: max(-500px, -70vw);
-    z-index: 100;
-
-    // used for animations;
-    // offset: ...
-    // offset: -min(500px, 70vw);
-
-    //
-    //
-    //
-
-    > .mobile-dropdown {
-        display: block;
-
+    a {
         // otherwise, overriden by user agent;
         font-size: 1.5em;
 
         // padding-left: 20px;
         padding: 15px 20px 15px 20px;
     }
+}
 
-    > .mobile-dropdown-content {
-        display: block;
+.mobile-dropdown-content {
+    background-color: $color-dark-1;
+    color: $color-text-active;
+    display: block;
 
-        //TODO
-        // margin-top: -100%;
-        // position: relative;
-        // z-index: 0;
-        // transition
+    // TODO
+    // height: 0;
+    height: 0;
+    transition: all 0.3s ease-out;
+    overflow-y: hidden;
+    // margin-top: -100%;
+    // position: relative;
+    // z-index: 0;
+    // transition
 
-        &.hidden {
-            display: none;
-        }
-
-        > a {
-            display: block;
-            padding-left: 30px;
-        }
+    &.active {
+        background-color: $color-light-1;
+        // height: fit-content;
+        // transition: all 0.3s ease-out;
     }
 
-    //
-    //
+    // &.hidden {
+    //     // display: none;
+    // }
+
+    > a {
+        padding-left: 30px;
+    }
+}
+
+// I don't like how big this class is; TODO;
+.mobile-sidebar {
+    position: fixed;
+    // box-sizing: content-box; //TODO
+
+    // fill out the whole left side;
+    height: calc(100vh - $height-mobile-topbar);
+    // height: 100%;
+
+    background-color: $color-dark-1;
+    line-height: 2.5em;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+    // scrollbar-color: hsl(0, 0%, 50%) transparent;
+    scrollbar-gutter: stable;
+
+    // question: is it preferable to use 70% and making sure that body / html are 100vw?
+    // there was one case where 100vw lead to scrolling in x; the scrollbar in y direction
+    // added more width or something; hm...; TODO;
+    // probably the other way around; body / html to 100% such that they can adept when 
+    // a scroll bar appears; still in that case 100vw > 100% and lead to overflow in
+    // x; not sure;
+    width: min(500px, 70vw);
+    left: max(-500px, -70vw);
+    z-index: 100;
+
     //
 
     > a {
-        display: block;
         padding-left: 15px;
 
         // is placed above .mobile-dropdown-content;
-        background-color: $color-background-1-overlay;
-        position: relative;
-        z-index: 100;
-
-        // padding: 10px 5px 10px 15px;
-        // margin-left: 20px;
-        // transform: -min(500px, 70vw);
-        // margin-bottom: 40px;
+        // background-color: $color-background-1-overlay;
+        // position: relative;
+        // z-index: 100;
     }
 
-    > button {
-        background-color: $color-background-1-opague;
-        color: $color-text-1;
-        text-align: left;
-        width: 100%;
-        // z-index: 200;
+    //
 
-        // is placed above .mobile-dropdown-content;
-        background-color: $color-background-1;
-        position: relative;
-        z-index: 100;
+    a {
+        // border-top: 2px solid transparent;
+        // border-bottom: 2px solid transparent;
+        border: 2px solid transparent;
+        display: block;
+
+        margin-top: 0;
+        // margin-right: -$width-scrollbar - 2px;
+        margin-bottom: 0;
+        // margin-left: -2px;
+
+        &:hover, &:focus-visible {
+            background-color: $color-hover-dark
+        }
     }
 }
 
 .mobile-topbar {
-    background-color: $color-background-1-overlay;
-    height: 50px;
+    align-content: center;
+    background-color: $color-dark-1;
+    box-shadow: 0px 5px 10px 0px $color-hover-dark;
+    height: $height-mobile-topbar;
+}
+
+//TODO; use code to directly change color on the elements;
+.overlay-anchor {
+    position: relative;
+}
+
+.overlay-back {
+    z-index: -50;
+}
+
+.overlay-front {
+    z-index: 50;
+}
+
+.overlay-transparent {
+    // let events pass through;
+    pointer-events: none;
+
+    background-color: transparent;
+    height: 100%;
+    left: 0;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    // top: $height-mobile-topbar;
+    // z-index: -100;
+    // height: calc(100% - $height-mobile-topbar);
 }
 
 .self-center {
@@ -266,7 +335,13 @@ a, button {
 
 .sidebar-toggle-button {
     aspect-ratio: 1;
-    width: fit-content;
+    // box-sizing: border-box;
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    // width: calc($height-mobile-topbar - 2px);
+    // margin: 2px auto 2px 2px;
+    width: $height-mobile-topbar;
+    border-width: 2px;
 }
 
 .sticky {
@@ -276,29 +351,51 @@ a, button {
     z-index: 100;
 }
 
+.width-full-both-edges {
+    width: calc(100% + 2 * $width-scrollbar);
+}
+
+.width-full-edge {
+    width: calc(100% + 1 * $width-scrollbar);
+}
+
 //
 // based on type;
 //
 
 a {
-    color: $color-text-1;
+    // margin: 2px;
+    // box-sizing: border-box;
+    // background-color: hsla(0, 0%, 0%, 0.2);
+    color: $color-text-inactive;
+    // color: $color-text-1;
+    display: block;
     text-decoration: none;
 
-    &:visited, &:hover {
-        color: $color-text-1;
+    .active {
+        color: $color-text-active;
     }
+
+    //TODO
+    &:hover {
+        background-color: hsla(0, 0%, 100%, 0.3)
+    }
+
+    // &:visited, &:hover {
+    //     color: $color-text-1;
+    // }
 }
 
 body {
     // prevent unintended scrolling;
     // height: 100vh;
-    height: 100%;
+    // height: 100%;
 
     // 100vw is problematic; it seems that the scroll bar can add to the total width
     // otherwise;
     width: 100%;
 
-    background-color: $color-background-1;
+    background-color: $color-dark-1;
     color: $color-text-1;
 
     // font-size: 1em;
@@ -323,11 +420,27 @@ body {
     // border-bottom: 0px;
 }
 
+button {
+    border: 2px solid transparent;
+    background-color: $color-same;
+    padding: 0;
+
+    &:hover, &:focus-visible {
+        background-color: $color-hover-dark;
+    }
+}
+
 footer {
-    height: 50px;
+    // for now the same height;
+    height: $height-mobile-topbar;
 }
 
 html {
+    // @extend .width-full-edge;
+
+    //TODO;
+    color-scheme: dark;
+
     scrollbar-color: hsl(0, 0%, 50%) transparent;
 
     // disable for debugging;
@@ -342,6 +455,10 @@ html {
     // box-sizing: content-box
 }
 
+hr {
+    margin: 0;
+}
+
 li {
     line-height: 1.5em;
     margin-bottom: 10px;
@@ -349,14 +466,15 @@ li {
 }
 
 main {
-    // topbar height = 50px;
-    height: calc(100vh - 50px);
+    z-index: 1;
+    background-color: transparent;
 
+    height: calc(100vh - $height-mobile-topbar);
     padding: 0 60px 0 30px;
     transition: background-color 0.3s ease-out 0s;
 
     // do scroll stuff here; otherwise, the topbar can get padding;
-    overflow-y: scroll;
+    overflow-y: auto;
 
     overflow-wrap: break-word;
     scrollbar-gutter: stable both-edges;
@@ -366,6 +484,7 @@ main {
     // scrollbar-color: hsl(0, 0%, 50%) transparent;
 
     // only scroll this container;
+    -ms-scroll-chaining: none;
     overscroll-behavior: contain;
 }
 

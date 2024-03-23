@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect } from "react"
+import { KeyboardEvent, useCallback, useContext, useEffect } from "react"
 import { SidebarContext } from "../Layout"
 
 let buttonElement: HTMLButtonElement | null = null
@@ -16,31 +16,18 @@ function MobileTopbarComponent() {
         if (buttonElement == null) return
         if (buttonElement.children.length < 2) return
 
-        //TODO
-        // for (let index = 0; index < button.children.length; ++index) {
-        //     console.log(button.children[index])
-        //     console.log(button.children[index].className)
-        //     console.log(button.children[index].classList.contains(""))
-        // }
-
         // this depends on the order; careful, if I want to leave it as simple as this;
-        const burgerClassList = buttonElement.children[0].classList
-        const xClassList = buttonElement.children[1].classList
-        // const iconBurger = button.children[0] as HTMLElement
-        // const iconX = button.children[1] as HTMLElement
+        const menuIconClassList = buttonElement.children[0].classList
+        const closeIconClassList = buttonElement.children[1].classList
 
         if (!sidebarContext.openState.isOpen) {
-            // iconBurger.style.visibility = "visible"
-            // iconX.style.visibility = "hidden"
-            burgerClassList.remove("hidden")
-            xClassList.add("hidden")
+            menuIconClassList.remove("hidden")
+            closeIconClassList.add("hidden")
             return
         }
 
-        // iconBurger.style.visibility = "hidden"
-        // iconX.style.visibility = "visible"
-        burgerClassList.add("hidden")
-        xClassList.remove("hidden")
+        menuIconClassList.add("hidden")
+        closeIconClassList.remove("hidden")
     }, [sidebarContext])
 
     //
@@ -64,7 +51,7 @@ function MobileTopbarComponent() {
         Object.freeze(topbarElement)
     }
 
-    const toggleSidebar = useCallback(() => {
+    const toggleSidebarMouseAndTouch = useCallback(() => {
         if (sidebarContext == null) return
         console.log('toggleSidebar')
 
@@ -72,18 +59,20 @@ function MobileTopbarComponent() {
         sidebarContext.openState.setIsOpen(!sidebarContext.openState.isOpen)
     }, [sidebarContext])
 
+    const toggleSidebarKeyboard = useCallback((event: KeyboardEvent) => {
+        if (event.key !== "Enter") return
+        toggleSidebarMouseAndTouch()
+    }, [toggleSidebarMouseAndTouch])
+
     //
     //
     //
 
-    const imgSize = "32px"
     return (<nav ref={(element) => initializeTopbarReference(element)} className="mobile-topbar">
         <div className="grid grid-row-20-80">
-            <button className="sidebar-toggle-button" ref={initializeButtonReference} onPointerUp={toggleSidebar}>
-                <img className="burger-open" src="/mobile/burger.svg" alt="burger-open button" width={imgSize} height={imgSize} />
-                <img className="x-close hidden" src="/mobile/x.svg" alt="x-close button" width={imgSize} height={imgSize} />
-                {/* <img className="burger-open" src="/mobile/burger.svg" alt="burger-open button" width={imgSize} height={imgSize} />
-            <img className="x-close hidden" src="/mobile/x.svg" alt="x-close button" width={imgSize} height={imgSize} /> */}
+            <button className="sidebar-toggle-button" ref={initializeButtonReference} onPointerUp={toggleSidebarMouseAndTouch} onKeyUp={toggleSidebarKeyboard}>
+                <i className="icon material-icons">menu</i>
+                <i className="icon material-icons hidden">close</i>
             </button>
             <div className="flex flex-row flex-main-center flex-cross-evenly">
                 <i className="material-icons">cloud</i>

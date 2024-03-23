@@ -27,7 +27,35 @@
     "eslintConfig": {
         "extends": [
             "react-app"
-        ]
+        ],
+        "rules": {
+            "jsx-a11y/anchor-is-valid": "off",
+            "space-infix-ops": [
+                "error",
+                {
+                    "int32Hint": true
+                }
+            ],
+            "new-cap": "off",
+            "require-jsdoc": "off",
+            "valid-jsdoc": "off",
+            "no-invalid-this": "off",
+            "no-undef": "error",
+            "no-unused-vars": "error",
+            "no-var": "error",
+            "prefer-const": "error",
+            "prefer-rest-params": "error",
+            "prefer-spread": "error",
+            "prefer-template": "error",
+            "arrow-spacing": "error",
+            "generator-star-spacing": "error",
+            "no-duplicate-imports": "error",
+            "no-useless-rename": "error",
+            "object-shorthand": "error",
+            "prefer-arrow-callback": "error",
+            "prefer-numeric-literals": "error",
+            "prefer-object-spread": "error"
+        }
     },
     "browserslist": {
         "production": [
@@ -43,7 +71,9 @@
     },
     "devDependencies": {
         "@types/hammerjs": "^2.0.45",
+        "@types/tinycolor2": "^1.4.6",
         "node-sass": "^9.0.0",
-        "sass": "^1.72.0"
+        "sass": "^1.72.0",
+        "tinycolor2": "^1.6.0"
     }
 }

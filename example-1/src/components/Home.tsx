@@ -15,6 +15,7 @@ function HomeComponent() {
             <li>search bar;</li>
             <li>use Node.js?; back-end?;</li>
             <li>use icons sheets</li>
+            <li>no overlays</li>
         </ul>
 
         <h2>Content:</h2>
