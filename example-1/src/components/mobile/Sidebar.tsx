@@ -1,8 +1,8 @@
-import { useContext, useEffect, useMemo } from 'react'
-import MobileDropdown1Component from './Dropdown1'
-import { SidebarContext, mainElement } from '../Layout'
+import { KeyboardEvent, useContext, useEffect, useMemo } from 'react'
+import MobileDropdownComponent from './Dropdown'
+import { SidebarContext, isDebugEnabled, mainElement, triggerFlashEffect } from '../Layout'
 import Hammer from 'hammerjs'
-import { buttonElement } from './Topbar'
+import { menuButtonElement } from './Topbar'
 
 let sidebarElement: HTMLElement | null = null
 
@@ -15,12 +15,67 @@ function MobileSidebarComponent() {
     }, [bodyElement])
     const recognizer = useMemo(() => new Hammer.Pan(), [])
 
+    //
+    // functions
+    //
+
+    // this is called when the component mounts or unmounts; and called when it re-renders;
+    const initializeSidebarReference = (element: HTMLElement | null) => {
+        if (sidebarElement != null) return
+        if (element == null) return // should never happen!!;
+        if (isDebugEnabled) console.log('Sidebar: Initialize reference.')
+        sidebarElement = element
+    }
 
     //
-    // swipe
+    // side effects
     //
 
-    // event listeners;
+    // update state
+    useEffect(() => {
+        if (sidebarContext == null) return
+        if (manager == null) return
+        if (sidebarElement == null) return
+        if (mainElement == null) return
+
+        const disableTabIndex = () => {
+            if (sidebarElement == null) return
+            for (const childIndex in sidebarElement.children) {
+                const child = sidebarElement.children[childIndex] as HTMLElement
+                if (child.tagName !== 'A') continue
+                child.tabIndex = -1
+            }
+        }
+
+        // use side effects for handling tab index??; TODO;
+        const enableTabIndex = () => {
+            if (sidebarElement == null) return
+            for (const childIndex in sidebarElement.children) {
+                const child = sidebarElement.children[childIndex] as HTMLElement
+                if (child.tagName !== 'A') continue
+                child.tabIndex = 100
+            }
+        }
+
+        //TODO; make changes by adding and removing classes only??; not possible if the value is dynamic;
+        sidebarElement.style.transition = 'transform 0.5s ease-out 0s'
+        if (isDebugEnabled) console.log(`Sidebar: isOpen ${sidebarContext.openState.isOpen}`)
+
+        if (sidebarContext.openState.isOpen) {
+            enableTabIndex()
+            manager.add(recognizer)
+            mainElement.classList.add('inactive')
+            sidebarElement.style.transform = `translateX(${sidebarElement.offsetWidth}px)`
+            return
+        }
+
+        disableTabIndex()
+        manager.remove(recognizer)
+        mainElement.classList.remove('inactive')
+        sidebarElement.style.transform = 'translateX(0)'
+    }, [manager, recognizer, sidebarContext])
+
+    // swipe event listener
     useEffect(() => {
         if (sidebarContext == null) return
         if (manager == null) return
@@ -77,76 +132,7 @@ function MobileSidebarComponent() {
         }
     }, [manager, sidebarContext])
 
-    // apply current sidebar state;
-    useEffect(() => {
-        if (sidebarContext == null) return
-        if (manager == null) return
-        if (sidebarElement == null) return
-        if (mainElement == null) return
-
-        const transparentOverlay = mainElement.parentElement?.children[0] as HTMLElement
-        if (transparentOverlay == null) return
-
-        const disableTabIndex = () => {
-            if (sidebarElement == null) return
-            for (const childIndex in sidebarElement.children) {
-                const child = sidebarElement.children[childIndex] as HTMLElement
-                if (child.tabIndex == null) continue
-                // if (child instanceof HTMLButtonElement) console.log('button')
-                if (child.tabIndex < 0) continue
-                // child.setAttribute('tabindex', '-1')
-                child.tabIndex = -100
-            }
-        }
-
-        const enableTabIndex = () => {
-            if (sidebarElement == null) return
-            for (const childIndex in sidebarElement.children) {
-                const child = sidebarElement.children[childIndex] as HTMLElement
-                if (child.tabIndex == null) continue
-                // console.log('tabIndex ' + child.tabIndex)
-                if (child.tabIndex > -100) continue
-                child.tabIndex = 0
-            }
-        }
-
-        const disableTouchEvents = () => {
-            console.log('disableTouchEvents')
-            manager.remove(recognizer)
-        }
-
-        const enableTouchEvents = () => {
-            console.log('enableTouchEvents')
-            manager.add(recognizer)
-        }
-
-        console.log('update sidebar state')
-        sidebarElement.style.transition = 'transform 0.5s ease-out 0s'
-
-        if (sidebarContext.openState.isOpen) {
-            console.log('open')
-            transparentOverlay.style.backgroundColor = "hsla(0, 0%, 0%, 0.3)"
-            mainElement.style.overflowY = "hidden"
-            sidebarElement.style.transform = `translateX(${sidebarElement.offsetWidth}px)`
-
-            enableTabIndex()
-            enableTouchEvents()
-            return
-        }
-
-        console.log('closed')
-        transparentOverlay.style.backgroundColor = "transparent"
-        mainElement.style.overflowY = "auto"
-        sidebarElement.style.transform = 'translateX(0)'
-
-        disableTabIndex()
-        disableTouchEvents()
-    }, [manager, recognizer, sidebarContext])
-
-    //
-    // click
-    //
-
+    // click event listener
     useEffect(() => {
         if (sidebarContext == null) return
         let startX = 0
@@ -170,8 +156,8 @@ function MobileSidebarComponent() {
             if (sidebarElement == null) return
             if (sidebarElement.contains(event.target as Node)) return
 
-            if (buttonElement == null) return
-            if (buttonElement.contains(event.target as Node)) return
+            if (menuButtonElement == null) return
+            if (menuButtonElement.contains(event.target as Node)) return
 
             console.log('close sidebar because clicked outside')
             sidebarContext.openState.setIsOpen(false)
@@ -186,65 +172,101 @@ function MobileSidebarComponent() {
         }
     }, [sidebarContext])
 
-    //     useEffect(() => {
-    //         const handleClickOutside = (event: MouseEvent) => {
-    //             if (sidebarContext == null) return
-    //             console.log(`isOpen ${sidebarContext.openState.isOpen}`)
-    //             if (!sidebarContext.openState.isOpen) return
-    //             if (sidebarElement == null) return
-    //             if (sidebarElement.contains(event.target as Node)) return
-    // 
-    //             // const topbar = topbarContext?.topbarState.topbar
-    //             // if (topbar == null) return
-    //             // if (topbar.contains(event.target as Node)) return
-    // 
-    //             if (buttonElement == null) return
-    //             if (buttonElement.contains(event.target as Node)) return
-    // 
-    //             console.log('close sidebar because clicked outside')
-    //             sidebarContext.openState.setIsOpen(false)
-    //         }
-    // 
-    //         document.addEventListener('click', handleClickOutside)
-    //         return () => { document.removeEventListener('click', handleClickOutside) }
-    // 
-    //         // this is bad; arrow functions override the "this" keyword; normally it would
-    //         // refer to document; this way the listener changes and is registered multiple times;
-    //         // document.addEventListener('click', (event) => handleClickOutside(event))
-    //         // return () => { document.removeEventListener('click', (event) => handleClickOutside(event)) }
-    //     }, [sidebarContext])
+    function focusNextElement() {
+        if (menuButtonElement == null) return
+        if (sidebarElement == null) return
+        const focusedElement = document.activeElement as HTMLAnchorElement | null
+        if (focusedElement == null) return
 
-    //
-    //
-    //
+        const focusableElements = [menuButtonElement, ...Array.from(sidebarElement.querySelectorAll<HTMLAnchorElement>('a[tabindex="100"]'))]
+        const currentIndex = focusableElements.indexOf(focusedElement)
+        const nextIndex = (currentIndex + 1) % focusableElements.length
+        const nextElement = focusableElements[nextIndex]
 
-    // this is called when the component mounts or unmounts; and called when it re-renders;
-    const initializeSidebarReference = (element: HTMLElement | null) => {
-        if (sidebarElement != null) return
-        if (element == null) return // should never happen!!;
-        console.log('initializeSidebarReference')
-        sidebarElement = element
-        Object.freeze(sidebarElement)
+        if (nextElement == null) return
+        if (nextElement === menuButtonElement) return
+        nextElement.focus()
     }
 
-    return (<nav ref={initializeSidebarReference} className="mobile-sidebar" tabIndex={-1}>
-        <hr />
-        <a href="/home">Link 1</a><hr />
-        <a href="/home">Link 2</a><hr />
-        <MobileDropdown1Component text="Dropdown 1">
-            <a href="/home">Link 3</a>
-            <a href="/home">Link 4</a>
-            <a href="/home">Link 5</a>
-            <a href="/home">Link 6</a>
-            <a href="/home">Link 7</a>
-            <a href="/home">Link 8</a>
-        </MobileDropdown1Component><hr />
-        <MobileDropdown1Component text="Dropdown 2">
-            <a href="/home">Link 9</a>
-            <a href="/home">Link 10</a>
-        </MobileDropdown1Component><hr />
-        {/* <MobileDropdown2Component /><hr /> */}
-    </nav>)
+    function focusPreviousElement() {
+        if (menuButtonElement == null) return
+        if (sidebarElement == null) return
+        const focusedElement = document.activeElement as HTMLElement | null
+        if (focusedElement == null) return
+
+        const focusableElements = [menuButtonElement, ...Array.from(sidebarElement.querySelectorAll<HTMLElement>('a[tabindex="100"]'))]
+        const currentIndex = focusableElements.indexOf(focusedElement)
+        const previousIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length
+        const previousElement = focusableElements[previousIndex]
+
+        if (previousElement == null) return
+        previousElement.focus()
+    }
+
+    function handleKeyInput(event: KeyboardEvent): void {
+        // if (menuButtonElement == null) return
+        if (sidebarContext == null) return
+        if (isDebugEnabled) console.log('Sidebar: Handle key inputs.')
+
+        if (event.key === 'Enter') {
+            // does not prevent links from being triggered;
+            event.preventDefault()
+
+            event.stopPropagation()
+            triggerFlashEffect(event)
+            return
+        }
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault()
+            event.stopPropagation()
+            focusNextElement()
+            return
+        }
+
+        if (event.key === 'ArrowUp') {
+            event.preventDefault()
+            event.stopPropagation()
+            focusPreviousElement()
+            return
+        }
+
+        if (event.key === 'ArrowLeft' && sidebarContext.openState.isOpen) {
+            event.preventDefault()
+            event.stopPropagation()
+            sidebarContext.openState.setIsOpen(false)
+
+            setTimeout(() => {
+                if (menuButtonElement == null) return
+                menuButtonElement.focus()
+            }, 500)
+            return
+        }
+    }
+
+    //
+    //
+    //
+
+    return (<>
+        <nav ref={initializeSidebarReference} className="mobile-sidebar" tabIndex={-1} onKeyUp={handleKeyInput}>
+            <hr />
+            <a href="#">Link 1</a><hr />
+            <a href="#">Link 2</a><hr />
+            <MobileDropdownComponent text="Dropdown 1">
+                <a href="#">Link 3</a>
+                <a href="#">Link 4</a>
+                <a href="#">Link 5</a>
+                <a href="#">Link 6</a>
+                <a href="#">Link 7</a>
+                <a href="#">Link 8</a>
+            </MobileDropdownComponent><hr />
+            <MobileDropdownComponent text="Dropdown 2">
+                <a href="#">Link 9</a>
+                <a href="#">Link 10</a>
+            </MobileDropdownComponent><hr />
+        </nav>
+    </>)
 }
 
 export default MobileSidebarComponent

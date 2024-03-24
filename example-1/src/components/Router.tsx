@@ -1,10 +1,10 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import PageNotFoundComponent from "./PageNotFound";
-import HomeComponent from "./Home";
-import LayoutComponent from "./Layout";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import PageNotFoundComponent from './PageNotFound'
+import HomeComponent from './Home'
+import LayoutComponent from './Layout'
 
 function RouterComponent() {
-    return (
+    return (<>
         <BrowserRouter>
             <Routes>
                 <Route path="/" element={<LayoutComponent />}>
@@ -16,7 +16,7 @@ function RouterComponent() {
                 </Route>
             </Routes>
         </BrowserRouter>
-    )
+    </>)
 }
 
 export default RouterComponent

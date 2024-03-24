@@ -1,6 +1,6 @@
 {
     "name": "example-1",
-    "version": "0.1.0",
+    "version": "0.0.4",
     "private": true,
     "dependencies": {
         "@testing-library/jest-dom": "^5.17.0",
@@ -25,10 +25,22 @@
         "eject": "react-scripts eject"
     },
     "eslintConfig": {
+        "plugins": [
+            "eslint-plugin-react"
+        ],
         "extends": [
             "react-app"
         ],
         "rules": {
+            "no-trailing-spaces": "error",
+            "quotes": [
+                "error",
+                "single"
+            ],
+            "jsx-quotes": [
+                "error",
+                "prefer-double"
+            ],
             "jsx-a11y/anchor-is-valid": "off",
             "space-infix-ops": [
                 "error",
@@ -41,7 +53,7 @@
             "valid-jsdoc": "off",
             "no-invalid-this": "off",
             "no-undef": "error",
-            "no-unused-vars": "error",
+            "no-unused-vars": "warn",
             "no-var": "error",
             "prefer-const": "error",
             "prefer-rest-params": "error",

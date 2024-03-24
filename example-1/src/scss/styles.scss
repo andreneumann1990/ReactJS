@@ -111,6 +111,22 @@ $height-mobile-topbar: 40px;
 // //     }
 // // }
 
+.relative {
+    position: relative;
+}
+
+.absolute {
+    position: absolute;
+}
+
+:focus-visible {
+    outline-offset: -1px;
+
+    // kinda works unless the mouse hovers over the element before you tab to it;
+    // without this you have a little bit of background outside the outline;
+    // border-radius: 10px;
+}
+
 //
 // based on class;
 //
@@ -136,15 +152,31 @@ $height-mobile-topbar: 40px;
     }
 }
 
-.flex-cross-center {
-    justify-content: center;
+.fg-space-between {
+    // for grids this applies when rows or columns are not filling the whole container;
+    align-content: space-between;
+    justify-content: space-between;
 }
 
-.flex-cross-evenly {
+.fg-space-evenly {
+    align-content: space-evenly;
     justify-content: space-evenly;
 }
 
-.flex-main-center {
+.fg-space-center {
+    align-content: center;
+    justify-content: center;
+}
+
+// for flex containers and grids;
+.fg-items-center {
+    align-items: center;
+
+    // ignored in flex container;
+    justify-items: center;
+}
+
+.fg-items-center-main {
     align-items: center;
 }
 
@@ -160,21 +192,45 @@ $height-mobile-topbar: 40px;
 
 .grid {
     display: grid;
+
+    // otherwise, centering vertically might be impossible;
+    // this time, it stayed smaller than the parent container; without, it centered itself;
+    // height: 100%;
+    // width: 100%;
 }
 
 .grid-row-20-80 {
     grid-template-columns: 20% 80%;
 }
 
+.grid-topbar {
+    grid-template-columns: 40px auto 260px;
+}
+
+.grid-dropdown {
+    grid-template-columns: auto 40px;
+}
+
 .grid-row-80-20 {
     grid-template-columns: 80% 20%;
 }
 
-.grid-row-fit-right {
+.grid-fit-right {
+    align-content: center;
+    margin-left: auto; // !important;
     width: -webkit-fit-content;
     width: -moz-fit-content;
     width: fit-content;
-    margin-left: auto !important;
+}
+
+.grid-fit-center {
+    margin: auto;
+    width: -webkit-fit-content;
+    width: -moz-fit-content;
+    width: fit-content;
+    height: -webkit-fit-content;
+    height: -moz-fit-content;
+    height: fit-content;
 }
 
 .hidden {
@@ -182,24 +238,21 @@ $height-mobile-topbar: 40px;
 }
 
 .icon {
-    align-content: center;
-    font-size: calc($height-mobile-topbar - 10px);
+    font-size: 32px;
+    padding: 4px;
+    // used in dropdown menu icons;
     transition: all 0.3s ease-out;
+    animation-timing-function: ease-out;
+    // animation-fill-mode: forwards;
 }
 
-.mobile-dropdown {
-    &.active {
-        background-color: $color-light-1;
-        color: $color-text-active
-    }
+.icon.hidden {
+    // transform: 'scaleX(0)';
+    opacity: 0;
+}
 
-    a {
-        // otherwise, overriden by user agent;
-        font-size: 1.5em;
-
-        // padding-left: 20px;
-        padding: 15px 20px 15px 20px;
-    }
+.icon-row {
+    margin: 0px 10px;
 }
 
 .mobile-dropdown-content {
@@ -223,13 +276,32 @@ $height-mobile-topbar: 40px;
         // transition: all 0.3s ease-out;
     }
 
-    // &.hidden {
-    //     // display: none;
-    // }
-
-    > a {
-        padding-left: 30px;
+    &:not(.active) a {
+        color: $color-text-inactive;
     }
+}
+
+.mobile-dropdown-content a {
+    padding-left: 30px;
+}
+
+.mobile-dropdown-menu {
+    &.active {
+        background-color: $color-light-1;
+        color: $color-text-active
+    }
+
+    &:not(.active) a {
+        color: $color-text-inactive
+    }
+}
+
+.mobile-dropdown-menu > a {
+    // otherwise, overriden by user agent;
+    font-size: 1.5em;
+
+    // padding-left: 20px;
+    padding: 15px 20px 15px 20px;
 }
 
 // I don't like how big this class is; TODO;
@@ -242,6 +314,7 @@ $height-mobile-topbar: 40px;
     // height: 100%;
 
     background-color: $color-dark-1;
+    box-shadow: 0px 10px 10px 0px $color-hover-dark;
     line-height: 2.5em;
 
     overflow-x: hidden;
@@ -258,90 +331,57 @@ $height-mobile-topbar: 40px;
     width: min(500px, 70vw);
     left: max(-500px, -70vw);
     z-index: 100;
+}
 
-    //
+.mobile-sidebar > a {
+    padding-left: 15px;
+}
 
-    > a {
-        padding-left: 15px;
+.mobile-sidebar a {
+    // border-top: 2px solid transparent;
+    // border-bottom: 2px solid transparent;
+    border: 2px solid transparent;
+    display: block;
 
-        // is placed above .mobile-dropdown-content;
-        // background-color: $color-background-1-overlay;
-        // position: relative;
-        // z-index: 100;
-    }
+    margin-top: 0;
+    // margin-right: -$width-scrollbar - 2px;
+    margin-bottom: 0;
+    // margin-left: -2px;
 
-    //
-
-    a {
-        // border-top: 2px solid transparent;
-        // border-bottom: 2px solid transparent;
-        border: 2px solid transparent;
-        display: block;
-
-        margin-top: 0;
-        // margin-right: -$width-scrollbar - 2px;
-        margin-bottom: 0;
-        // margin-left: -2px;
-
-        &:hover, &:focus-visible {
-            background-color: $color-hover-dark
-        }
-    }
+    // &:hover, &:focus-visible {
+    //     background-color: $color-hover-dark
+    // }
 }
 
 .mobile-topbar {
     align-content: center;
     background-color: $color-dark-1;
-    box-shadow: 0px 5px 10px 0px $color-hover-dark;
+    box-shadow: 0px 0px 10px 0px $color-hover-dark;
     height: $height-mobile-topbar;
 }
 
-//TODO; use code to directly change color on the elements;
-.overlay-anchor {
-    position: relative;
-}
-
-.overlay-back {
-    z-index: -50;
-}
-
-.overlay-front {
-    z-index: 50;
-}
-
-.overlay-transparent {
-    // let events pass through;
-    pointer-events: none;
-
-    background-color: transparent;
-    height: 100%;
-    left: 0;
-    position: absolute;
-    top: 0;
-    width: 100%;
-    // top: $height-mobile-topbar;
-    // z-index: -100;
-    // height: calc(100% - $height-mobile-topbar);
-}
-
 .self-center {
-    margin-left: auto !important;
-    margin-right: auto !important;
+    // should be enought to override user agent;
+    margin-left: auto; // !important;
+    margin-right: auto; // !important;
 }
 
 .self-right {
-    margin-left: auto !important;
+    margin-left: auto; // !important;
 }
 
-.sidebar-toggle-button {
-    aspect-ratio: 1;
-    // box-sizing: border-box;
-    width: -webkit-fit-content;
-    width: -moz-fit-content;
+.menu-button {
+    // when using position: absolute on the icons; 
+    height: 40px;
+    // aspect-ratio: 1;
+    // height: fit-content;
+    // border-width: 1px;
+
+    // for navigating with keys;
+    // height: calc($height-mobile-topbar - 2px);
     // width: calc($height-mobile-topbar - 2px);
-    // margin: 2px auto 2px 2px;
-    width: $height-mobile-topbar;
-    border-width: 2px;
+    // height: 32px;
+    // width: 32px;
 }
 
 .sticky {
@@ -364,26 +404,32 @@ $height-mobile-topbar: 40px;
 //
 
 a {
+    // for navigating with keyboard; does not help;
+    // border: 2px solid transparent;
+    // background-color: $color-same;
+    // padding: 0;
+
     // margin: 2px;
     // box-sizing: border-box;
     // background-color: hsla(0, 0%, 0%, 0.2);
-    color: $color-text-inactive;
+    color: $color-text-active;
+    // color: $color-text-inactive;
     // color: $color-text-1;
     display: block;
     text-decoration: none;
 
-    .active {
-        color: $color-text-active;
-    }
-
     //TODO
-    &:hover {
+    &:hover, &:focus-visible {
         background-color: hsla(0, 0%, 100%, 0.3)
     }
 
     // &:visited, &:hover {
     //     color: $color-text-1;
     // }
+}
+
+a.inactive {
+    color: $color-text-inactive;
 }
 
 body {
@@ -421,7 +467,7 @@ body {
 }
 
 button {
-    border: 2px solid transparent;
+    border: 3px solid transparent;
     background-color: $color-same;
     padding: 0;
 
@@ -466,9 +512,8 @@ li {
 }
 
 main {
-    z-index: 1;
-    background-color: transparent;
-
+    // z-index: 1;
+    // background-color: transparent;
     height: calc(100vh - $height-mobile-topbar);
     padding: 0 60px 0 30px;
     transition: background-color 0.3s ease-out 0s;
@@ -486,6 +531,12 @@ main {
     // only scroll this container;
     -ms-scroll-chaining: none;
     overscroll-behavior: contain;
+
+    &.inactive {
+        background-color: $color-hover-dark;
+        color: $color-text-inactive;
+        overflow-y: hidden;
+    }
 }
 
 strong {
