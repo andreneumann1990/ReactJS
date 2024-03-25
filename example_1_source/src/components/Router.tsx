@@ -7,7 +7,7 @@ function RouterComponent() {
     return (<>
         <BrowserRouter>
             <Routes>
-                <Route path="/" element={<LayoutComponent />}>
+                <Route path="/ReactJS/example_1/" element={<LayoutComponent />}>
                     <Route index element={<Navigate to="/home" />} />
                     <Route path="home" element={<HomeComponent />} />
                     <Route path="home#" element={<HomeComponent />} />
