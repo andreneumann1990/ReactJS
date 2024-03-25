@@ -10,7 +10,7 @@ function RouterComponent() {
                 <Route path="/" element={<LayoutComponent />}>
                     <Route index element={<Navigate to="/home" />} />
                     <Route path="home" element={<HomeComponent />} />
-                    <Route path="home#" element={<HomeComponent />} /> //TODO
+                    <Route path="home#" element={<HomeComponent />} />
                     {/* <Route path="react_exercise" element={<ReactExercise />} /> */}
                     {/* <Route path=":fileExtension/:fileName/" element={<FileContent />} /> */}
                     <Route path="*" element={<PageNotFoundComponent />} />
