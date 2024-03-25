@@ -251,7 +251,7 @@ function MobileSidebarComponent() {
     return (<>
         <nav ref={initializeSidebarReference} className="mobile-sidebar" tabIndex={-1} onKeyUp={handleKeyInput}>
             <hr />
-            <a href="/reactjs/example_1/image_examples">Image Examples</a><hr />
+            <a href="/ReactJS/example_1/image_examples">Image Examples</a><hr />
             <a href="#">Link 2</a><hr />
             <MobileDropdownComponent text="Dropdown 1">
                 <a href="#">Link 3</a>

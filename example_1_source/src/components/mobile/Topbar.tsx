@@ -208,14 +208,14 @@ function MobileTopbarComponent() {
                         <i className="icon-medium material-icons">menu</i>
                         <i className="icon-medium material-icons hidden">close</i>
                     </a>
-                    <a className="inline" href="/reactjs/example_1/home" tabIndex={1000}>
+                    <a className="inline" href="/ReactJS/example_1/home" tabIndex={1000}>
                         <i className="material-icons icon-medium">home</i>
                     </a>
                 </div>
                 {/* <div className="grid"> */}
                 {/* <div> */}
                 {/* <SearchComponent /> */}
-                {/* <img src="/reactjs/example_1/svg/Algolia-mark-rounded-blue.svg" alt="Algolia logo" height={40} width={40} /> */}
+                {/* <img src="/ReactJS/example_1/svg/Algolia-mark-rounded-blue.svg" alt="Algolia logo" height={40} width={40} /> */}
                 {/* </div> */}
                 {/* </div> */}
                 {/* <div /> */}
