@@ -29,6 +29,7 @@ function HomeComponent() {
             <li>search bar;</li>
             <li>use Node.js?; back-end?;</li>
             <li>light / dark theme switch;</li>
+            <li>some more standard stuff; forms, maps, videos / iframes, lists maybe;</li>
         </ul>
     </>)
 }

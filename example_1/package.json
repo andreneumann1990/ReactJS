@@ -2,6 +2,7 @@
     "name": "example-1",
     "version": "0.0.4",
     "private": true,
+    "homepage": "https://andreneumann1990.github.io/ReactJS/example_1",
     "dependencies": {
         "@testing-library/jest-dom": "^5.17.0",
         "@testing-library/react": "^13.4.0",
@@ -22,7 +23,8 @@
         "start": "react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",
-        "eject": "react-scripts eject"
+        "eject": "react-scripts eject",
+        "deploy": "gh-pages -d build"
     },
     "eslintConfig": {
         "plugins": [
@@ -84,6 +86,7 @@
     "devDependencies": {
         "@types/hammerjs": "^2.0.45",
         "@types/tinycolor2": "^1.4.6",
+        "gh-pages": "^6.1.1",
         "node-sass": "^9.0.0",
         "sass": "^1.72.0",
         "tinycolor2": "^1.6.0"
