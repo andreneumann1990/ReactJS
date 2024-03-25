@@ -8,7 +8,7 @@ function HomeComponent() {
             <li>based on the mobile version of the Steam website</li>
         </ul>
 
-        <h2>Features:</h2>
+        <h2>Changelog / Features:</h2>
         <ul>
             <li>clicking highlights links</li>
             <li>sidebar animation</li>
@@ -20,6 +20,7 @@ function HomeComponent() {
             <li>passing data around using <strong>useContext()</strong></li>
             <li>exporting references of non-unmounting elements as globals instead (bad?)</li>
             <li>tabindex management & navigation via keyboard</li>
+            <li>deployed on github.io</li>
         </ul>
 
         <h2>TODO:</h2>

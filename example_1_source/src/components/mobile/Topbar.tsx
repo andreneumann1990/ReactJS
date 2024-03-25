@@ -1,6 +1,7 @@
 import { KeyboardEvent, useCallback, useContext, useEffect } from 'react'
 import { SidebarContext, isDebugEnabled, mainElement, triggerFlashEffect } from '../Layout'
 import { sidebarElement } from './Sidebar'
+// import SearchComponent from '../SearchComponent'
 
 let menuButtonElement: HTMLAnchorElement | null = null
 let topbarElement: HTMLElement | null = null
@@ -200,30 +201,24 @@ function MobileTopbarComponent() {
     //
 
     return (<>
-        <nav ref={initializeTopbarReference} className="mobile-topbar" >
+        <nav ref={initializeTopbarReference} className="mobile-topbar">
             <div className="grid grid-topbar fg-items-center-main fg-space-between" onKeyUp={handleKeyInputs}>
-                <a className="menu-button relative" ref={initializeMenuButtonReference} onPointerUp={toggleSidebar} href="#" tabIndex={2}>
-                    <i className="icon material-icons absolute">menu</i>
-                    <i className="icon material-icons absolute hidden">close</i>
-                </a>
-                <div />
-                <div className="icon-row flex flex-row fg-space-between" >
-                    <a tabIndex={1000}>
-                        <i className="material-icons icon">cloud</i>
+                <div>
+                    <a className="menu-button inline" ref={initializeMenuButtonReference} onPointerUp={toggleSidebar} href="#" tabIndex={2}>
+                        <i className="icon-medium material-icons">menu</i>
+                        <i className="icon-medium material-icons hidden">close</i>
                     </a>
-                    <a tabIndex={1000}>
-                        <i className="material-icons icon">favorite</i>
-                    </a>
-                    <a tabIndex={1000}>
-                        <i className="material-icons icon">attachment</i>
-                    </a>
-                    <a tabIndex={1000}>
-                        <i className="material-icons icon">computer</i>
-                    </a>
-                    <a tabIndex={1000}>
-                        <i className="material-icons icon">traffic</i>
+                    <a className="inline" href="/reactjs/example_1/home" tabIndex={1000}>
+                        <i className="material-icons icon-medium">home</i>
                     </a>
                 </div>
+                {/* <div className="grid"> */}
+                {/* <div> */}
+                {/* <SearchComponent /> */}
+                {/* <img src="/reactjs/example_1/svg/Algolia-mark-rounded-blue.svg" alt="Algolia logo" height={40} width={40} /> */}
+                {/* </div> */}
+                {/* </div> */}
+                {/* <div /> */}
             </div>
         </nav>
     </>)

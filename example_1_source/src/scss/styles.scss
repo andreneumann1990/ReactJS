@@ -204,7 +204,8 @@ $height-mobile-topbar: 40px;
 }
 
 .grid-topbar {
-    grid-template-columns: 40px auto 260px;
+    grid-template-columns: auto auto auto;
+    // grid-template-columns: 40px auto 260px;
 }
 
 .grid-dropdown {
@@ -237,22 +238,53 @@ $height-mobile-topbar: 40px;
     display: none;
 }
 
-.icon {
-    font-size: 32px;
-    padding: 4px;
-    // used in dropdown menu icons;
-    transition: all 0.3s ease-out;
-    animation-timing-function: ease-out;
-    // animation-fill-mode: forwards;
-}
-
 .icon.hidden {
     // transform: 'scaleX(0)';
     opacity: 0;
 }
 
+.icon-large {
+    font-size: 48px;
+    padding: 6px;
+    // transition: all 0.3s ease-out;
+    // animation-timing-function: ease-out;
+}
+
+.icon-medium {
+    font-size: 32px;
+    padding: 4px;
+    // used in dropdown menu icons;
+    transition: all 0.3s ease-out;
+    // animation-timing-function: ease-out;
+    // animation-fill-mode: forwards;
+}
+
 .icon-row {
     margin: 0px 10px;
+}
+
+.inline {
+    // display: inline;
+    display: inline-block;
+}
+
+.margin-lr-10 {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.menu-button {
+    // when using position: absolute on the icons; 
+    height: 40px;
+    // aspect-ratio: 1;
+    // height: fit-content;
+    // border-width: 1px;
+
+    // for navigating with keys;
+    // height: calc($height-mobile-topbar - 2px);
+    // width: calc($height-mobile-topbar - 2px);
+    // height: 32px;
+    // width: 32px;
 }
 
 .mobile-dropdown-content {
@@ -360,6 +392,11 @@ $height-mobile-topbar: 40px;
     height: $height-mobile-topbar;
 }
 
+.padding-lr-10 {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
 .self-center {
     // should be enought to override user agent;
     margin-left: auto; // !important;
@@ -370,18 +407,8 @@ $height-mobile-topbar: 40px;
     margin-left: auto; // !important;
 }
 
-.menu-button {
-    // when using position: absolute on the icons; 
-    height: 40px;
-    // aspect-ratio: 1;
-    // height: fit-content;
-    // border-width: 1px;
-
-    // for navigating with keys;
-    // height: calc($height-mobile-topbar - 2px);
-    // width: calc($height-mobile-topbar - 2px);
-    // height: 32px;
-    // width: 32px;
+.self-top {
+    margin-bottom: auto;
 }
 
 .sticky {

@@ -149,7 +149,7 @@ function MobileDropdownComponent({ text, children }: Props) {
             <a href="#" onPointerUp={toggleContent} onKeyUp={toggleContentKeyInput}>
                 <div className="grid grid-dropdown">
                     {text}
-                    <i ref={iconReference} className="icon material-icons grid-fit-right">computer</i>
+                    <i ref={iconReference} className="icon-medium material-icons grid-fit-right">computer</i>
                 </div>
             </a>
             <div ref={contentReference} className="mobile-dropdown-content hidden" onKeyUp={handleArrowLeft}>

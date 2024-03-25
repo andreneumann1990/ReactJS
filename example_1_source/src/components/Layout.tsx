@@ -102,10 +102,12 @@ function LayoutComponent() {
                     <MobileSidebarComponent />
                 </aside>
             </SidebarContext.Provider>
-        </div >
+        </div>
 
         <main ref={initializeMainReference} tabIndex={1}>
-            <Outlet />
+            <div className="padding-main-lr">
+                <Outlet />
+            </div>
             <footer />
         </main>
     </>)
