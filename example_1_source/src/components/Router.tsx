@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import PageNotFoundComponent from './PageNotFound'
+// import PageNotFoundComponent from './PageNotFound'
 import HomeComponent from './Home'
 import LayoutComponent from './Layout'
 
@@ -13,7 +13,8 @@ function RouterComponent() {
                     <Route path="home#" element={<HomeComponent />} />
                     {/* <Route path="react_exercise" element={<ReactExercise />} /> */}
                     {/* <Route path=":fileExtension/:fileName/" element={<FileContent />} /> */}
-                    <Route path="*" element={<PageNotFoundComponent />} />
+                    <Route path="*" element={<Navigate to="/home" />} />
+                    {/* <Route path="*" element={<PageNotFoundComponent />} /> */}
                 </Route>
             </Routes>
         </BrowserRouter>
