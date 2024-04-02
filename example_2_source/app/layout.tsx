@@ -21,19 +21,23 @@ export default function RootLayout({
     return (<>
         <html lang="en">
             <head>
-                <meta charSet="utf-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
+                {/* <meta charSet="utf-8" /> */}
+                {/* <meta name="viewport" content="width=device-width, initial-scale=1" /> */}
                 <meta name="theme-color" content="#000000" />
                 <meta name="description" content="Web site created using create-react-app" />
 
                 <title>React App</title>
-                <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+                {/* <link rel="icon" href="%PUBLIC_URL%/favicon.ico" /> */}
+                {/* <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" /> */}
+                {/* <link rel="manifest" href="%PUBLIC_URL%/manifest.json" /> */}
 
-                <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-                <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+                <link rel="icon" href="/favicon.ico" />
+                <link rel="apple-touch-icon" href="/logo192.png" />
+                <link rel="manifest" href="/manifest.json" />
 
                 {/* <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia&display=optional" /> */}
                 <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+                {/* <link rel="stylesheet" href="/styles/globals.css" /> */}
             </head>
 
             <body>

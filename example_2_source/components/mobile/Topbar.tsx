@@ -14,59 +14,20 @@ function MobileTopbarComponent() {
 
     // switch image for the sidebar toggle button;
     useEffect(() => {
-        // useEffect in combination with ref.current is probably bad; .current does not
-        // trigger a re-render and cannot be a dependency therefore;
-        // => use topbarState instead;
         if (sidebarContext == null) return
+        console.log(sidebarContext.openState.isOpen)
         if (menuButtonElement == null) return
         if (menuButtonElement.children.length < 2) return
 
-        // this depends on the order; careful, if I want to leave it as simple as this;
-        // const menuIconClassList = menuButtonElement.children[0].classList
-        // const closeIconClassList = menuButtonElement.children[1].classList
-
         const menuIcon = menuButtonElement.children[0] as HTMLElement
         const closeIcon = menuButtonElement.children[1] as HTMLElement
-        // const menuIconAnimation = new Animation(new KeyframeEffect(menuIcon, [
-        //     { rotate: '0deg', scale: 1 },
-        //     { rotate: '45deg', scale: 1 },
-        //     { rotate: '45deg', scale: '0.5 0.5' },
-        //     { rotate: '45deg', scale: '0.5 0' }
-        // ], { duration: 500, easing: 'ease-out', fill: 'both' }), document.timeline)
-        // const duration = 300
-        // const menuIconAnimation = new Animation(new KeyframeEffect(menuIcon, [
-        //     { opacity: 1 },
-        //     { opacity: 0 },
-        // ], { duration, easing: 'ease-out', fill: 'both' }), document.timeline)
-        // const menuIconAnimation = new Animation(new KeyframeEffect(menuIcon, [
-        //     { scale: '1' },
-        //     { scale: '1 0' }
-        // ], { duration: 150, endDelay: 150, easing: 'ease-out', fill: 'both' }), document.timeline)
-        // const closeIconAnimation = new Animation(new KeyframeEffect(closeIcon, [
-        //     { rotate: '-45deg', scale: '0 1' },
-        //     { rotate: '-45deg', scale: '1 1' }
-        // ], { delay: 250, duration: 250, easing: 'ease-out', fill: 'both' }), document.timeline)
-        // const closeIconAnimation = new Animation(new KeyframeEffect(closeIcon, [
-        //     { opacity: 0 },
-        //     { opacity: 1 },
-        // ], { duration, easing: 'ease-out', fill: 'both' }), document.timeline)
-        // const closeIconAnimation = new Animation(new KeyframeEffect(closeIcon, [
-        //     { scale: '1 0' },
-        //     { scale: '1' },
-        //     { rotate: '0deg' },
-        //     { rotate: '45deg', scale: '1' }
-        // ], { delay: 150, duration: 150, easing: 'ease-out', fill: 'both' }), document.timeline)
 
         if (sidebarContext.openState.isOpen) {
-            // menuIconAnimation.play()
-            // closeIconAnimation.play()
             menuIcon.classList.add('hidden')
             closeIcon.classList.remove('hidden')
             return
         }
 
-        // menuIconAnimation.reverse()
-        // closeIconAnimation.reverse()
         menuIcon.classList.remove('hidden')
         closeIcon.classList.add('hidden')
     }, [sidebarContext])
@@ -211,14 +172,15 @@ function MobileTopbarComponent() {
                         <i className="icon-medium material-icons">menu</i>
                         <i className="icon-medium material-icons hidden">close</i>
                     </a>
-                    <a className="inline" href="/reactjs/example_1/home" tabIndex={1000}>
+                    <a className="inline" href="/home" tabIndex={1000}>
                         <i className="material-icons icon-medium">home</i>
                     </a>
                 </div>
                 {/* <div className="grid"> */}
                 {/* <div> */}
                 <SearchComponent />
-                <Image src="/reactjs/example_1/svg/Algolia-mark-rounded-blue.svg" alt="Algolia logo" height={40} width={40} />
+                {/* TODO; priority; */}
+                <Image src="/svg/Algolia-mark-rounded-blue.svg" alt="Algolia logo" height={40} width={40} priority={false} />
                 {/* </div> */}
                 {/* </div> */}
                 {/* <div /> */}

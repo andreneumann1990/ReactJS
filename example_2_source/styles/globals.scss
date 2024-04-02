@@ -119,6 +119,10 @@ $height-mobile-topbar: 40px;
     position: absolute;
 }
 
+.touch-none {
+    touch-action: none;
+}
+
 :focus-visible {
     outline-offset: -1px;
 

@@ -1,23 +1,58 @@
 'use client'
 
-import { KeyboardEvent, useContext, useEffect, useMemo } from 'react'
+import { KeyboardEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import MobileDropdownComponent from './Dropdown'
 import { SidebarContext, isDebugEnabled, mainElement, triggerFlashEffect } from '../Layout'
-import Hammer from 'hammerjs'
 import { menuButtonElement } from './Topbar'
+import { useDrag } from '@use-gesture/react'
 
 let sidebarElement: HTMLElement | null = null
 
 function MobileSidebarComponent() {
-    // const importHammerJS = () => import("hammerjs")
-    const sidebarContext = useContext(SidebarContext)
-    const bodyElement = document.querySelector('main')
+    const [isLoading, setIsLoading] = useState(true)
+    useEffect(() => setIsLoading(false), [])
 
-    useEffect(() => { import('hammerjs') }, [])
-    const manager = useMemo(() => {
-        return bodyElement != null ? new Hammer.Manager(bodyElement) : undefined
-    }, [bodyElement])
-    const recognizer = useMemo(() => new Hammer.Pan(), [])
+    const sidebarContext = useContext(SidebarContext)
+    // const mainElement = document.querySelector('main')
+
+    //         // Drag (pan) handler
+    //         const bindSwipe = useDrag(({ offset: [dx, dy], direction: [x], velocity: [vx], last }) => {
+    //             if (sidebarContext == null) return
+    //             if (!sidebarContext.openState.isOpen) return
+    //             if (sidebarElement == null) return
+    //             if (dx > -10) return
+    //             if (Math.abs(dy) > Math.abs(dx)) return
+    //
+    //             // pan move;
+    //             if (!last) {
+    //                 sidebarElement.style.transition = 'transform 0s ease'
+    //                 const currentOffset = sidebarElement.offsetWidth + dx
+    //                 sidebarElement.style.transform = `translateX(${currentOffset}px)`
+    //             }
+    //
+    //             // pan end;
+    //             if (isDebugEnabled) console.log('Sidebar: Pan gesture has ended.')
+    //             if (dx < -0.5 * sidebarElement.offsetWidth) {
+    //                 // isOpen is not updated immediately;
+    //                 // this is enough since the isOpen state is changed; hence, applySidebarState()
+    //                 // is called automatically;
+    //                 sidebarContext.openState.setIsOpen(false)
+    //                 return
+    //             }
+    //
+    //             // not needed; the isOpen state is not changed;
+    //             // sidebarContext.openState.setIsOpen(true)
+    //             // cannot call applySidebarState() for this since it depends on this function, i.e. enableTouchEvents();
+    //             sidebarElement.style.transition = 'transform 0.5s ease-out 0s'
+    //             sidebarElement.style.transform = `translateX(${sidebarElement.offsetWidth}px)`
+    //         }, {
+    //             domTarget: mainElement,
+    //             eventOptions: { capture: true },
+    //         })
+
+    // Ensure the effect hooks into the domTarget
+
+    console.log('TEMP 2') //TODO
 
     //
     // functions
@@ -26,7 +61,7 @@ function MobileSidebarComponent() {
     // this is called when the component mounts or unmounts; and called when it re-renders;
     const initializeSidebarReference = (element: HTMLElement | null) => {
         if (sidebarElement != null) return
-        if (element == null) return // should never happen!!;
+        if (element == null) return // should never happen!! since it gets never unmounted;
         if (isDebugEnabled) console.log('Sidebar: Initialize reference.')
         sidebarElement = element
     }
@@ -38,7 +73,7 @@ function MobileSidebarComponent() {
     // update state
     useEffect(() => {
         if (sidebarContext == null) return
-        if (manager == null) return
+        // if (manager == null) return
         if (sidebarElement == null) return
         if (mainElement == null) return
 
@@ -67,74 +102,22 @@ function MobileSidebarComponent() {
 
         if (sidebarContext.openState.isOpen) {
             enableTabIndex()
-            manager.add(recognizer)
+            // manager.add(recognizer)
             mainElement.classList.add('inactive')
             sidebarElement.style.transform = `translateX(${sidebarElement.offsetWidth}px)`
             return
         }
 
         disableTabIndex()
-        manager.remove(recognizer)
+        // manager.remove(recognizer)
         mainElement.classList.remove('inactive')
         sidebarElement.style.transform = 'translateX(0)'
-    }, [manager, recognizer, sidebarContext])
+    }, [mainElement, sidebarContext])
 
     // swipe event listener
-    useEffect(() => {
-        if (sidebarContext == null) return
-        if (manager == null) return
-        let startX = 0
-        let currentX = 0
-
-        const handlePanStart = function () {
-            console.log('panstart')
-            // console.log('target ' + event.target)
-            startX = 0
-            currentX = 0
-        }
-
-        // eslint-disable-next-line no-undef
-        const handlePanMove = function (event: HammerInput) {
-            if (sidebarElement == null) return
-            // console.log('panmove')
-            const deltaX = event.deltaX
-            currentX = startX + deltaX
-            if (currentX >= 0) return
-
-            sidebarElement.style.transition = 'transform 0s ease'
-            const currentOffset = sidebarElement.offsetWidth + currentX
-            sidebarElement.style.transform = `translateX(${currentOffset}px)`
-        }
-
-        const handlePanEnd = function () {
-            if (sidebarElement == null) return
-            console.log('panend')
-
-            if (currentX < -0.5 * sidebarElement.offsetWidth) {
-                // isOpen is not updated immediately;
-                // this is enough since the isOpen state is changed; hence, applySidebarState()
-                // is called automatically;
-                sidebarContext.openState.setIsOpen(false)
-                return
-            }
-
-            // not needed; the isOpen state is not changed;
-            // sidebarContext.openState.setIsOpen(true)
-            // cannot call applySidebarState() for this since it depends on this function, i.e. enableTouchEvents();
-            sidebarElement.style.transition = 'transform 0.5s ease-out 0s'
-            sidebarElement.style.transform = `translateX(${sidebarElement.offsetWidth}px)`
-        }
-
-        manager.on('panstart', handlePanStart)
-        manager.on('panmove', handlePanMove)
-        manager.on('panend', handlePanEnd)
-
-        return () => {
-            manager.off('panstart', handlePanStart)
-            manager.off('panmove', handlePanMove)
-            manager.off('panend', handlePanEnd)
-        }
-    }, [manager, sidebarContext])
+    // useEffect(() => {
+    //     bindSwipe()
+    // }, [bindSwipe])
 
     // click event listener
     useEffect(() => {
@@ -142,7 +125,6 @@ function MobileSidebarComponent() {
         let startX = 0
         let startY = 0
 
-        // console.log(`threshold ${new Hammer.Tap().defaults.threshold}`) // 9
         const thresholdSquared = 81
         const distanceSquared = (x: number, y: number) => {
             return x * x + y * y
@@ -155,7 +137,6 @@ function MobileSidebarComponent() {
 
         const handlePointerUp = (event: PointerEvent) => {
             if (distanceSquared(event.screenX - startX, event.screenY - startY) > thresholdSquared) return
-            console.log(`isOpen ${sidebarContext.openState.isOpen}`)
             if (!sidebarContext.openState.isOpen) return
             if (sidebarElement == null) return
             if (sidebarElement.contains(event.target as Node)) return
@@ -163,7 +144,7 @@ function MobileSidebarComponent() {
             if (menuButtonElement == null) return
             if (menuButtonElement.contains(event.target as Node)) return
 
-            console.log('close sidebar because clicked outside')
+            if (isDebugEnabled) console.log('Sidebar: Clicked outside. Close sidebar.')
             sidebarContext.openState.setIsOpen(false)
         }
 
@@ -252,10 +233,12 @@ function MobileSidebarComponent() {
     //
     //
 
+    if (isLoading) return <></>
+
     return (<>
         <nav ref={initializeSidebarReference} className="mobile-sidebar" tabIndex={-1} onKeyUp={handleKeyInput}>
             <hr />
-            <a href="/ReactJS/example_1/image_examples">Image Examples</a><hr />
+            <a href="/image_examples">Image Examples</a><hr />
             <a href="#">Link 2</a><hr />
             <MobileDropdownComponent text="Dropdown 1">
                 <a href="#">Link 3</a>

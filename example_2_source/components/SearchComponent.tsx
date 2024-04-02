@@ -28,10 +28,10 @@ function SearchComponent() {
     return (<>
         {/* <div className="inline"> */}
         <div>
-            <InstantSearch searchClient={searchClient} indexName="YourIndexName">
+            {/* <InstantSearch searchClient={searchClient} indexName="YourIndexName">
                 <SearchBox />
                 <Hits hitComponent={Hit} />
-            </InstantSearch>
+            </InstantSearch> */}
         </div>
         {/* </div> */}
     </>)

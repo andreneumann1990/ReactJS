@@ -2,9 +2,11 @@
 
 // import { Outlet } from 'react-router-dom'
 import MobileTopbarComponent from './mobile/Topbar'
-import MobileSidebarComponent from './mobile/Sidebar'
-import React, { useEffect, useState } from 'react'
+import MobileSidebarComponent, { sidebarElement } from './mobile/Sidebar'
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import tinycolor from 'tinycolor2'
+import { dragAction, useDrag } from '@use-gesture/react'
+// import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 
 interface SidebarState {
     openState: {
@@ -70,6 +72,49 @@ function LayoutComponent({ children }: React.PropsWithChildren<{}>) {
         }
     }, [])
 
+    //
+    //
+    //
+
+    const sidebarContext = useContext(SidebarContext)
+
+    // close sidebar by swipe / panning gesture;
+    const dragAttributes = useDrag<PointerEvent>(({ movement: [dx, dy], first, last }) => {
+        // offset does not reset when panning ends; movement does;
+        if (sidebarContext == null) return
+        console.log(`dx ${dx} first ${first} last ${last}`)
+        if (!sidebarContext.openState.isOpen) return
+        if (sidebarElement == null) return
+        if (dx > -10) return
+        if (Math.abs(dy) > Math.abs(dx)) return
+
+        // pan move;
+        if (!last) {
+            sidebarElement.style.transition = 'transform 0s ease'
+            const currentOffset = sidebarElement.offsetWidth + dx
+            sidebarElement.style.transform = `translateX(${currentOffset}px)`
+        }
+
+        // pan end;
+        if (isDebugEnabled) console.log('Sidebar: Pan gesture has ended.')
+        if (dx < -0.5 * sidebarElement.offsetWidth) {
+            // isOpen is not updated immediately;
+            // this is enough since the isOpen state is changed; hence, applySidebarState()
+            // is called automatically;
+            sidebarContext.openState.setIsOpen(false)
+            return
+        }
+
+        // not needed; the isOpen state is not changed;
+        // sidebarContext.openState.setIsOpen(true)
+        // cannot call applySidebarState() for this since it depends on this function, i.e. enableTouchEvents();
+        sidebarElement.style.transition = 'transform 0.5s ease-out 0s'
+        sidebarElement.style.transform = `translateX(${sidebarElement.offsetWidth}px)`
+    }, { eventOptions: { capture: true } })
+
+    // const dragAttributes = function () { return {} }
+    // if (isServer) dragAttributes = function () { return {} }
+    // const temp: ReactDOMAttributes | null = null
 
     const [isOpen, setIsOpen] = useState(false)
     const [activeDropdownElement, setActiveDropdownElement] = useState<HTMLDivElement | null>(null)
@@ -83,6 +128,10 @@ function LayoutComponent({ children }: React.PropsWithChildren<{}>) {
         // only accounts for properties; the reference can still be changed;
         // Object.freeze(mainElement)
     }
+
+    const [isLoading, setIsLoading] = useState(true)
+    useEffect(() => setIsLoading(false), [])
+    if (isLoading) return <></>
 
     return (<>
         <div className="mobile sticky">
@@ -99,13 +148,12 @@ function LayoutComponent({ children }: React.PropsWithChildren<{}>) {
             </SidebarContext.Provider>
         </div>
 
-        <main ref={initializeMainReference} tabIndex={1}>
+        <main className="touch-none" ref={initializeMainReference} {...dragAttributes()} tabIndex={1}>
             <div className="padding-main-lr">
-                {/* <Outlet /> */}
                 {children}
             </div>
             <footer />
-        </main>
+        </main >
     </>)
 }
 

@@ -23,6 +23,7 @@ function HomeComponent() {
             <li>exporting references of non-unmounting elements as globals instead (bad?)</li>
             <li>tabindex management & navigation via keyboard</li>
             <li>deployed on github.io</li>
+            <li>switched to nextjs; no server-side-rendering (SSR); needs to be static at this point; no back-end yet;</li>
         </ul>
 
         <h2>TODO:</h2>
