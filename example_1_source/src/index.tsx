@@ -5,9 +5,13 @@ import reportWebVitals from './reportWebVitals'
 import RouterComponent from './components/Router'
 import './scss/styles.scss'
 
-if (window.location.pathname !== '/') {
-    sessionStorage.redirect = window.location.href
-}
+// there are routing issues since when reloading the page; chatgpt says that
+// there is a workaround using gh-pages and a custom 404 page that automatically
+// redirects; not sure if this works with subfolders; too much effort for now;
+// only a small issue; this part is needed in addition(?) to the 404 page;
+// if (window.location.pathname !== '/') {
+//     sessionStorage.redirect = window.location.href
+// }
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(

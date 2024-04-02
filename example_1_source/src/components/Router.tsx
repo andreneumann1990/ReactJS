@@ -8,8 +8,7 @@ function RouterComponent() {
         <BrowserRouter basename="/reactjs/example_1">
             <Routes>
                 <Route path="/" element={<LayoutComponent />}>
-                    <Route index element={<Navigate to="/home" />} />
-                    <Route path="/home" element={<HomeComponent />} />
+                    <Route index element={<HomeComponent />} />
                     <Route path="/image_examples" element={<ImageExamplesComponent />} />
                     <Route path="*" element={<Navigate to="/" />} />
                 </Route>
