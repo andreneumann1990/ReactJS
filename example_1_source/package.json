@@ -1,8 +1,8 @@
 {
     "name": "example_1",
-    "version": "0.0.5",
+    "version": "0.0.6",
     "private": true,
-    "homepage": "https://andreneumann1990.github.io/ReactJS/example_1",
+    "homepage": "https://andreneumann1990.github.io/reactjs/example_1",
     "dependencies": {
         "@testing-library/jest-dom": "^5.17.0",
         "@testing-library/react": "^13.4.0",

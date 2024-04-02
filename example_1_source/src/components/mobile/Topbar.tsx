@@ -1,6 +1,7 @@
 import { KeyboardEvent, useCallback, useContext, useEffect } from 'react'
 import { SidebarContext, isDebugEnabled, mainElement, triggerFlashEffect } from '../Layout'
 import { sidebarElement } from './Sidebar'
+import { Link } from 'react-router-dom'
 // import SearchComponent from '../SearchComponent'
 
 let menuButtonElement: HTMLAnchorElement | null = null
@@ -204,21 +205,14 @@ function MobileTopbarComponent() {
         <nav ref={initializeTopbarReference} className="mobile-topbar">
             <div className="grid grid-topbar fg-items-center-main fg-space-between" onKeyUp={handleKeyInputs}>
                 <div>
-                    <a className="menu-button inline" ref={initializeMenuButtonReference} onPointerUp={toggleSidebar} href="#" tabIndex={2}>
+                    <Link className="menu-button inline" ref={initializeMenuButtonReference} onPointerUp={toggleSidebar} to="#" tabIndex={2}>
                         <i className="icon-medium material-icons">menu</i>
                         <i className="icon-medium material-icons hidden">close</i>
-                    </a>
-                    <a className="inline" href="/ReactJS/example_1/home" tabIndex={1000}>
+                    </Link>
+                    <Link className="inline" to="/" tabIndex={1000}>
                         <i className="material-icons icon-medium">home</i>
-                    </a>
+                    </Link>
                 </div>
-                {/* <div className="grid"> */}
-                {/* <div> */}
-                {/* <SearchComponent /> */}
-                {/* <img src="/ReactJS/example_1/svg/Algolia-mark-rounded-blue.svg" alt="Algolia logo" height={40} width={40} /> */}
-                {/* </div> */}
-                {/* </div> */}
-                {/* <div /> */}
             </div>
         </nav>
     </>)

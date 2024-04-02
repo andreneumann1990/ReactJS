@@ -1,10 +1,11 @@
+import { Link } from 'react-router-dom'
 import DesktopDropdown1Component from './Dropdown1'
 
 function DesktopTopbarComponent() {
     return (<nav className="desktop-navbar">
         {/* <p>very important text</p> */}
-        <a href="#">Link 1</a>
-        <a href="#">Link 2</a>
+        <Link to="#">Link 1</Link>
+        <Link to="#">Link 2</Link>
         <DesktopDropdown1Component />
     </nav>)
 }

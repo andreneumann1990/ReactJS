@@ -1,5 +1,6 @@
 import { KeyboardEvent, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { SidebarContext, isDebugEnabled, triggerFlashEffect } from '../Layout'
+import { Link } from 'react-router-dom'
 
 interface Props {
     children: ReactNode
@@ -146,12 +147,12 @@ function MobileDropdownComponent({ text, children }: Props) {
     return (<>
         {/* the div block is for changing the background color; the anchor changed its bg-color based on hover; */}
         <div ref={menuReference} className="mobile-dropdown-menu">
-            <a href="#" onPointerUp={toggleContent} onKeyUp={toggleContentKeyInput}>
+            <Link to="#" onPointerUp={toggleContent} onKeyUp={toggleContentKeyInput}>
                 <div className="grid grid-dropdown">
                     {text}
                     <i ref={iconReference} className="icon-medium material-icons grid-fit-right">computer</i>
                 </div>
-            </a>
+            </Link>
             <div ref={contentReference} className="mobile-dropdown-content hidden" onKeyUp={handleArrowLeft}>
                 {children}
             </div>

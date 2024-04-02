@@ -1,8 +1,9 @@
-import { KeyboardEvent, useContext, useEffect, useMemo } from 'react'
+import { KeyboardEvent, MouseEvent, useContext, useEffect, useMemo } from 'react'
 import MobileDropdownComponent from './Dropdown'
 import { SidebarContext, isDebugEnabled, mainElement, triggerFlashEffect } from '../Layout'
 import Hammer from 'hammerjs'
 import { menuButtonElement } from './Topbar'
+import { Link } from 'react-router-dom'
 
 let sidebarElement: HTMLElement | null = null
 
@@ -18,6 +19,11 @@ function MobileSidebarComponent() {
     //
     // functions
     //
+
+    function closeSidebar(event: MouseEvent): void {
+        if (sidebarContext == null) return
+        sidebarContext.openState.setIsOpen(false)
+    }
 
     // this is called when the component mounts or unmounts; and called when it re-renders;
     const initializeSidebarReference = (element: HTMLElement | null) => {
@@ -251,19 +257,19 @@ function MobileSidebarComponent() {
     return (<>
         <nav ref={initializeSidebarReference} className="mobile-sidebar" tabIndex={-1} onKeyUp={handleKeyInput}>
             <hr />
-            <a href="/ReactJS/example_1/image_examples">Image Examples</a><hr />
-            <a href="#">Link 2</a><hr />
+            <Link to="/image_examples" onClick={closeSidebar}>Image Examples</Link><hr />
+            <Link to="#">Link 2</Link><hr />
             <MobileDropdownComponent text="Dropdown 1">
-                <a href="#">Link 3</a>
-                <a href="#">Link 4</a>
-                <a href="#">Link 5</a>
-                <a href="#">Link 6</a>
-                <a href="#">Link 7</a>
-                <a href="#">Link 8</a>
+                <Link to="#">Link 3</Link>
+                <Link to="#">Link 4</Link>
+                <Link to="#">Link 5</Link>
+                <Link to="#">Link 6</Link>
+                <Link to="#">Link 7</Link>
+                <Link to="#">Link 8</Link>
             </MobileDropdownComponent><hr />
             <MobileDropdownComponent text="Dropdown 2">
-                <a href="#">Link 9</a>
-                <a href="#">Link 10</a>
+                <Link to="#">Link 9</Link>
+                <Link to="#">Link 10</Link>
             </MobileDropdownComponent><hr />
         </nav>
     </>)

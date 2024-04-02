@@ -5,15 +5,15 @@ import ImageExamplesComponent from './ImageExamples'
 
 function RouterComponent() {
     return (<>
-        <BrowserRouter>
+        <BrowserRouter basename="/reactjs/example_1">
             <Routes>
-                <Route path="/ReactJS/example_1/" element={<LayoutComponent />}>
-                    <Route index element={<Navigate to="/ReactJS/example_1/home" />} />
-                    <Route path="/ReactJS/example_1/home" element={<HomeComponent />} />
-                    <Route path="/ReactJS/example_1/image_examples" element={<ImageExamplesComponent />} />
-                    <Route path="*" element={<Navigate to="/ReactJS/example_1/home" />} />
+                <Route path="/" element={<LayoutComponent />}>
+                    <Route index element={<Navigate to="/home" />} />
+                    <Route path="/home" element={<HomeComponent />} />
+                    <Route path="/image_examples" element={<ImageExamplesComponent />} />
+                    <Route path="*" element={<Navigate to="/" />} />
                 </Route>
-                <Route path="*" element={<Navigate to="/ReactJS/example_1/home" />} />
+                <Route path="*" element={<Navigate to="/" />} />
             </Routes>
         </BrowserRouter>
     </>)

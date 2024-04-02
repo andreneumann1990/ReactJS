@@ -1,10 +1,11 @@
+import { Link } from 'react-router-dom'
 
 function DesktopDropdown1Component() {
     return (<div className="desktop-dropdown">
         Dropdown 1
         <div className="desktop-dropdown-content">
-            <a href="#">Link 3</a>
-            <a href="#">Link 4</a>
+            <Link to="#">Link 3</Link>
+            <Link to="#">Link 4</Link>
         </div>
     </div>)
 }
