@@ -1,77 +1,82 @@
 'use client'
 
 import { KeyboardEvent, useCallback, useEffect } from 'react'
-import { isDebugEnabled, mainElement, triggerFlashEffect, useSidenavStore } from './Layout'
-import { sidebarElement } from './Sidenav'
+import { isDebugEnabled, triggerFlashEffect } from './Layout'
 import SearchComponent from './SearchComponent'
 import Image from 'next/image'
+import { useSidenavStore } from './Sidenav'
+import Link from 'next/link'
+import { create } from 'zustand'
+import { useMainStore } from './Main'
 
-let menuButtonElement: HTMLAnchorElement | null = null
-let topbarElement: HTMLElement | null = null
+export default Topnav
+export { useTopnavStore }
+
+//
+//
+//
+
+interface topnavState {
+    element: HTMLElement | null,
+    setElement: (element: HTMLElement | null) => void,
+
+    menuButtonElement: HTMLAnchorElement | null,
+    setMenuButtonElement: (element: HTMLAnchorElement | null) => void,
+}
+
+const useTopnavStore = create<topnavState>(set => ({
+    element: null,
+    setElement: (element) => set(() => ({ element })),
+
+    menuButtonElement: null,
+    setMenuButtonElement: (element) => set(() => ({ menuButtonElement: element }))
+}))
+
+//
+// main
+//
 
 function Topnav() {
     //
     // parameters and variables
     //
 
+    const mainElement = useMainStore(state => state.element)
+
+    const sidenavElement = useSidenavStore(state => state.element)
     const isSidenavOpen = useSidenavStore(state => state.isOpen)
     const setIsSidenavOpen = useSidenavStore(state => state.setIsOpen)
 
-    //
-    //
-    //
-
-    // switch image for the sidebar toggle button;
-    useEffect(() => {
-        console.log(isSidenavOpen)
-        if (menuButtonElement == null) return
-        if (menuButtonElement.children.length < 2) return
-
-        const menuIcon = menuButtonElement.children[0] as HTMLElement
-        const closeIcon = menuButtonElement.children[1] as HTMLElement
-
-        if (isSidenavOpen) {
-            menuIcon.classList.add('hidden')
-            closeIcon.classList.remove('hidden')
-            return
-        }
-
-        menuIcon.classList.remove('hidden')
-        closeIcon.classList.add('hidden')
-    }, [isSidenavOpen])
+    const topnavElement = useTopnavStore(state => state.element)
+    const setTopnavElement = useTopnavStore(state => state.setElement)
+    const menuButtonElement = useTopnavStore(state => state.menuButtonElement)
+    const setMenuButtonElement = useTopnavStore(state => state.setMenuButtonElement)
 
     //
-    //
+    // functions
     //
 
     const initializeMenuButtonReference = (element: HTMLAnchorElement | null) => {
         if (menuButtonElement != null) return
         if (element == null) return
-        if (isDebugEnabled) console.log('Topbar: Initialize menu reference.')
-        menuButtonElement = element
+        if (isDebugEnabled) console.log('Topnav: Initialize menu reference.')
+        setMenuButtonElement(element)
     }
 
-    const initializeTopbarReference = (element: HTMLElement | null) => {
-        if (topbarElement != null) return
+    const initializeTopnavReference = (element: HTMLElement | null) => {
+        if (topnavElement != null) return
         if (element == null) return
-        if (isDebugEnabled) console.log('Topbar: Initialize topbar reference.')
-        topbarElement = element
+        if (isDebugEnabled) console.log('Topnav: Initialize topbar reference.')
+        setTopnavElement(element)
     }
 
-    const toggleSidenav = useCallback(() => {
-        if (isDebugEnabled) console.log('Topbar: Toggle sidebar.')
-
-        // not updated immediately;
-        setIsSidenavOpen(!isSidenavOpen)
-    }, [isSidenavOpen, setIsSidenavOpen])
-
-    function focusNextElement() {
+    const focusNextElement = useCallback(() => {
         if (menuButtonElement == null) return
-        if (topbarElement == null) return
+        if (topnavElement == null) return
         const focusedElement = document.activeElement as HTMLAnchorElement | null
         if (focusedElement == null) return
 
-        const focusableElements = [menuButtonElement, ...Array.from(topbarElement.querySelectorAll<HTMLAnchorElement>('a[tabindex="1000"]'))]
+        const focusableElements = [menuButtonElement, ...Array.from(topnavElement.querySelectorAll<HTMLAnchorElement>('a[tabindex="1000"]'))]
         const currentIndex = focusableElements.indexOf(focusedElement)
         const nextIndex = (currentIndex + 1) % focusableElements.length
         const nextElement = focusableElements[nextIndex]
@@ -79,28 +84,35 @@ function Topnav() {
         if (nextElement == null) return
         if (nextElement === menuButtonElement) return
         nextElement.focus()
-    }
+    }, [menuButtonElement, topnavElement])
 
-    function focusPreviousElement() {
+    const focusPreviousElement = useCallback(() => {
         if (menuButtonElement == null) return
-        if (topbarElement == null) return
+        if (topnavElement == null) return
         const focusedElement = document.activeElement as HTMLElement | null
         if (focusedElement == null) return
 
         if (focusedElement === menuButtonElement) return
-        const focusableElements = [menuButtonElement, ...Array.from(topbarElement.querySelectorAll<HTMLElement>('a[tabindex="1000"]'))]
+        const focusableElements = [menuButtonElement, ...Array.from(topnavElement.querySelectorAll<HTMLElement>('a[tabindex="1000"]'))]
         const currentIndex = focusableElements.indexOf(focusedElement)
         const previousIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length
 
         const previousElement = focusableElements[previousIndex]
         if (previousElement == null) return
         previousElement.focus()
-    }
+    }, [menuButtonElement, topnavElement])
+
+    const toggleSidenav = useCallback(() => {
+        if (isDebugEnabled) console.log('Topnav: Toggle sidebar.')
+
+        // not updated immediately;
+        setIsSidenavOpen(!isSidenavOpen)
+    }, [isSidenavOpen, setIsSidenavOpen])
 
     const handleKeyInputs = useCallback((event: KeyboardEvent) => {
         if (mainElement == null) return
         if (menuButtonElement == null) return
-        if (sidebarElement == null) return
+        if (sidenavElement == null) return
 
         //TODO; up + down for switching between main and topbar;
 
@@ -128,7 +140,7 @@ function Topnav() {
                 if (isSidenavOpen) {
                     event.preventDefault()
                     event.stopPropagation()
-                    const firstElement = sidebarElement.querySelector<HTMLAnchorElement>('a')
+                    const firstElement = sidenavElement.querySelector<HTMLAnchorElement>('a')
                     if (firstElement == null) return
                     firstElement.focus()
                     return
@@ -164,23 +176,45 @@ function Topnav() {
             focusNextElement()
             return
         }
-    }, [isSidenavOpen, toggleSidenav])
+    }, [focusNextElement, focusPreviousElement, isSidenavOpen, mainElement, menuButtonElement, sidenavElement, toggleSidenav])
+
+    //
+    // effects
+    //
+
+    // switch image for the sidebar toggle button;
+    useEffect(() => {
+        if (menuButtonElement == null) return
+        if (menuButtonElement.children.length < 2) return
+
+        const menuIcon = menuButtonElement.children[0] as HTMLElement
+        const closeIcon = menuButtonElement.children[1] as HTMLElement
+
+        if (isSidenavOpen) {
+            menuIcon.classList.add('hidden')
+            closeIcon.classList.remove('hidden')
+            return
+        }
+
+        menuIcon.classList.remove('hidden')
+        closeIcon.classList.add('hidden')
+    }, [isSidenavOpen, menuButtonElement])
 
     //
     //
     //
 
     return (<>
-        <nav ref={initializeTopbarReference} className="mobile-topbar">
+        <nav ref={initializeTopnavReference} className="mobile-topbar">
             <div className="grid grid-topbar fg-items-center-main fg-space-between" onKeyUp={handleKeyInputs}>
-                <div>
-                    <a className="menu-button inline" ref={initializeMenuButtonReference} onPointerUp={toggleSidenav} href="#" tabIndex={2}>
+                <div className="grid grid-flow-col">
+                    <Link className="" ref={initializeMenuButtonReference} onPointerUp={toggleSidenav} href="#" tabIndex={2}>
                         <i className="icon-medium material-icons">menu</i>
                         <i className="icon-medium material-icons hidden">close</i>
-                    </a>
-                    <a className="inline" href="/home" tabIndex={1000}>
-                        <i className="material-icons icon-medium">home</i>
-                    </a>
+                    </Link>
+                    <Link className="" href="/home" tabIndex={1000}>
+                        <i className="icon-medium material-icons">home</i>
+                    </Link>
                 </div>
                 <SearchComponent />
                 <Image src="/svg/Algolia-mark-rounded-blue.svg" alt="Algolia logo" height={40} width={40} priority={false} />
@@ -188,7 +222,3 @@ function Topnav() {
         </nav>
     </>)
 }
-
-export default Topnav
-export { menuButtonElement }
-export { topbarElement }

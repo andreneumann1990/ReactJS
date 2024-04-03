@@ -36,7 +36,7 @@ export default function RootLayout({
                 <link rel="manifest" href="/manifest.json" />
 
                 {/* <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia&display=optional" /> */}
-                <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+                {/* <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" /> */}
                 {/* <link rel="stylesheet" href="/styles/globals.css" /> */}
             </head>
 

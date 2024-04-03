@@ -1,7 +1,9 @@
 'use client'
 
 import { KeyboardEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
-import { isDebugEnabled, triggerFlashEffect, useSidenavStore } from './Layout'
+import { isDebugEnabled, triggerFlashEffect } from './Layout'
+import Link from 'next/link'
+import { useSidenavStore } from './Sidenav'
 
 interface Props {
     children: ReactNode
@@ -26,11 +28,6 @@ function Dropdown({ text, children }: Props) {
     //
     // functions
     //
-
-    // what was this used for again?; TODO;
-    // function cancelEvent(event: MouseEvent): void {
-    //     event.preventDefault()
-    // }
 
     function handleArrowLeft(event: KeyboardEvent): void {
         if (menuReference.current == null) return
@@ -105,7 +102,7 @@ function Dropdown({ text, children }: Props) {
     }, [isDropdownOpen, setLastActiveDropdownElement])
 
     //
-    // side effects
+    // effects
     //
 
     // close this one if another dropdown menu got opened;
@@ -153,12 +150,12 @@ function Dropdown({ text, children }: Props) {
     return (<>
         {/* the div block is for changing the background color; the anchor changed its bg-color based on hover; */}
         <div ref={menuReference} className="mobile-dropdown-menu">
-            <a href="#" onPointerUp={toggleContent} onKeyUp={toggleContentKeyInput}>
+            <Link href="#" onPointerUp={toggleContent} onKeyUp={toggleContentKeyInput}>
                 <div className="grid grid-dropdown">
                     {text}
                     <i ref={iconReference} className="icon-medium material-icons grid-fit-right">computer</i>
                 </div>
-            </a>
+            </Link>
             <div ref={contentReference} className="mobile-dropdown-content hidden" onKeyUp={handleArrowLeft}>
                 {children}
             </div>

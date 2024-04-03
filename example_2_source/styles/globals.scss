@@ -1,14 +1,19 @@
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+
 @import "tailwindcss/base";
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
-// @layer base {
-//     h1 {
-//         @apply font-bold;
-//     }
-// }
-
 @layer components {
+    .icon-medium {
+        font-size: calc(-8px + var(--height-topnav));
+        padding: 4px;
+
+        // used in dropdown menu icons;
+        //TODO export there;
+        transition: all 0.3s ease-out;
+    }
+
     .scrollbar-gutter-stable-both {
         scrollbar-gutter: stable both-edges;
     }
@@ -53,95 +58,6 @@ $width-scrollbar: 17px;
 * {
     box-sizing: border-box;
 }
-
-//TODO; debug;
-// a, button {
-// border: 3px solid aqua;
-// border-style: groove;
-// }
-
-// .desktop-navbar {
-//     background-color: aqua;
-// }
-// 
-// // @media (hover: none) {
-.desktop {
-    display: none;
-}
-
-// 
-// // }
-// 
-// .desktop-dropdown {
-//     // background-color: #be2828;
-//     display: inline-block;
-//     // margin: 10px;
-//     position: relative;
-//     // width: 10%;
-//     // width: fit-content;
-// 
-//     @media (hover: hover) {
-//         &:hover .desktop-dropdown-content {
-//             display: block;
-//         }
-//     }
-// }
-// 
-// .desktop-dropdown-content {
-//     background-color: $color-background-1-overlay;
-//     // background-color: rgba(86, 148, 38, 0.685);
-//     // opacity: 100%;
-//     display: none;
-//     margin: 0px;
-//     position: absolute;
-//     box-sizing: border-box;
-//     // width: 100%;
-//     z-index: 1000;
-// 
-//     > a {
-//         display: block;
-//         margin: 3px;
-//     }
-// }
-// 
-// // @media (hover: hover) {
-// //     .mobile {
-// //         display: none;
-// //     }
-// // }
-// 
-// //orientation; TODO?;
-// //hover
-// // @media (hover: none) {
-// .desktop-dropdown, .desktop-navbar {
-//     display: none;
-// }
-// 
-// // }
-// 
-// // @media (hover: hover) {
-// //     .mobile-dropdown, .mobile-topbar {
-// //         display: none;
-// //     }
-// // }
-// 
-// // @media (hover: none) {
-// //     .dropdown.active .dropdown-content {
-// //         display: block;
-// //     }
-// // }
-
-.relative {
-    position: relative;
-}
-
-.absolute {
-    position: absolute;
-}
-
-// .touch-none {
-//     touch-action: none;
-// }
 
 :focus-visible {
     outline-offset: -1px;
@@ -238,77 +154,6 @@ $width-scrollbar: 17px;
 
 .grid-row-80-20 {
     grid-template-columns: 80% 20%;
-}
-
-.grid-fit-right {
-    align-content: center;
-    margin-left: auto; // !important;
-    width: -webkit-fit-content;
-    width: -moz-fit-content;
-    width: fit-content;
-}
-
-.grid-fit-center {
-    margin: auto;
-    width: -webkit-fit-content;
-    width: -moz-fit-content;
-    width: fit-content;
-    height: -webkit-fit-content;
-    height: -moz-fit-content;
-    height: fit-content;
-}
-
-.hidden {
-    display: none;
-}
-
-.icon.hidden {
-    // transform: 'scaleX(0)';
-    opacity: 0;
-}
-
-.icon-large {
-    font-size: 48px;
-    padding: 6px;
-    // transition: all 0.3s ease-out;
-    // animation-timing-function: ease-out;
-}
-
-.icon-medium {
-    font-size: 32px;
-    padding: 4px;
-    // used in dropdown menu icons;
-    transition: all 0.3s ease-out;
-    // animation-timing-function: ease-out;
-    // animation-fill-mode: forwards;
-}
-
-.icon-row {
-    margin: 0px 10px;
-}
-
-.inline {
-    // display: inline;
-    display: inline-block;
-}
-
-.margin-lr-10 {
-    margin-left: 10px;
-    margin-right: 10px;
-}
-
-.menu-button {
-    // when using position: absolute on the icons; 
-    height: 40px;
-    // aspect-ratio: 1;
-    // height: fit-content;
-    // border-width: 1px;
-
-    // for navigating with keys;
-    // height: calc($height-topnav - 2px);
-    // width: calc($height-topnav - 2px);
-    // height: 32px;
-    // width: 32px;
 }
 
 .mobile-dropdown-content {
@@ -500,8 +345,8 @@ body {
     font-size: 100%;
     font-family: Helvetica, Arial, sans-serif;
 
-    margin: 0;
-    padding: 0;
+    // margin: 0;
+    // padding: 0;
 
     // google fonts;
     // font-family: "Sofia", sans-serif;
@@ -532,29 +377,9 @@ code {
         monospace;
 }
 
-// footer {
-//     // for now the same height;
-//     height: var(--height-topnav);
-// }
-
 html {
-    // @extend .width-full-edge;
-
-    //TODO;
     color-scheme: dark;
-
     scrollbar-color: hsl(0, 0%, 50%) transparent;
-
-    // disable for debugging;
-    // overflow-x: hidden;
-
-    // by default the width does not include the margin; prevent things from getting
-    // larger than 100vw, 100vh;
-    margin: 0px;
-    padding: 0px;
-
-    // default = content-box;
-    // box-sizing: content-box
 }
 
 main.inactive {

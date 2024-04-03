@@ -2,8 +2,8 @@
  * @type {import('next').NextConfig}
  */
 const nextConfig = {
-//   output: 'export',
-//   distDir: 'exported',
+  output: 'export',
+  distDir: '../example_2',
 
 //   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
 //     // Override production minification
@@ -16,6 +16,7 @@ const nextConfig = {
 //     return config;
 //   },
     images: {
+        unoptimized: true,
         remotePatterns: [
         {
             protocol: 'https',
