@@ -2,7 +2,7 @@
  * @type {import('next').NextConfig}
  */
 const nextConfig = {
-    basePath: '/example_2',
+    basePath: '/reactjs/example_2',
     distDir: '../example_2',
     output: 'export',
 
