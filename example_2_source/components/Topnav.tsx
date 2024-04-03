@@ -1,28 +1,36 @@
 'use client'
 
-import { KeyboardEvent, useCallback, useContext, useEffect } from 'react'
-import { SidebarContext, isDebugEnabled, mainElement, triggerFlashEffect } from '../Layout'
-import { sidebarElement } from './Sidebar'
-import SearchComponent from '../SearchComponent'
+import { KeyboardEvent, useCallback, useEffect } from 'react'
+import { isDebugEnabled, mainElement, triggerFlashEffect, useSidenavStore } from './Layout'
+import { sidebarElement } from './Sidenav'
+import SearchComponent from './SearchComponent'
 import Image from 'next/image'
 
 let menuButtonElement: HTMLAnchorElement | null = null
 let topbarElement: HTMLElement | null = null
 
-function MobileTopbarComponent() {
-    const sidebarContext = useContext(SidebarContext)
+function Topnav() {
+    //
+    // parameters and variables
+    //
+
+    const isSidenavOpen = useSidenavStore(state => state.isOpen)
+    const setIsSidenavOpen = useSidenavStore(state => state.setIsOpen)
+
+    //
+    //
+    //
 
     // switch image for the sidebar toggle button;
     useEffect(() => {
-        if (sidebarContext == null) return
-        console.log(sidebarContext.openState.isOpen)
+        console.log(isSidenavOpen)
         if (menuButtonElement == null) return
         if (menuButtonElement.children.length < 2) return
 
         const menuIcon = menuButtonElement.children[0] as HTMLElement
         const closeIcon = menuButtonElement.children[1] as HTMLElement
 
-        if (sidebarContext.openState.isOpen) {
+        if (isSidenavOpen) {
             menuIcon.classList.add('hidden')
             closeIcon.classList.remove('hidden')
             return
@@ -30,7 +38,7 @@ function MobileTopbarComponent() {
 
         menuIcon.classList.remove('hidden')
         closeIcon.classList.add('hidden')
-    }, [sidebarContext])
+    }, [isSidenavOpen])
 
     //
     //
@@ -50,13 +58,12 @@ function MobileTopbarComponent() {
         topbarElement = element
     }
 
-    const toggleSidebar = useCallback(() => {
-        if (sidebarContext == null) return
+    const toggleSidenav = useCallback(() => {
         if (isDebugEnabled) console.log('Topbar: Toggle sidebar.')
 
         // not updated immediately;
-        sidebarContext.openState.setIsOpen(!sidebarContext.openState.isOpen)
-    }, [sidebarContext])
+        setIsSidenavOpen(!isSidenavOpen)
+    }, [isSidenavOpen, setIsSidenavOpen])
 
     function focusNextElement() {
         if (menuButtonElement == null) return
@@ -91,7 +98,6 @@ function MobileTopbarComponent() {
     }
 
     const handleKeyInputs = useCallback((event: KeyboardEvent) => {
-        if (sidebarContext == null) return
         if (mainElement == null) return
         if (menuButtonElement == null) return
         if (sidebarElement == null) return
@@ -111,7 +117,7 @@ function MobileTopbarComponent() {
             if (event.key === 'Enter') {
                 event.preventDefault()
                 event.stopPropagation()
-                toggleSidebar()
+                toggleSidenav()
                 triggerFlashEffect(event)
                 return
             }
@@ -119,7 +125,7 @@ function MobileTopbarComponent() {
             // ignore ArrowRight because other icons are displayed to the right;
             // but for consistency it would be nice; hmmm...;
             if (event.key === 'ArrowDown') {
-                if (sidebarContext.openState.isOpen) {
+                if (isSidenavOpen) {
                     event.preventDefault()
                     event.stopPropagation()
                     const firstElement = sidebarElement.querySelector<HTMLAnchorElement>('a')
@@ -130,15 +136,15 @@ function MobileTopbarComponent() {
 
                 event.preventDefault()
                 event.stopPropagation()
-                toggleSidebar()
+                toggleSidenav()
                 triggerFlashEffect(event)
                 return
             }
 
-            if ((event.key === 'ArrowLeft' || event.key === 'ArrowUp') && sidebarContext.openState.isOpen) {
+            if ((event.key === 'ArrowLeft' || event.key === 'ArrowUp') && isSidenavOpen) {
                 event.preventDefault()
                 event.stopPropagation()
-                toggleSidebar()
+                toggleSidenav()
                 triggerFlashEffect(event)
                 return
             }
@@ -158,7 +164,7 @@ function MobileTopbarComponent() {
             focusNextElement()
             return
         }
-    }, [sidebarContext, toggleSidebar])
+    }, [isSidenavOpen, toggleSidenav])
 
     //
     //
@@ -168,7 +174,7 @@ function MobileTopbarComponent() {
         <nav ref={initializeTopbarReference} className="mobile-topbar">
             <div className="grid grid-topbar fg-items-center-main fg-space-between" onKeyUp={handleKeyInputs}>
                 <div>
-                    <a className="menu-button inline" ref={initializeMenuButtonReference} onPointerUp={toggleSidebar} href="#" tabIndex={2}>
+                    <a className="menu-button inline" ref={initializeMenuButtonReference} onPointerUp={toggleSidenav} href="#" tabIndex={2}>
                         <i className="icon-medium material-icons">menu</i>
                         <i className="icon-medium material-icons hidden">close</i>
                     </a>
@@ -176,19 +182,13 @@ function MobileTopbarComponent() {
                         <i className="material-icons icon-medium">home</i>
                     </a>
                 </div>
-                {/* <div className="grid"> */}
-                {/* <div> */}
                 <SearchComponent />
-                {/* TODO; priority; */}
                 <Image src="/svg/Algolia-mark-rounded-blue.svg" alt="Algolia logo" height={40} width={40} priority={false} />
-                {/* </div> */}
-                {/* </div> */}
-                {/* <div /> */}
             </div>
         </nav>
     </>)
 }
 
-export default MobileTopbarComponent
+export default Topnav
 export { menuButtonElement }
 export { topbarElement }

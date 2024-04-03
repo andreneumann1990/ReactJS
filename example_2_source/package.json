@@ -1,7 +1,8 @@
 {
-    "name": "example_1_source_next",
-    "version": "0.0.5",
+    "name": "example_2_source",
+    "version": "0.0.1",
     "private": true,
+    "homepage": "https://andreneumann1990.github.io/reactjs/example_2",
     "scripts": {
         "dev": "next dev",
         "build": "next build",
@@ -18,7 +19,8 @@
         "react-instantsearch": "^7.7.0",
         "react-router-dom": "^6.22.3",
         "sass": "^1.72.0",
-        "tinycolor2": "^1.6.0"
+        "tinycolor2": "^1.6.0",
+        "zustand": "^4.5.2"
     },
     "devDependencies": {
         "@babel/core": "^7.24.3",
@@ -27,26 +29,32 @@
         "@types/react": "^18",
         "@types/react-dom": "^18",
         "@types/tinycolor2": "^1.4.6",
-        "autoprefixer": "^10.0.1",
+        "@typescript-eslint/eslint-plugin": "^7.5.0",
+        "@typescript-eslint/parser": "^7.5.0",
+        "autoprefixer": "^10.4.19",
         "babel-loader": "^9.1.3",
         "eslint": "^8.57.0",
         "eslint-config-next": "^14.1.4",
         "imports-loader": "^5.0.0",
-        "postcss": "^8",
-        "tailwindcss": "^3.3.0",
+        "postcss": "^8.4.38",
+        "tailwindcss": "^3.4.3",
         "typescript": "^5",
         "webpack": "^5.91.0",
         "webpack-cli": "^5.1.4"
     },
     "eslintConfig": {
+        "parser": "@typescript-eslint/parser",
         "plugins": [
-            "eslint-plugin-react"
+            "eslint-plugin-react",
+            "@typescript-eslint/eslint-plugin"
         ],
         "extends": [
             "next",
-            "next/core-web-vitals"
+            "next/core-web-vitals",
+            "plugin:@typescript-eslint/recommended"
         ],
         "rules": {
+            "@typescript-eslint/no-unused-vars": "warn",
             "no-trailing-spaces": "error",
             "quotes": [
                 "error",
@@ -68,7 +76,6 @@
             "valid-jsdoc": "off",
             "no-invalid-this": "off",
             "no-undef": "error",
-            "no-unused-vars": "warn",
             "no-var": "error",
             "prefer-const": "warn",
             "prefer-rest-params": "error",

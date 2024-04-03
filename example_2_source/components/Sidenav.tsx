@@ -1,18 +1,26 @@
 'use client'
 
-import { KeyboardEvent, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import MobileDropdownComponent from './Dropdown'
-import { SidebarContext, isDebugEnabled, mainElement, triggerFlashEffect } from '../Layout'
-import { menuButtonElement } from './Topbar'
-import { useDrag } from '@use-gesture/react'
+import { KeyboardEvent, useEffect, useState } from 'react'
+import Dropdown from './Dropdown'
+import { isDebugEnabled, mainElement, triggerFlashEffect, useSidenavStore } from './Layout'
+import { menuButtonElement } from './Topnav'
 
-let sidebarElement: HTMLElement | null = null
+// TODO: add to store;
+let sidenavElement: HTMLElement | null = null
 
-function MobileSidebarComponent() {
+function Sidenav() {
+    //
+    // paramters and variables
+    //
+
+    const isSidenavOpen = useSidenavStore(state => state.isOpen)
+    const setIsSidenavOpen = useSidenavStore(state => state.setIsOpen)
     const [isLoading, setIsLoading] = useState(true)
+
+    //TODO
     useEffect(() => setIsLoading(false), [])
 
-    const sidebarContext = useContext(SidebarContext)
+    // const sidenavContext = useContext(SidenavContext)
     // const mainElement = document.querySelector('main')
 
     //         // Drag (pan) handler
@@ -31,10 +39,10 @@ function MobileSidebarComponent() {
     //             }
     //
     //             // pan end;
-    //             if (isDebugEnabled) console.log('Sidebar: Pan gesture has ended.')
+    //             if (isDebugEnabled) console.log('Sidenav: Pan gesture has ended.')
     //             if (dx < -0.5 * sidebarElement.offsetWidth) {
     //                 // isOpen is not updated immediately;
-    //                 // this is enough since the isOpen state is changed; hence, applySidebarState()
+    //                 // this is enough since the isOpen state is changed; hence, applySidenavState()
     //                 // is called automatically;
     //                 sidebarContext.openState.setIsOpen(false)
     //                 return
@@ -42,7 +50,7 @@ function MobileSidebarComponent() {
     //
     //             // not needed; the isOpen state is not changed;
     //             // sidebarContext.openState.setIsOpen(true)
-    //             // cannot call applySidebarState() for this since it depends on this function, i.e. enableTouchEvents();
+    //             // cannot call applySidenavState() for this since it depends on this function, i.e. enableTouchEvents();
     //             sidebarElement.style.transition = 'transform 0.5s ease-out 0s'
     //             sidebarElement.style.transform = `translateX(${sidebarElement.offsetWidth}px)`
     //         }, {
@@ -59,11 +67,11 @@ function MobileSidebarComponent() {
     //
 
     // this is called when the component mounts or unmounts; and called when it re-renders;
-    const initializeSidebarReference = (element: HTMLElement | null) => {
-        if (sidebarElement != null) return
+    const initializeSidenavReference = (element: HTMLElement | null) => {
+        if (sidenavElement != null) return
         if (element == null) return // should never happen!! since it gets never unmounted;
-        if (isDebugEnabled) console.log('Sidebar: Initialize reference.')
-        sidebarElement = element
+        if (isDebugEnabled) console.log('Sidenav: Initialize reference.')
+        sidenavElement = element
     }
 
     //
@@ -72,15 +80,14 @@ function MobileSidebarComponent() {
 
     // update state
     useEffect(() => {
-        if (sidebarContext == null) return
         // if (manager == null) return
-        if (sidebarElement == null) return
+        if (sidenavElement == null) return
         if (mainElement == null) return
 
         const disableTabIndex = () => {
-            if (sidebarElement == null) return
-            for (const childIndex in sidebarElement.children) {
-                const child = sidebarElement.children[childIndex] as HTMLElement
+            if (sidenavElement == null) return
+            for (const childIndex in sidenavElement.children) {
+                const child = sidenavElement.children[childIndex] as HTMLElement
                 if (child.tagName !== 'A') continue
                 child.tabIndex = -1
             }
@@ -88,31 +95,31 @@ function MobileSidebarComponent() {
 
         // use side effects for handling tab index??; TODO;
         const enableTabIndex = () => {
-            if (sidebarElement == null) return
-            for (const childIndex in sidebarElement.children) {
-                const child = sidebarElement.children[childIndex] as HTMLElement
+            if (sidenavElement == null) return
+            for (const childIndex in sidenavElement.children) {
+                const child = sidenavElement.children[childIndex] as HTMLElement
                 if (child.tagName !== 'A') continue
                 child.tabIndex = 100
             }
         }
 
         //TODO; make changes by adding and removing classes only??; not possible if the value is dynamic;
-        sidebarElement.style.transition = 'transform 0.5s ease-out 0s'
-        if (isDebugEnabled) console.log(`Sidebar: isOpen ${sidebarContext.openState.isOpen}`)
+        sidenavElement.style.transition = 'transform 0.5s ease-out 0s'
+        if (isDebugEnabled) console.log(`Sidenav: isOpen ${isSidenavOpen}`)
 
-        if (sidebarContext.openState.isOpen) {
+        if (isSidenavOpen) {
             enableTabIndex()
             // manager.add(recognizer)
             mainElement.classList.add('inactive')
-            sidebarElement.style.transform = `translateX(${sidebarElement.offsetWidth}px)`
+            sidenavElement.style.transform = `translateX(${sidenavElement.offsetWidth}px)`
             return
         }
 
         disableTabIndex()
         // manager.remove(recognizer)
         mainElement.classList.remove('inactive')
-        sidebarElement.style.transform = 'translateX(0)'
-    }, [mainElement, sidebarContext])
+        sidenavElement.style.transform = 'translateX(0)'
+    }, [isSidenavOpen])
 
     // swipe event listener
     // useEffect(() => {
@@ -121,7 +128,6 @@ function MobileSidebarComponent() {
 
     // click event listener
     useEffect(() => {
-        if (sidebarContext == null) return
         let startX = 0
         let startY = 0
 
@@ -137,15 +143,15 @@ function MobileSidebarComponent() {
 
         const handlePointerUp = (event: PointerEvent) => {
             if (distanceSquared(event.screenX - startX, event.screenY - startY) > thresholdSquared) return
-            if (!sidebarContext.openState.isOpen) return
-            if (sidebarElement == null) return
-            if (sidebarElement.contains(event.target as Node)) return
+            if (!isSidenavOpen) return
+            if (sidenavElement == null) return
+            if (sidenavElement.contains(event.target as Node)) return
 
             if (menuButtonElement == null) return
             if (menuButtonElement.contains(event.target as Node)) return
 
-            if (isDebugEnabled) console.log('Sidebar: Clicked outside. Close sidebar.')
-            sidebarContext.openState.setIsOpen(false)
+            if (isDebugEnabled) console.log('Sidenav: Clicked outside. Close sidebar.')
+            setIsSidenavOpen(false)
         }
 
         document.addEventListener('pointerdown', handlePointerDown)
@@ -155,15 +161,15 @@ function MobileSidebarComponent() {
             document.removeEventListener('pointerdown', handlePointerDown)
             document.removeEventListener('pointerup', handlePointerUp)
         }
-    }, [sidebarContext])
+    }, [isSidenavOpen, setIsSidenavOpen])
 
     function focusNextElement() {
         if (menuButtonElement == null) return
-        if (sidebarElement == null) return
+        if (sidenavElement == null) return
         const focusedElement = document.activeElement as HTMLAnchorElement | null
         if (focusedElement == null) return
 
-        const focusableElements = [menuButtonElement, ...Array.from(sidebarElement.querySelectorAll<HTMLAnchorElement>('a[tabindex="100"]'))]
+        const focusableElements = [menuButtonElement, ...Array.from(sidenavElement.querySelectorAll<HTMLAnchorElement>('a[tabindex="100"]'))]
         const currentIndex = focusableElements.indexOf(focusedElement)
         const nextIndex = (currentIndex + 1) % focusableElements.length
         const nextElement = focusableElements[nextIndex]
@@ -175,11 +181,11 @@ function MobileSidebarComponent() {
 
     function focusPreviousElement() {
         if (menuButtonElement == null) return
-        if (sidebarElement == null) return
+        if (sidenavElement == null) return
         const focusedElement = document.activeElement as HTMLElement | null
         if (focusedElement == null) return
 
-        const focusableElements = [menuButtonElement, ...Array.from(sidebarElement.querySelectorAll<HTMLElement>('a[tabindex="100"]'))]
+        const focusableElements = [menuButtonElement, ...Array.from(sidenavElement.querySelectorAll<HTMLElement>('a[tabindex="100"]'))]
         const currentIndex = focusableElements.indexOf(focusedElement)
         const previousIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length
         const previousElement = focusableElements[previousIndex]
@@ -190,8 +196,7 @@ function MobileSidebarComponent() {
 
     function handleKeyInput(event: KeyboardEvent): void {
         // if (menuButtonElement == null) return
-        if (sidebarContext == null) return
-        if (isDebugEnabled) console.log('Sidebar: Handle key inputs.')
+        if (isDebugEnabled) console.log('Sidenav: Handle key inputs.')
 
         if (event.key === 'Enter') {
             // does not prevent links from being triggered;
@@ -216,10 +221,10 @@ function MobileSidebarComponent() {
             return
         }
 
-        if (event.key === 'ArrowLeft' && sidebarContext.openState.isOpen) {
+        if (event.key === 'ArrowLeft' && isSidenavOpen) {
             event.preventDefault()
             event.stopPropagation()
-            sidebarContext.openState.setIsOpen(false)
+            setIsSidenavOpen(false)
 
             setTimeout(() => {
                 if (menuButtonElement == null) return
@@ -236,25 +241,25 @@ function MobileSidebarComponent() {
     if (isLoading) return <></>
 
     return (<>
-        <nav ref={initializeSidebarReference} className="mobile-sidebar" tabIndex={-1} onKeyUp={handleKeyInput}>
+        <nav ref={initializeSidenavReference} className="mobile-sidebar" tabIndex={-1} onKeyUp={handleKeyInput}>
             <hr />
             <a href="/image_examples">Image Examples</a><hr />
             <a href="#">Link 2</a><hr />
-            <MobileDropdownComponent text="Dropdown 1">
+            <Dropdown text="Dropdown 1">
                 <a href="#">Link 3</a>
                 <a href="#">Link 4</a>
                 <a href="#">Link 5</a>
                 <a href="#">Link 6</a>
                 <a href="#">Link 7</a>
                 <a href="#">Link 8</a>
-            </MobileDropdownComponent><hr />
-            <MobileDropdownComponent text="Dropdown 2">
+            </Dropdown><hr />
+            <Dropdown text="Dropdown 2">
                 <a href="#">Link 9</a>
                 <a href="#">Link 10</a>
-            </MobileDropdownComponent><hr />
+            </Dropdown><hr />
         </nav>
     </>)
 }
 
-export default MobileSidebarComponent
-export { sidebarElement }
+export default Sidenav
+export { sidenavElement as sidebarElement }

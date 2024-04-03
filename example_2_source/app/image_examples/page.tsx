@@ -4,7 +4,7 @@ import Image from 'next/image'
 
 function Page() {
     return (<>
-        <Image src="https://fakeimg.pl/250x100/" alt="placeholder"></Image>
+        <Image className="p-10" src="https://fakeimg.pl/250x100/" alt="placeholder" width={250} height={100}></Image>
     </>)
 }
 

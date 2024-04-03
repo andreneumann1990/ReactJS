@@ -1,3 +1,23 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+// @layer base {
+//     h1 {
+//         @apply font-bold;
+//     }
+// }
+
+@layer components {
+    .scrollbar-gutter-stable-both {
+        scrollbar-gutter: stable both-edges;
+    }
+}
+
+:root {
+    --height-topnav: 40px;
+}
+
 $color-active: #04AA6D;
 
 // $color-background-1: #23272f;
@@ -23,7 +43,7 @@ $color-light-2: hsl(99, 23%, 39%); //TODO
 $color-light-3: hsl(51, 94%, 27%); //TODO
 
 $width-scrollbar: 17px;
-$height-mobile-topbar: 40px;
+// $height-topnav: 40px;
 
 
 //
@@ -119,9 +139,9 @@ $height-mobile-topbar: 40px;
     position: absolute;
 }
 
-.touch-none {
-    touch-action: none;
-}
+// .touch-none {
+//     touch-action: none;
+// }
 
 :focus-visible {
     outline-offset: -1px;
@@ -285,8 +305,8 @@ $height-mobile-topbar: 40px;
     // border-width: 1px;
 
     // for navigating with keys;
-    // height: calc($height-mobile-topbar - 2px);
-    // width: calc($height-mobile-topbar - 2px);
+    // height: calc($height-topnav - 2px);
+    // width: calc($height-topnav - 2px);
     // height: 32px;
     // width: 32px;
 }
@@ -346,7 +366,7 @@ $height-mobile-topbar: 40px;
     // box-sizing: content-box; //TODO
 
     // fill out the whole left side;
-    height: calc(100vh - $height-mobile-topbar);
+    height: calc(100vh - var(--height-topnav));
     // height: 100%;
 
     background-color: $color-dark-1;
@@ -393,7 +413,7 @@ $height-mobile-topbar: 40px;
     align-content: center;
     background-color: $color-dark-1;
     box-shadow: 0px 0px 10px 0px $color-hover-dark;
-    height: $height-mobile-topbar;
+    height: var(--height-topnav);
 }
 
 .padding-lr-10 {
@@ -512,10 +532,10 @@ code {
         monospace;
 }
 
-footer {
-    // for now the same height;
-    height: $height-mobile-topbar;
-}
+// footer {
+//     // for now the same height;
+//     height: var(--height-topnav);
+// }
 
 html {
     // @extend .width-full-edge;
@@ -537,42 +557,12 @@ html {
     // box-sizing: content-box
 }
 
-hr {
-    margin: 0;
-}
-
-li {
-    line-height: 1.5em;
-    margin-bottom: 10px;
-    // font-size: 0.625em;
-}
-
-main {
-    // z-index: 1;
-    // background-color: transparent;
-    height: calc(100vh - $height-mobile-topbar);
-    padding: 0 60px 0 30px;
-    transition: background-color 0.3s ease-out 0s;
-
-    // do scroll stuff here; otherwise, the topbar can get padding;
-    overflow-y: auto;
-
-    overflow-wrap: break-word;
-    scrollbar-gutter: stable both-edges;
-    text-wrap: wrap;
-
-    // inherited from html;
-    // scrollbar-color: hsl(0, 0%, 50%) transparent;
-
-    // only scroll this container;
-    -ms-scroll-chaining: none;
-    overscroll-behavior: contain;
-
-    &.inactive {
-        background-color: $color-hover-dark;
-        color: $color-text-inactive;
-        overflow-y: hidden;
-    }
+main.inactive {
+    background-color: $color-hover-dark;
+    color: $color-text-inactive;
+    overflow-y: hidden;
+    user-select: none;
+    touch-action: none;
 }
 
 strong {

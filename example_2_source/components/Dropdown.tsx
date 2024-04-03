@@ -1,22 +1,30 @@
 'use client'
 
-import { KeyboardEvent, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react'
-import { SidebarContext, isDebugEnabled, triggerFlashEffect } from '../Layout'
+import { KeyboardEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import { isDebugEnabled, triggerFlashEffect, useSidenavStore } from './Layout'
 
 interface Props {
     children: ReactNode
     text: ReactNode
 }
 
-function MobileDropdownComponent({ text, children }: Props) {
-    const sidebarContext = useContext(SidebarContext)
+function Dropdown({ text, children }: Props) {
+    //
+    // parameters and variables
+    //
+
+    // const sidebarContext = useContext(SidenavContext)
     const menuReference = useRef<HTMLDivElement | null>(null)
     const contentReference = useRef<HTMLDivElement | null>(null)
     const iconReference = useRef<HTMLElement | null>(null)
-    const [isOpen, setIsOpen] = useState<boolean>(false)
+
+    const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false)
+    const isSidenavOpen = useSidenavStore(state => state.isOpen)
+    const lastActiveDropdownElement = useSidenavStore(state => state.lastActiveDropdownElement)
+    const setLastActiveDropdownElement = useSidenavStore(state => state.setLastActiveDropdownElement)
 
     //
-    //
+    // functions
     //
 
     // what was this used for again?; TODO;
@@ -26,7 +34,7 @@ function MobileDropdownComponent({ text, children }: Props) {
 
     function handleArrowLeft(event: KeyboardEvent): void {
         if (menuReference.current == null) return
-        if (event.key === 'ArrowLeft' && isOpen) {
+        if (event.key === 'ArrowLeft' && isDropdownOpen) {
             event.preventDefault()
             event.stopPropagation()
             toggleContent()
@@ -46,7 +54,7 @@ function MobileDropdownComponent({ text, children }: Props) {
             return
         }
 
-        if (event.key === 'ArrowRight' && !isOpen) {
+        if (event.key === 'ArrowRight' && !isDropdownOpen) {
             event.preventDefault()
             event.stopPropagation()
             toggleContent()
@@ -54,7 +62,7 @@ function MobileDropdownComponent({ text, children }: Props) {
             return
         }
 
-        if (event.key === 'ArrowLeft' && isOpen) {
+        if (event.key === 'ArrowLeft' && isDropdownOpen) {
             event.preventDefault()
             event.stopPropagation()
             toggleContent()
@@ -63,15 +71,14 @@ function MobileDropdownComponent({ text, children }: Props) {
     }
 
     const toggleContent = useCallback(() => {
-        if (sidebarContext == null) return
         if (menuReference.current === null) return
         if (contentReference.current === null) return
 
         if (iconReference.current === null) return
-        if (isDebugEnabled) console.log(`Dropdown: isOpen ${!isOpen}`)
+        if (isDebugEnabled) console.log(`Dropdown: isOpen ${!isDropdownOpen}`)
 
-        if (isOpen) {
-            setIsOpen(false)
+        if (isDropdownOpen) {
+            setIsDropdownOpen(false)
             menuReference.current.classList.remove('active')
             contentReference.current.classList.add('hidden')
 
@@ -87,15 +94,15 @@ function MobileDropdownComponent({ text, children }: Props) {
             contentHeight += element.offsetHeight
         })
 
-        setIsOpen(true)
+        setIsDropdownOpen(true)
         menuReference.current.classList.add('active')
         contentReference.current.classList.remove('hidden')
 
         contentReference.current.classList.add('active')
         contentReference.current.style.height = `${contentHeight}px`
         iconReference.current.style.transform = 'rotate(-180deg)'
-        sidebarContext.lastActiveDropdownState.setElement(menuReference.current)
-    }, [isOpen, sidebarContext])
+        setLastActiveDropdownElement(menuReference.current)
+    }, [isDropdownOpen, setLastActiveDropdownElement])
 
     //
     // side effects
@@ -103,23 +110,21 @@ function MobileDropdownComponent({ text, children }: Props) {
 
     // close this one if another dropdown menu got opened;
     useEffect(() => {
-        if (isDebugEnabled) console.log(`Dropdown: isOpen ${isOpen}`)
-        if (!isOpen) return
-        if (sidebarContext == null) return
-        if (sidebarContext.lastActiveDropdownState.element == null) return
+        if (isDebugEnabled) console.log(`Dropdown: isOpen ${isDropdownOpen}`)
+        if (!isDropdownOpen) return
+        if (lastActiveDropdownElement == null) return
 
         if (menuReference.current == null) return
-        if (menuReference.current === sidebarContext.lastActiveDropdownState.element) return
+        if (menuReference.current === lastActiveDropdownElement) return
         toggleContent()
-    }, [isOpen, sidebarContext, toggleContent])
+    }, [isDropdownOpen, lastActiveDropdownElement, toggleContent])
 
     // update tabindex;
     useEffect(() => {
-        if (sidebarContext == null) return
         if (contentReference.current == null) return
         if (menuReference.current == null) return
 
-        if (!sidebarContext.openState.isOpen) {
+        if (!isSidenavOpen) {
             menuReference.current.querySelectorAll('a').forEach(element => {
                 element.tabIndex = -1
             })
@@ -129,7 +134,7 @@ function MobileDropdownComponent({ text, children }: Props) {
         const menuButton = menuReference.current.querySelector('a')
         if (menuButton != null) menuButton.tabIndex = 100
 
-        if (isOpen) {
+        if (isDropdownOpen) {
             contentReference.current.querySelectorAll('a').forEach(element => {
                 element.tabIndex = 100
             })
@@ -139,7 +144,7 @@ function MobileDropdownComponent({ text, children }: Props) {
         contentReference.current.querySelectorAll('a').forEach(element => {
             element.tabIndex = -1
         })
-    }, [isOpen, sidebarContext])
+    }, [isDropdownOpen, isSidenavOpen])
 
     //
     //
@@ -161,4 +166,4 @@ function MobileDropdownComponent({ text, children }: Props) {
     </>)
 }
 
-export default MobileDropdownComponent
+export default Dropdown

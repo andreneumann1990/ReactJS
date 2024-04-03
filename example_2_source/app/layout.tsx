@@ -4,7 +4,7 @@
 // import { Inter } from 'next/font/google'
 import '../styles/globals.scss'
 import React from 'react'
-import LayoutComponent from '../components/Layout'
+import Layout from '../components/Layout'
 
 // const inter = Inter({ subsets: ['latin'] })
 
@@ -44,9 +44,9 @@ export default function RootLayout({
                 <noscript>You need to enable JavaScript to run this app.</noscript>
                 <div id="root">
                     <React.StrictMode>
-                        <LayoutComponent>
+                        <Layout>
                             {children}
-                        </LayoutComponent>
+                        </Layout>
                     </React.StrictMode>
                 </div>
             </body>
