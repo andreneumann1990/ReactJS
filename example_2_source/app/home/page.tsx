@@ -30,6 +30,7 @@ function HomeComponent() {
         <ul className="*:my-2 pl-5">
             <li>switched to nextjs; no server-side-rendering (SSR); needs to be static at this point; no back-end yet;</li>
             <li>switched to tailwindcss in most cases;</li>
+            <li>using <strong>Zustand</strong> for sharing data and states; less boilerplate than <strong>Redux</strong>?;</li>
         </ul >
 
         <h2 className="my-2 text-2xl font-bold">TODO:</h2>
