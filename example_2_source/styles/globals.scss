@@ -4,10 +4,16 @@
 @import "tailwindcss/components";
 @import "tailwindcss/utilities";
 
+@layer base {
+    button {
+        line-height: normal;
+    }
+}
+
 @layer components {
     .icon-medium {
         font-size: calc(-8px + var(--height-topnav));
-        padding: 4px;
+        // padding: 4px; // do it manually;
 
         // used in dropdown menu icons;
         //TODO export there;
@@ -20,6 +26,8 @@
 }
 
 :root {
+    --color-dark-1: hsl(220, 15%, 16%);
+    --color-light-1: hsl(220, 30%, 30%);
     --height-topnav: 40px;
 }
 
@@ -41,9 +49,8 @@ $color-text-inactive: hsl(0, 0%, 70%);
 $color-text-2: #109FAB;
 
 // color scheme?
-$color-dark-1: hsl(220, 15%, 16%);
 $color-dark-2: hsl(186, 89%, 21%); //TODO
-$color-light-1: hsl(220, 30%, 30%);
+// $color-light-1: hsl(220, 30%, 30%);
 $color-light-2: hsl(99, 23%, 39%); //TODO
 $color-light-3: hsl(51, 94%, 27%); //TODO
 
@@ -130,34 +137,12 @@ $width-scrollbar: 17px;
     width: 100%;
 }
 
-.grid {
-    display: grid;
-
-    // otherwise, centering vertically might be impossible;
-    // this time, it stayed smaller than the parent container; without, it centered itself;
-    // height: 100%;
-    // width: 100%;
-}
-
-.grid-row-20-80 {
-    grid-template-columns: 20% 80%;
-}
-
-.grid-topbar {
-    grid-template-columns: auto auto auto;
-    // grid-template-columns: 40px auto 260px;
-}
-
 .grid-dropdown {
     grid-template-columns: auto 40px;
 }
 
-.grid-row-80-20 {
-    grid-template-columns: 80% 20%;
-}
-
 .mobile-dropdown-content {
-    background-color: $color-dark-1;
+    background-color: var(--color-dark-1);
     color: $color-text-active;
     display: block;
 
@@ -172,7 +157,7 @@ $width-scrollbar: 17px;
     // transition
 
     &.active {
-        background-color: $color-light-1;
+        background-color: var(--color-light-1);
         // height: fit-content;
         // transition: all 0.3s ease-out;
     }
@@ -188,7 +173,7 @@ $width-scrollbar: 17px;
 
 .mobile-dropdown-menu {
     &.active {
-        background-color: $color-light-1;
+        background-color: var(--color-light-1);
         color: $color-text-active
     }
 
@@ -214,7 +199,7 @@ $width-scrollbar: 17px;
     height: calc(100vh - var(--height-topnav));
     // height: 100%;
 
-    background-color: $color-dark-1;
+    background-color: var(--color-dark-1);
     box-shadow: 0px 10px 10px 0px $color-hover-dark;
     line-height: 2.5em;
 
@@ -252,32 +237,6 @@ $width-scrollbar: 17px;
     // &:hover, &:focus-visible {
     //     background-color: $color-hover-dark
     // }
-}
-
-.mobile-topbar {
-    align-content: center;
-    background-color: $color-dark-1;
-    box-shadow: 0px 0px 10px 0px $color-hover-dark;
-    height: var(--height-topnav);
-}
-
-.padding-lr-10 {
-    padding-left: 10px;
-    padding-right: 10px;
-}
-
-.self-center {
-    // should be enought to override user agent;
-    margin-left: auto; // !important;
-    margin-right: auto; // !important;
-}
-
-.self-right {
-    margin-left: auto; // !important;
-}
-
-.self-top {
-    margin-bottom: auto;
 }
 
 .sticky {
@@ -337,7 +296,7 @@ body {
     // otherwise;
     width: 100%;
 
-    background-color: $color-dark-1;
+    background-color: var(--color-dark-1);
     color: $color-text-1;
 
     // font-size: 1em;
@@ -360,16 +319,6 @@ body {
     // does not account for borders; it scrolls the border-width amount;
     // border-top: 0px; 
     // border-bottom: 0px;
-}
-
-button {
-    border: 3px solid transparent;
-    background-color: $color-same;
-    padding: 0;
-
-    &:hover, &:focus-visible {
-        background-color: $color-hover-dark;
-    }
 }
 
 code {

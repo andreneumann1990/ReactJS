@@ -1,6 +1,6 @@
 {
     "name": "example_2_source",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "private": true,
     "homepage": "https://andreneumann1990.github.io/reactjs/example_2",
     "scripts": {
@@ -16,7 +16,7 @@
         "next": "^14.1.4",
         "react": "^18",
         "react-dom": "^18",
-        "react-instantsearch": "^7.7.0",
+        "react-instantsearch": "^7.7.1",
         "react-router-dom": "^6.22.3",
         "sass": "^1.72.0",
         "tinycolor2": "^1.6.0",
@@ -33,6 +33,7 @@
         "@typescript-eslint/parser": "^7.5.0",
         "autoprefixer": "^10.4.19",
         "babel-loader": "^9.1.3",
+        "cheerio": "^1.0.0-rc.12",
         "eslint": "^8.57.0",
         "eslint-config-next": "^14.1.4",
         "imports-loader": "^5.0.0",

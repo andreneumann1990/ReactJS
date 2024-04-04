@@ -8,6 +8,7 @@ function HomeComponent() {
         <ul className="*:my-2 pl-5">
             <li>a basic front-end mock-up;</li>
             <li>based on the mobile version of the Steam website</li>
+            <li>added some ideas / features from other sides; search placeholder; some basic html stuff like forms and images TODO;</li>
         </ul>
 
         <h2 className="my-2 text-2xl font-bold">Changelog / Features:</h2>
@@ -31,6 +32,7 @@ function HomeComponent() {
             <li>switched to nextjs; no server-side-rendering (SSR); needs to be static at this point; no back-end yet;</li>
             <li>switched to tailwindcss in most cases;</li>
             <li>using <strong>Zustand</strong> for sharing data and states; less boilerplate than <strong>Redux</strong>?;</li>
+            <li>added a search bar placeholder; there is no back-end yet; maybe you could work around that and handle search entries and stuff; let&apos;s not bother just yet;</li>
         </ul >
 
         <h2 className="my-2 text-2xl font-bold">TODO:</h2>

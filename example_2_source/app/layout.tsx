@@ -10,7 +10,7 @@ export default RootLayout
 //
 //
 
-function RootLayout({ children, }: Readonly<{ children: React.ReactNode }>) {
+function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (<>
         <html lang="en">
             <head>

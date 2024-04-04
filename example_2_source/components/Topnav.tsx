@@ -2,12 +2,12 @@
 
 import { KeyboardEvent, useCallback, useEffect } from 'react'
 import { isDebugEnabled, triggerFlashEffect } from './Layout'
-import SearchComponent from './SearchComponent'
-import Image from 'next/image'
 import { useSidenavStore } from './Sidenav'
 import Link from 'next/link'
 import { create } from 'zustand'
 import { useMainStore } from './Main'
+import InstantSearch from './InstantSearchPlaceholder'
+import SearchBox, { useSearchStore } from './SearchBoxPlaceholder'
 
 export default Topnav
 export { useTopnavStore }
@@ -42,6 +42,8 @@ function Topnav() {
     //
 
     const mainElement = useMainStore(state => state.element)
+
+    const searchInputElement = useSearchStore(state => state.inputElement)
 
     const sidenavElement = useSidenavStore(state => state.element)
     const isSidenavOpen = useSidenavStore(state => state.isOpen)
@@ -110,20 +112,10 @@ function Topnav() {
     }, [isSidenavOpen, setIsSidenavOpen])
 
     const handleKeyInputs = useCallback((event: KeyboardEvent) => {
+        if (document.activeElement == searchInputElement) return
         if (mainElement == null) return
         if (menuButtonElement == null) return
         if (sidenavElement == null) return
-
-        //TODO; up + down for switching between main and topbar;
-
-        // doesn't even work; but it's not that great anyway; you can tab forward; so
-        // you should be able to tab backwards;
-        // if (event.shiftKey && event.key === 'Tab') {
-        //     event.preventDefault()
-        //     event.stopPropagation()
-        //     mainElement.focus()
-        //     return
-        // }
 
         if (document.activeElement === menuButtonElement) {
             if (event.key === 'Enter') {
@@ -176,7 +168,11 @@ function Topnav() {
             focusNextElement()
             return
         }
-    }, [focusNextElement, focusPreviousElement, isSidenavOpen, mainElement, menuButtonElement, sidenavElement, toggleSidenav])
+    }, [focusNextElement, focusPreviousElement, isSidenavOpen, mainElement, menuButtonElement, searchInputElement, sidenavElement, toggleSidenav])
+
+    function handleSearch(query: string): void {
+        if (isDebugEnabled) console.log(`Topnav: search query ${query}`)
+    }
 
     //
     // effects
@@ -205,19 +201,23 @@ function Topnav() {
     //
 
     return (<>
-        <nav ref={initializeTopnavReference} className="mobile-topbar">
-            <div className="grid grid-topbar fg-items-center-main fg-space-between" onKeyUp={handleKeyInputs}>
-                <div className="grid grid-flow-col">
-                    <Link className="" ref={initializeMenuButtonReference} onPointerUp={toggleSidenav} href="#" tabIndex={2}>
-                        <i className="icon-medium material-icons">menu</i>
-                        <i className="icon-medium material-icons hidden">close</i>
+        <nav ref={initializeTopnavReference} className="bg-[var(--color-dark-1)] h-[var(--height-topnav)] shadow-md">
+            <div className="grid grid-flow-col [grid-template-columns:20%_60%_20%] justify-items-center justify-between" onKeyUp={handleKeyInputs}>
+                <div className="grid grid-flow-col justify-self-start">
+                    <Link className="h-[--height-topnav]" ref={initializeMenuButtonReference} onPointerUp={toggleSidenav} href="#" tabIndex={2}>
+                        <i className="p-1 icon-medium material-icons">menu</i>
+                        <i className="p-1 icon-medium material-icons hidden">close</i>
                     </Link>
-                    <Link className="" href="/home" tabIndex={1000}>
-                        <i className="icon-medium material-icons">home</i>
+                    <Link className="h-[--height-topnav]" href="/home" tabIndex={1000}>
+                        <i className="p-1 icon-medium material-icons">home</i>
                     </Link>
                 </div>
-                <SearchComponent />
-                <Image src="./svg/Algolia-mark-rounded-blue.svg" alt="Algolia logo" height={40} width={40} priority={false} />
+
+                <InstantSearch>
+                    <SearchBox onSearch={handleSearch} />
+                </InstantSearch>
+
+                {/* <Image className="p-1" src="/svg/Algolia-mark-rounded-blue.svg" alt="Algolia logo" height={40} width={40} priority={false} /> */}
             </div>
         </nav>
     </>)
