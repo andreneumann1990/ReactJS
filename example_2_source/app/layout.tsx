@@ -27,13 +27,13 @@ export default function RootLayout({
                 <meta name="description" content="Web site created using create-react-app" />
 
                 <title>React App</title>
-                {/* <link rel="icon" href="%PUBLIC_URL%/favicon.ico" /> */}
-                {/* <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" /> */}
-                {/* <link rel="manifest" href="%PUBLIC_URL%/manifest.json" /> */}
+                <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+                <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+                <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
-                <link rel="icon" href="/favicon.ico" />
+                {/* <link rel="icon" href="/favicon.ico" />
                 <link rel="apple-touch-icon" href="/logo192.png" />
-                <link rel="manifest" href="/manifest.json" />
+                <link rel="manifest" href="/manifest.json" /> */}
 
                 {/* <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Sofia&display=optional" /> */}
                 {/* <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" /> */}
