@@ -217,7 +217,7 @@ function Topnav() {
                     </Link>
                 </div>
                 <SearchComponent />
-                <Image src="/svg/Algolia-mark-rounded-blue.svg" alt="Algolia logo" height={40} width={40} priority={false} />
+                <Image src="./svg/Algolia-mark-rounded-blue.svg" alt="Algolia logo" height={40} width={40} priority={false} />
             </div>
         </nav>
     </>)
