@@ -204,7 +204,7 @@ function Topnav() {
         <nav ref={initializeTopnavReference} className="bg-[var(--color-dark-1)] h-[var(--height-topnav)] shadow-md">
             <div className="grid grid-flow-col [grid-template-columns:20%_60%_20%] justify-items-center justify-between" onKeyUp={handleKeyInputs}>
                 <div className="grid grid-flow-col justify-self-start">
-                    <Link className="h-[--height-topnav]" ref={initializeMenuButtonReference} onPointerUp={toggleSidenav} href="#" tabIndex={2}>
+                    <Link className="h-[--height-topnav]" ref={initializeMenuButtonReference} onPointerUp={toggleSidenav} href="" tabIndex={2}>
                         <i className="p-1 icon-medium material-icons">menu</i>
                         <i className="p-1 icon-medium material-icons hidden">close</i>
                     </Link>

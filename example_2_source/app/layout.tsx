@@ -20,9 +20,12 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
                 <meta name="description" content="Web site created using create-react-app" />
 
                 <title>React App</title>
+                <base href="/reactjs/example_2" />
                 <link rel="icon" href="/favicon.ico" />
                 <link rel="apple-touch-icon" href="/logo192.png" />
-                <link rel="manifest" href="/manifest.json" />
+
+                {/* why do I need the full link; TODO add base */}
+                <link rel="manifest" href="/reactjs/example_2/manifest.json" />
             </head>
 
             <body>
