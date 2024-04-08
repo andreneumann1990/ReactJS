@@ -1,6 +1,6 @@
 {
     "name": "example_2_source",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "private": true,
     "homepage": "https://andreneumann1990.github.io/reactjs/example_2",
     "scripts": {
@@ -13,18 +13,20 @@
     "dependencies": {
         "@use-gesture/react": "^10.3.1",
         "algoliasearch": "^4.22.1",
+        "formik": "^2.4.5",
         "next": "^14.1.4",
         "react": "^18",
         "react-dom": "^18",
         "react-instantsearch": "^7.7.1",
         "react-router-dom": "^6.22.3",
         "sass": "^1.72.0",
+        "timers-promises": "^1.0.1",
         "tinycolor2": "^1.6.0",
+        "yup": "^1.4.0",
         "zustand": "^4.5.2"
     },
     "devDependencies": {
         "@babel/core": "^7.24.3",
-        "@types/hammerjs": "^2.0.45",
         "@types/node": "^20",
         "@types/react": "^18",
         "@types/react-dom": "^18",
@@ -56,7 +58,7 @@
         ],
         "rules": {
             "@typescript-eslint/no-unused-vars": "warn",
-            "no-trailing-spaces": "error",
+            "no-trailing-spaces": "off",
             "quotes": [
                 "error",
                 "single"
@@ -78,7 +80,7 @@
             "no-invalid-this": "off",
             "no-undef": "error",
             "no-var": "error",
-            "prefer-const": "warn",
+            "prefer-const": "off",
             "prefer-rest-params": "error",
             "prefer-spread": "error",
             "prefer-template": "error",

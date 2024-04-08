@@ -20,8 +20,8 @@ interface topnavState {
     element: HTMLElement | null,
     setElement: (element: HTMLElement | null) => void,
 
-    menuButtonElement: HTMLAnchorElement | null,
-    setMenuButtonElement: (element: HTMLAnchorElement | null) => void,
+    menuButtonElement: HTMLButtonElement | null,
+    setMenuButtonElement: (element: HTMLButtonElement | null) => void,
 }
 
 const useTopnavStore = create<topnavState>(set => ({
@@ -58,7 +58,7 @@ function Topnav() {
     // functions
     //
 
-    const initializeMenuButtonReference = (element: HTMLAnchorElement | null) => {
+    const initializeMenuButtonReference = (element: HTMLButtonElement | null) => {
         if (menuButtonElement != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Topnav: Initialize menu reference.')
@@ -204,10 +204,10 @@ function Topnav() {
         <nav ref={initializeTopnavReference} className="bg-[var(--color-dark-1)] h-[var(--height-topnav)] shadow-md">
             <div className="grid grid-flow-col [grid-template-columns:20%_60%_20%] justify-items-center justify-between" onKeyUp={handleKeyInputs}>
                 <div className="grid grid-flow-col justify-self-start">
-                    <Link className="h-[--height-topnav]" ref={initializeMenuButtonReference} onPointerUp={toggleSidenav} href="" tabIndex={2}>
+                    <button className="h-[--height-topnav]" ref={initializeMenuButtonReference} onPointerUp={toggleSidenav} tabIndex={2}>
                         <i className="p-1 icon-medium material-icons">menu</i>
                         <i className="p-1 icon-medium material-icons hidden">close</i>
-                    </Link>
+                    </button>
                     <Link className="h-[--height-topnav]" href="/home" tabIndex={1000}>
                         <i className="p-1 icon-medium material-icons">home</i>
                     </Link>

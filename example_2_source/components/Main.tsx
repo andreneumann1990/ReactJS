@@ -44,7 +44,7 @@ function Main({ children }: React.PropsWithChildren) {
     //
 
     // close sidebar by swipe / panning gesture;
-    const dragAttributes = useDrag<PointerEvent>(({ movement: [dx, dy], last }) => {
+    const onDrag = useDrag<PointerEvent>(({ movement: [dx, dy], last }) => {
         // offset does not reset when panning ends; movement does;
         if (sidenavElement == null) return
         if (dx > -10) return
@@ -75,10 +75,6 @@ function Main({ children }: React.PropsWithChildren) {
         sidenavElement.style.transform = `translateX(${sidenavElement.offsetWidth}px)`
     }, { eventOptions: { capture: true }, enabled: isSidenavOpen })
 
-    // const dragAttributes = function () { return { } }
-    // if (isServer) dragAttributes = function () { return { } }
-    // const temp: ReactDOMAttributes | null = null
-
     const initializeMainReference = (element: HTMLElement | null) => {
         if (mainElement != null) return
         if (element == null) return
@@ -95,11 +91,11 @@ function Main({ children }: React.PropsWithChildren) {
 
     //TODO: export main component;
     return (<>
-        <main className="flex flex-col justify-between h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-gutter-stable-both transition-colors ease-out duration-300" ref={initializeMainReference} {...dragAttributes()} tabIndex={1}>
+        <main ref={initializeMainReference} className="flex flex-col justify-between h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-gutter-stable-both transition-colors ease-out duration-300" {...onDrag()} tabIndex={1}>
             <div>{children}</div>
             <div>
                 <footer className="border grid content-center h-32">
-                    <h1 className="text-center text-xl">Footer</h1>
+                    <h1 className="text-center text-xl">Footer; not sure what I want to do here; TODO;</h1>
                 </footer>
             </div>
         </main >

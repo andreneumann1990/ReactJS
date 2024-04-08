@@ -65,16 +65,22 @@ function SearchBox({ onSearch }: Props) {
     //
 
     useEffect(() => {
-        const bodyElement = document.getElementsByTagName('body')[0]
+        const bodyElement = document.querySelector('body')
         if (bodyElement == null) return
+        let previousElement: HTMLElement | null = null
 
         function handleKeyInputs(event: KeyboardEvent) {
             if (searchInputElement == null) return
-            if (!event.ctrlKey) return
-            if (event.key != 'k') return
+            if (event.ctrlKey && event.key == 'k') {
+                event.preventDefault()
+                if (document.activeElement == searchInputElement) {
+                    previousElement?.focus()
+                    return
+                }
 
-            event.preventDefault()
-            searchInputElement.focus()
+                previousElement = document.activeElement as HTMLElement | null
+                searchInputElement.focus()
+            }
         }
 
         bodyElement.addEventListener('keydown', handleKeyInputs)
@@ -105,7 +111,7 @@ function SearchBox({ onSearch }: Props) {
         <form className="relative grid grid-flow-col [grid-template-columns:var(--height-topnav)_auto] items-center" onSubmit={handleSearch}>
             <button type="submit"><i className="p-1 icon-medium material-icons">search</i></button>
             <div className="relative pr-1">
-                <input className="w-full px-2 py-1 rounded-md peer"
+                <input className="w-full px-2 py-1 rounded-md bg-tomato-700 peer"
                     type="text"
                     placeholder="Search here..."
                     value={query}

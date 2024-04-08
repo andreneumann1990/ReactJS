@@ -7,6 +7,7 @@ import { create } from 'zustand'
 import Link from 'next/link'
 import { useTopnavStore } from './Topnav'
 import { useMainStore } from './Main'
+import { useClick } from './CustomGestures'
 
 export default Sidenav
 export { useSidenavStore }
@@ -235,8 +236,8 @@ function Sidenav() {
     return (<>
         <nav ref={initializeSidenavReference} className="mobile-sidebar" tabIndex={-1} onKeyUp={handleKeyInput}>
             <hr />
-            <Link href="/image_examples" onClick={closeSidenav}>Image Examples</Link><hr />
-            <Link href="#">Link 2</Link><hr />
+            <Link href="/image_examples" {...useClick(closeSidenav)}>Image Examples</Link><hr />
+            <Link href="/form_examples" {...useClick(closeSidenav)}>Form Examples</Link><hr />
             <Dropdown text="Dropdown 1">
                 <Link href="#">Link 3</Link>
                 <Link href="#">Link 4</Link>

@@ -20,23 +20,24 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
                 <meta name="description" content="Web site created using create-react-app" />
 
                 <title>React App</title>
-                <base href="/reactjs/example_2" />
-                <link rel="icon" href="/favicon.ico" />
-                <link rel="apple-touch-icon" href="/logo192.png" />
+                {/* does not work; can conflict with nextjs's basePath?; do not use!; */}
+                {/* <base href="/reactjs/example_2" /> */}
 
-                {/* why do I need the full link; TODO add base */}
+                {/* manually prefix instead; */}
+                <link rel="icon" href="reactjs/example_2/icons/favicon.ico" />
+                <link rel="apple-touch-icon" href="reactjs/example_2/icons/logo192.png" />
+
+                {/* for app home screen shortcuts and bookmarks?; */}
                 <link rel="manifest" href="/reactjs/example_2/manifest.json" />
             </head>
 
             <body>
                 <noscript>You need to enable JavaScript to run this app.</noscript>
-                <div id="root">
-                    <React.StrictMode>
-                        <Layout>
-                            {children}
-                        </Layout>
-                    </React.StrictMode>
-                </div>
+                <React.StrictMode>
+                    <Layout>
+                        {children}
+                    </Layout>
+                </React.StrictMode>
             </body>
         </html>
     </>)
