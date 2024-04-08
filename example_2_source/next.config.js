@@ -2,24 +2,6 @@
  * @type {import('next').NextConfig}
  */
 
-//
-// dev config;
-//
-
-// const nextConfig = {
-//     images: {
-//         unoptimized: true,
-//         remotePatterns: [{
-//             protocol: 'https',
-//             hostname: 'fakeimg.pl',
-//         }],
-//     },
-// }
-
-//
-// export config;
-//
-
 const isProduction = process.env.NODE_ENV === 'production'
 const nextConfig = {
     assetPrefix: isProduction ? '/reactjs/example_2' : '',
