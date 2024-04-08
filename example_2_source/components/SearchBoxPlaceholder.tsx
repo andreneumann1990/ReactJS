@@ -111,7 +111,7 @@ function SearchBox({ onSearch }: Props) {
         <form className="relative grid grid-flow-col [grid-template-columns:var(--height-topnav)_auto] items-center" onSubmit={handleSearch}>
             <button type="submit"><i className="p-1 icon-medium material-icons">search</i></button>
             <div className="relative pr-1">
-                <input className="w-full px-2 py-1 rounded-md bg-tomato-700 peer"
+                <input name="searchInput" className="w-full px-2 py-1 rounded-md bg-tomato-700 peer"
                     type="text"
                     placeholder="Search here..."
                     value={query}

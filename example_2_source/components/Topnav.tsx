@@ -216,8 +216,6 @@ function Topnav() {
                 <InstantSearch>
                     <SearchBox onSearch={handleSearch} />
                 </InstantSearch>
-
-                {/* <Image className="p-1" src="/svg/Algolia-mark-rounded-blue.svg" alt="Algolia logo" height={40} width={40} priority={false} /> */}
             </div>
         </nav>
     </>)

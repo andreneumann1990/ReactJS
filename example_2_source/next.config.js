@@ -20,15 +20,16 @@
 // export config;
 //
 
+const isProduction = process.env.NODE_ENV === 'production'
 const nextConfig = {
-    assetPrefix: '/reactjs/example_2/',
-    basePath: '/reactjs/example_2',
-    distDir: '../example_2',
-    output: 'export',
+    assetPrefix: isProduction ? '/reactjs/example_2' : '',
+    basePath: isProduction ? '/reactjs/example_2' : '',
+    distDir: isProduction ? '../example_2' : undefined,
+    output: isProduction ? 'export' : undefined,
 
     images: {
         unoptimized: true,
-        path: '/reactjs/example_2',
+        path: isProduction ? '/reactjs/example_2' : undefined,
         remotePatterns: [{
             protocol: 'https',
             hostname: 'fakeimg.pl',

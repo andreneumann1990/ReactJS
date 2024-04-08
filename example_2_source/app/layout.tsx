@@ -23,12 +23,12 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
                 {/* does not work; can conflict with nextjs's basePath?; do not use!; */}
                 {/* <base href="/reactjs/example_2" /> */}
 
-                {/* manually prefix instead; */}
-                <link rel="icon" href="reactjs/example_2/icons/favicon.ico" />
-                <link rel="apple-touch-icon" href="reactjs/example_2/icons/logo192.png" />
+                {/* manually prefix instead; I am confused; this time is added the prefix automatically too; TOOD; */}
+                <link rel="icon" href="./icons/favicon.ico" />
+                <link rel="apple-touch-icon" href="./icons/logo192.png" />
 
                 {/* for app home screen shortcuts and bookmarks?; */}
-                <link rel="manifest" href="/reactjs/example_2/manifest.json" />
+                <link rel="manifest" href="./manifest.json" />
             </head>
 
             <body>

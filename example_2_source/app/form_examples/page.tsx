@@ -6,22 +6,10 @@ import * as Yup from 'yup'
 
 function Page() {
     //
-    // parameters and variables
-    //
-
-    // const [formElement, setFormElement] = useState<HTMLElement | null>(null)
-
-    // const isSidenavOpen = useSidenavStore(state => state.isOpen)
-    // const [imageRowElement, setImageRowElement] = useState<HTMLDivElement | null>(null)
-    // const [overlayElement, setOverlayElement] = useState<HTMLDivElement | null>(null)
-
-    //
     // functions
     //
 
     const formik = useFormik({
-        // validateOnBlur: false,
-        // validateOnChange: false,
         initialValues: {
             button: '',
             checkbox: 'false',
@@ -55,22 +43,8 @@ function Page() {
                 .required('Required.'),
             url: Yup.string().url('Invalid url.'),
         }),
-        onSubmit: async (values: { [field: string]: string }, { setErrors, setFieldError, setStatus }) => {
+        onSubmit: async (values: { [field: string]: string }) => {
             alert(JSON.stringify(values, null, 2))
-            // await validationSchemaOnSubmit.validate(values, { abortEarly: false })
-            //     .then(() => {
-            //         alert(JSON.stringify(values, null, 2))
-            //     })
-            //     .catch((error: Yup.ValidationError) => {
-            //         let errors = error.inner.reduce((accumulatedErrors: { [field: string]: string }, currentError: Yup.ValidationError) => {
-            //             if (currentError.path == null) return accumulatedErrors
-            //             accumulatedErrors[currentError.path] = currentError.message
-            //             return accumulatedErrors
-            //         }, {})
-            //         
-            //         // does not work
-            //         setErrors(errors)
-            //     })
         },
     })
 
@@ -79,7 +53,6 @@ function Page() {
     //
 
     function normalizeHeights(formElement: HTMLDivElement | null): void {
-        // useEffect(() => {
         if (formElement == null) return
         const items = formElement.childNodes
         let tallest = 0
@@ -95,13 +68,11 @@ function Page() {
             item.style.minHeight = `${tallest}px`
         })
     }
-    // }, [formElement])
 
     function handleClick(event: MouseEvent): void {
         const element = event.target as HTMLInputElement | null
         if (element == null) return
         if (element.name == '') return
-        // formik.setFieldError('password', 'Nooooooo!')
         formik.setFieldValue(element.name, 'clicked')
     }
 
@@ -110,15 +81,6 @@ function Page() {
         handleClick(event)
     }
 
-    // does give the content of the text file; not useful here; rather for back-end later;
-    // async function handleFileChange(event: ChangeEvent): Promise<void> {
-    //     if (!(event.target instanceof HTMLInputElement)) return
-    //     const { files: fileList } = event.target
-    //     if (fileList == null) return
-    //     const text = await fileList[0].text()
-    //     formik.setFieldValue('file', text)
-    // }
-
     //
     //
     //
@@ -126,13 +88,8 @@ function Page() {
     return (<>
         {/* header; */}
         <h1 className="my-3 text-3xl font-bold">Form Examples</h1>
-        {/* <ul className="pl-5">
-            <li>images are taken from
-            </li>
-        </ul> */}
 
         <h2 className="my-1 text-xl font-bold">All Input Types:</h2>
-
         <form onSubmit={formik.handleSubmit} >
             <div ref={normalizeHeights} className="grid grid-flow-row md:grid-cols-2 xl:grid-cols-3 border-x-[1px] items-center">
                 <div className="grid px-5 border-x-[1px] items-center">
@@ -158,7 +115,7 @@ function Page() {
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>Email:<br />
-                        <input type="email" placeholder="max.musterfrau@mail.com" className="w-72 m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('email')} />
+                        <input type="email" autoComplete="true" placeholder="max.musterfrau@mail.com" className="w-72 m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('email')} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
@@ -170,7 +127,7 @@ function Page() {
                     <label>Hidden: <input type="hidden" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('hidden')} /></label>
                 </div>
                 <div className="flex px-5 border-x-[1px] items-center">
-                    <label className="flex items-center">Image: <input type="image" name="image" src="/icons/logo192.png" width={40} className="m-1 px-2 py-1 rounded-md" onClick={handleClick} /></label>
+                    <label className="flex items-center">Image: <input type="image" name="image" src="./icons/logo192.png" width={40} className="m-1 px-2 py-1 rounded-md" onClick={handleClick} /></label>
                     {!formik.touched.image || Object.keys(formik.errors).length < 1 ?
                         null : <span className="px-2 py-1 ml-4 text-red-500">The form contains invalid fields.</span>
                     }
@@ -228,7 +185,7 @@ function Page() {
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>Tel:<br />
-                        <input type="tel" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('tel')} />
+                        <input type="tel" autoComplete="true" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('tel')} />
                     </label>
                 </div>
                 <div className="flex px-5 border-x-[1px] items-center">
@@ -245,7 +202,7 @@ function Page() {
                 </div>
                 <div className="flex px-5 border-x-[1px] items-center">
                     <label>URL:<br />
-                        <input type="text" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('url')} />
+                        <input type="url" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('url')} />
                     </label>
                     <label className="place-self-end">
                         {!formik.errors.url ?
