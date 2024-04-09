@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class UserController {
 
-    @PostMapping("/submit")
+    @PostMapping("/user/submit")
     public ResponseEntity<User> submitUser(@RequestBody User user) {
         return ResponseEntity.ok(user);
     }
