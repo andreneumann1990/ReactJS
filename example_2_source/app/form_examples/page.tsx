@@ -1,15 +1,18 @@
 'use client'
 
 import { useFormik } from 'formik'
-import { MouseEvent, } from 'react'
+import { MouseEvent, SyntheticEvent, } from 'react'
 import * as Yup from 'yup'
+import { InputCountry1, InputCountry2 } from '../../components/input/Country'
+import Link from 'next/link'
+import { Button } from '@mui/material'
 
 function Page() {
     //
     // functions
     //
 
-    const formik = useFormik({
+    const form1 = useFormik({
         initialValues: {
             button: '',
             checkbox: 'false',
@@ -27,7 +30,7 @@ function Page() {
             range: '50',
             reset: '',
             search: '',
-            submit: 'Submit',
+            submit: '',
             tel: '',
             text: '',
             time: '',
@@ -43,6 +46,16 @@ function Page() {
                 .required('Required.'),
             url: Yup.string().url('Invalid url.'),
         }),
+        onSubmit: async (values: { [field: string]: string }) => {
+            alert(JSON.stringify(values, null, 2))
+        },
+    })
+
+    const form2 = useFormik({
+        initialValues: {
+            country1: '',
+            country2: '',
+        },
         onSubmit: async (values: { [field: string]: string }) => {
             alert(JSON.stringify(values, null, 2))
         },
@@ -73,12 +86,20 @@ function Page() {
         const element = event.target as HTMLInputElement | null
         if (element == null) return
         if (element.name == '') return
-        formik.setFieldValue(element.name, 'clicked')
+        form1.setFieldValue(element.name, 'clicked')
     }
 
     function resetForm(event: MouseEvent): void {
-        formik.resetForm()
+        form1.resetForm()
         handleClick(event)
+    }
+
+    function handleChangeForCountry1(value: string) {
+        form2.setFieldValue('country1', value)
+    }
+
+    function handleChangeForCountry2(value: string) {
+        form2.setFieldValue('country2', value)
     }
 
     //
@@ -90,7 +111,7 @@ function Page() {
         <h1 className="my-3 text-3xl font-bold">Form Examples</h1>
 
         <h2 className="my-1 text-xl font-bold">All Input Types:</h2>
-        <form onSubmit={formik.handleSubmit} >
+        <form onSubmit={form1.handleSubmit}>
             <div ref={normalizeHeights} className="grid grid-flow-row md:grid-cols-2 xl:grid-cols-3 border-x-[1px] items-center">
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
@@ -102,54 +123,54 @@ function Page() {
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         Checkbox:
-                        <input type="checkbox" className="ml-2 m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('checkbox')} />
+                        <input type="checkbox" className="ml-2 m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('checkbox')} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         Color:
-                        <input type="color" className="ml-2 m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('color')} />
+                        <input type="color" className="ml-2 m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('color')} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         Date:
                         <br />
-                        <input type="date" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('date')} />
+                        <input type="date" className="m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('date')} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         Datetime-Local:
                         <br />
-                        <input type="datetime-local" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('datetimeLocal')} />
+                        <input type="datetime-local" className="m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('datetimeLocal')} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         Email:
                         <br />
-                        <input type="email" autoComplete="true" placeholder="max.mustermann@mustermail.de" className="w-72 m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('email')} />
+                        <input type="email" placeholder="max.mustermann@mustermail.de" className="w-72 m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('email')} autoComplete="email" />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         File:
                         <br />
-                        <input type="file" accept=".txt,.cs,application/msword" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('file')} />
+                        <input type="file" accept=".txt,.cs,application/msword" className="m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('file')} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
-                    <label htmlFor="hidden">Hidden:
-                        <input type="hidden" className="ml-2 m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('hidden')} />
-                    </label>
+                    <p>Hidden:
+                        <input type="hidden" className="ml-2 m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('hidden')} />
+                    </p>
                 </div>
                 <div className="flex px-5 border-x-[1px] items-center">
                     <label className="flex items-center">
                         Image:
                         <input type="image" name="image" src="./icons/logo192.png" width={40} className="ml-2 m-1 px-2 py-1 rounded-md" onClick={handleClick} />
                     </label>
-                    {!formik.touched.image || Object.keys(formik.errors).length < 1 ?
+                    {!form1.touched.image || Object.keys(form1.errors).length < 1 ?
                         null : <span className="ml-4 px-2 py-1 text-red-500">The form contains invalid fields.</span>
                     }
                 </div>
@@ -157,41 +178,41 @@ function Page() {
                     <label>
                         Month:
                         <br />
-                        <input type="month" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('month')} />
+                        <input type="month" className="m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('month')} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         Number:
                         <br />
-                        <input type="number" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('number')} />
+                        <input type="number" className="m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('number')} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         <span className="after:content-['*'] after:ml-1 after:text-red-500">Password:</span>
-                        {!formik.touched.password ? null : formik.errors.password ?
-                            <span className="ml-4 px-2 py-1 text-red-500">{formik.errors.password}</span>
+                        {!form1.touched.password ? null : form1.errors.password ?
+                            <span className="ml-4 px-2 py-1 text-red-500">{form1.errors.password}</span>
                             : <span className="ml-4 px-2 py-1 text-green-500">That&apos;s the right password!</span>
                         }
                         <br />
-                        <input id="password" type="password" placeholder="123456" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('password')} />
+                        <input id="password" type="password" placeholder="123456" className="m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('password')} autoComplete="current-password" />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         Radio:
                         <br />
-                        <label className="inline-flex px-2"><input type="radio" name="radio" value="a" checked={formik.values.radio === 'a'} onChange={formik.handleChange} />&nbsp;a</label>
-                        <label className="inline-flex px-2"><input type="radio" name="radio" value="b" checked={formik.values.radio === 'b'} onChange={formik.handleChange} />&nbsp;b</label>
-                        <label className="inline-flex px-2"><input type="radio" name="radio" value="c" checked={formik.values.radio === 'c'} onChange={formik.handleChange} />&nbsp;c</label>
+                        <label className="inline-flex px-2"><input type="radio" name="radio" value="a" checked={form1.values.radio === 'a'} onChange={form1.handleChange} />&nbsp;a</label>
+                        <label className="inline-flex px-2"><input type="radio" name="radio" value="b" checked={form1.values.radio === 'b'} onChange={form1.handleChange} />&nbsp;b</label>
+                        <label className="inline-flex px-2"><input type="radio" name="radio" value="c" checked={form1.values.radio === 'c'} onChange={form1.handleChange} />&nbsp;c</label>
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         Range:
                         <br />
-                        <input type="range" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('range')} />
+                        <input type="range" className="m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('range')} />
                     </label>
                 </div>
                 <div className="grid justify-between px-5 border-x-[1px] items-center">
@@ -205,13 +226,13 @@ function Page() {
                     <label>
                         Search:
                         <br />
-                        <input type="search" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('search')} />
+                        <input type="search" className="m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('search')} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         Submit:
-                        {!formik.touched.submit || Object.keys(formik.errors).length < 1 ?
+                        {!form1.touched.submit || Object.keys(form1.errors).length < 1 ?
                             <span className="h-7" /> :
                             <span className="ml-4 px-2 py-1 text-red-500">The form contains invalid fields.</span>
                         }
@@ -223,41 +244,68 @@ function Page() {
                     <label>
                         Tel:
                         <br />
-                        <input type="tel" autoComplete="true" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('tel')} />
+                        <input type="tel" className="m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('tel')} autoComplete="tel" />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         Text:
-                        {!formik.touched.text || !formik.errors.text ? null : <span className="ml-4 px-2 py-1 text-red-500">{formik.errors.text}</span>}
+                        {!form1.touched.text || !form1.errors.text ? null : <span className="ml-4 px-2 py-1 text-red-500">{form1.errors.text}</span>}
                         <br />
-                        <input type="text" placeholder="text only" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('text')} />
+                        <input type="text" placeholder="text only" className="m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('text')} autoComplete="username" />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         Time:
-                        <input type="time" className="ml-2 m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('time')} />
+                        <input type="time" className="ml-2 m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('time')} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         URL:
-                        {!formik.touched.url || !formik.errors.url ? null : <span className="ml-4 px-2 py-1 text-red-500">{formik.errors.url}</span>}
+                        {!form1.touched.url || !form1.errors.url ? null : <span className="ml-4 px-2 py-1 text-red-500">{form1.errors.url}</span>}
                         <br />
-                        <input type="url" placeholder="https://www.google.de" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('url')} />
+                        <input type="url" placeholder="https://www.google.de" className="m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('url')} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
                         Week:
                         <br />
-                        <input type="week" className="m-1 px-2 py-1 rounded-md" {...formik.getFieldProps('week')} />
+                        <input type="week" className="m-1 px-2 py-1 rounded-md" {...form1.getFieldProps('week')} />
                     </label>
                 </div>
                 <div className="hidden xl:block px-5 xl:border-x-[1px] items-center" />
                 <div className="hidden xl:block px-5 xl:border-x-[1px] items-center" />
             </div>
+        </form >
+
+        <br />
+
+        {/* country select input element; */}
+        <h2 className="my-1 text-xl font-bold">MUI has predefined UI elements:</h2>
+        <form className="m-4" onSubmit={form2.handleSubmit}>
+            <div ref={normalizeHeights} className="grid grid-flow-row md:grid-cols-2 xl:grid-cols-3 items-center">
+                <div className="grid px-5 items-center">
+                    <div>
+                        First try:
+                        {/*
+                            rounded-md does not work since it is applied to the container without border; 
+                            customization might be difficult when using these; 
+                        */}
+                        <InputCountry1 className="m-1 px-2 py-1 rounded-md" onChange={(_: SyntheticEvent, value: string) => handleChangeForCountry1(value)} />
+                    </div>
+                </div>
+                <div className="grid px-5 items-center">
+                    <div>
+                        Copied from: <Link className="inline-block text-blue-300" href={'https://mui.com/material-ui/react-autocomplete/'}>https://mui.com/material-ui/react-autocomplete/</Link>
+                        <InputCountry2 className="m-1 px-2 py-1 rounded-md" onChange={(_: SyntheticEvent, { label }: { label: string }) => handleChangeForCountry2(label)} />
+                    </div>
+                </div>
+            </div>
+            <br />
+            <Button variant="outlined" type="submit">Submit</Button>
         </form >
     </>)
 }

@@ -34,14 +34,14 @@ function HomeComponent() {
             <li>using <strong>Zustand</strong> for sharing data and states; less boilerplate than <strong>Redux</strong>?;</li>
             <li>added a search bar placeholder; there is no back-end yet; maybe you could work around that and handle search entries and stuff; let&apos;s not bother just yet;</li>
             <li>using <strong>formik</strong> and <strong>Yap</strong> for form handling and validation;</li>
+            <li>using <strong>MUI</strong> for pre-defined country input field; TODO: check how much stuff can be done with these pre-defined elements;</li>
         </ul >
 
         <h2 className="my-2 text-2xl font-bold">TODO:</h2>
         <ul className="*:my-2 pl-5">
-            <li>try Redux to share states using less(?) code;</li>
             <li>user login;</li>
             <li>search bar;</li>
-            <li>use Node.js?; back-end?;</li>
+            <li>back-end?; Node.js, java and c# are options;</li>
             <li>light / dark theme switch;</li>
             <li>some more standard stuff; forms, maps, videos / iframes, lists maybe;</li>
         </ul>

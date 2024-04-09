@@ -11,6 +11,9 @@
         "export": "next build && next export"
     },
     "dependencies": {
+        "@emotion/react": "^11.11.4",
+        "@emotion/styled": "^11.11.5",
+        "@mui/material": "^5.15.15",
         "@use-gesture/react": "^10.3.1",
         "formik": "^2.4.5",
         "next": "^14.1.4",
@@ -56,6 +59,8 @@
             "plugin:@typescript-eslint/recommended"
         ],
         "rules": {
+            "@next/next/no-img-element": "off",
+            "@typescript-eslint/no-explicit-any": "off",
             "@typescript-eslint/no-unused-vars": "warn",
             "no-trailing-spaces": "off",
             "quotes": [

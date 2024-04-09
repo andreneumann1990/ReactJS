@@ -3,12 +3,19 @@
 import '../styles/globals.scss'
 import React from 'react'
 import Layout from '../components/Layout'
+import { ThemeProvider, createTheme } from '@mui/material/styles'
 
 export default RootLayout
 
 //
 //
 //
+
+const darkTheme = createTheme({
+    palette: {
+        mode: 'dark',
+    },
+})
 
 function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (<>
@@ -34,9 +41,11 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
             <body>
                 <noscript>You need to enable JavaScript to run this app.</noscript>
                 <React.StrictMode>
-                    <Layout>
-                        {children}
-                    </Layout>
+                    <ThemeProvider theme={darkTheme}>
+                        <Layout>
+                            {children}
+                        </Layout>
+                    </ThemeProvider>
                 </React.StrictMode>
             </body>
         </html>
