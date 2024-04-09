@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 // this is supposed to be for requests or interactions between fron and back
 // end;
 
-@CrossOrigin(origins = "http://localhost:3000")
+@CrossOrigin(origins = { "http://localhost:3000", "https://andreneumann1990.github.io" })
 @RestController
 public class UserController {
 
