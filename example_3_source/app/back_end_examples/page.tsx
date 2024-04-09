@@ -1,6 +1,6 @@
 'use client'
 
-import { Box, Button, TextField } from '@mui/material'
+import { Box, Button, Link, TextField } from '@mui/material'
 import { useFormik } from 'formik'
 import { useEffect, useState } from 'react'
 import * as Yup from 'yup'
@@ -67,6 +67,14 @@ function Page() {
     return (<>
         {/* header; */}
         <h1 className="my-3 text-3xl font-bold">Back-End Examples</h1>
+
+        {/* <h2 className="my-1 text-xl font-bold">Link:</h2> */}
+        <ul className="*:my-2 pl-10">
+            <li>
+                Link:&nbsp;
+                <Link className="inline-block text-blue-300" href={backEndHRef}>{backEndHRef}</Link>
+            </li>
+        </ul>
 
         <h2 className="my-1 text-xl font-bold">GET requests:</h2>
         <ul className="*:my-2 pl-10">
