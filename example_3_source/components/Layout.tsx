@@ -16,7 +16,7 @@ export { backEndHRef }
 //
 
 const isProduction = process.env.NODE_ENV === 'production'
-const backEndHRef = isProduction ? 'https://www.example-3-b52da596edfb.herokuapp.com' : 'http://localhost:8080'
+const backEndHRef = isProduction ? 'https://example-3-b52da596edfb.herokuapp.com/' : 'http://localhost:8080'
 
 interface eventData {
     target: EventTarget | null
