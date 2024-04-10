@@ -137,7 +137,7 @@ function Sidenav() {
     const initializeSidenavReference = (element: HTMLElement | null) => {
         if (sidenavElement != null) return
         if (element == null) return // should never happen!! since it gets never unmounted;
-        if (isDebugEnabled) console.log('Sidenav: Initialize reference.')
+        if (isDebugEnabled) console.log('Sidenav: Initialize sidenav reference.')
         setSidenavElement(element)
     }
 
