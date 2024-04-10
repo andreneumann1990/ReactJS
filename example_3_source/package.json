@@ -2,7 +2,6 @@
     "name": "example_3_source",
     "version": "0.0.1",
     "private": true,
-    "homepage": "https://reactjs-sigma-five.vercel.app/reactjs/example_3",
     "scripts": {
         "dev": "next dev",
         "build": "next build",
