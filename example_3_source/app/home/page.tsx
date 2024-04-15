@@ -1,6 +1,6 @@
 'use client'
 
-import { useNavigateAndHighlightElement } from '../../hooks/navigation'
+import { useNavigateAndHighlightElement } from '../../hooks/navigation_hooks'
 
 export default Page
 

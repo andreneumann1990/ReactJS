@@ -2,7 +2,7 @@
 
 import '../styles/globals.scss'
 import React from 'react'
-import Layout from '../components/Layout'
+import Layout from '../components/layout/Layout'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 
 export default RootLayout

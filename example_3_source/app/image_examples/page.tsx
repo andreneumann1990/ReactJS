@@ -4,9 +4,9 @@ import { useDrag } from '@use-gesture/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
-import { useSidenavStore } from '../../components/Sidenav'
-import { useClick } from '../../components/CustomGestures'
-import { useNavigateAndHighlightElement } from '../../hooks/navigation'
+import { useSidenavStore } from '../../components/layout/Sidenav'
+import { useClick } from '../../hooks/gesture_hooks'
+import { useNavigateAndHighlightElement } from '../../hooks/navigation_hooks'
 
 function Page() {
     useNavigateAndHighlightElement('ImageExamples')

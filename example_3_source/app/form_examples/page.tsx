@@ -3,10 +3,10 @@
 import { useFormik } from 'formik'
 import { MouseEvent, SyntheticEvent, } from 'react'
 import * as Yup from 'yup'
-import { InputCountry1, InputCountry2 } from '../../components/input/Country'
+import { InputCountry1, InputCountry2 } from '../../components/atoms/InputCountry'
 import Link from 'next/link'
 import { Button } from '@mui/material'
-import { useNavigateAndHighlightElement } from '../../hooks/navigation'
+import { useNavigateAndHighlightElement } from '../../hooks/navigation_hooks'
 
 function Page() {
     useNavigateAndHighlightElement('FormExamples')

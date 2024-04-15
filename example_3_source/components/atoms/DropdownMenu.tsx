@@ -1,16 +1,16 @@
 import { KeyboardEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { useSidenavStore } from './Sidenav'
-import { triggerFlashEffect } from '../constants/events'
-import { isDebugEnabled } from '../constants/general'
+import { useSidenavStore } from '../layout/Sidenav'
+import { triggerFlashEffect } from '../../constants/event_constants'
+import { isDebugEnabled } from '../../constants/general_constants'
 
-export default Dropdown
+export default DropdownMenu
 
 //
 //
 //
 
-function Dropdown({ children, className, text }: {
+function DropdownMenu({ children, className, text }: {
     children?: ReactNode
     className?: string
     text?: ReactNode

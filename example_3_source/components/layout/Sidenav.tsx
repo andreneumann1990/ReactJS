@@ -1,12 +1,12 @@
 import { KeyboardEvent, useEffect } from 'react'
-import Dropdown from './Dropdown'
+import DropdownMenu from '../atoms/DropdownMenu'
 import { create } from 'zustand'
 import Link from 'next/link'
 import { useTopnavStore } from './Topnav'
 import { useMainStore } from './Main'
-import { useClick } from './CustomGestures'
-import { isDebugEnabled } from '../constants/general'
-import { triggerFlashEffect } from '../constants/events'
+import { useClick } from '../../hooks/gesture_hooks'
+import { isDebugEnabled } from '../../constants/general_constants'
+import { triggerFlashEffect } from '../../constants/event_constants'
 
 export default Sidenav
 export { useSidenavStore }
@@ -238,18 +238,18 @@ function Sidenav() {
             <Link href="/image_examples" className="pl-4 py-[2px]" {...useClick(closeSidenav)}>Image Examples</Link><hr />
             <Link href="/form_examples" className="pl-4 py-[2px]" {...useClick(closeSidenav)}>Form Examples</Link><hr />
             <Link href="/back_end_examples" className="pl-4 py-[2px]" {...useClick(closeSidenav)}>Back-End Examples</Link><hr />
-            <Dropdown text="Dropdown 1">
+            <DropdownMenu text="Dropdown 1">
                 <Link href="#" className="pl-8 py-[2px]">Link 3</Link>
                 <Link href="#" className="pl-8 py-[2px]">Link 4</Link>
                 <Link href="#" className="pl-8 py-[2px]">Link 5</Link>
                 <Link href="#" className="pl-8 py-[2px]">Link 6</Link>
                 <Link href="#" className="pl-8 py-[2px]">Link 7</Link>
                 <Link href="#" className="pl-8 py-[2px]">Link 8</Link>
-            </Dropdown><hr />
-            <Dropdown text="Dropdown 2">
+            </DropdownMenu><hr />
+            <DropdownMenu text="Dropdown 2">
                 <Link href="#" className="pl-8 py-[2px]">Link 9</Link>
                 <Link href="#" className="pl-8 py-[2px]">Link 10</Link>
-            </Dropdown><hr />
+            </DropdownMenu><hr />
         </nav>
     </>)
 }

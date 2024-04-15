@@ -4,8 +4,8 @@ import Topnav from './Topnav'
 import Sidenav from './Sidenav'
 import React, { useEffect, useState } from 'react'
 import Main from './Main'
-import { isDebugEnabled } from '../constants/general'
-import { triggerFlashEffect } from '../constants/events'
+import { isDebugEnabled } from '../../constants/general_constants'
+import { triggerFlashEffect } from '../../constants/event_constants'
 
 export default Layout
 

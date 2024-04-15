@@ -2,7 +2,7 @@ import { useSidenavStore } from './Sidenav'
 import React from 'react'
 import { useDrag } from '@use-gesture/react'
 import { create } from 'zustand'
-import { isDebugEnabled } from '../constants/general'
+import { isDebugEnabled } from '../../constants/general_constants'
 
 export default Main
 export { useMainStore }

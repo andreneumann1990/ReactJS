@@ -3,9 +3,9 @@ import { create } from 'zustand'
 import algoliasearch from 'algoliasearch/lite'
 import DOMPurify from 'dompurify'
 import Link from 'next/link'
-import { isDebugEnabled } from '../../constants/general'
+import { isDebugEnabled } from '../../constants/general_constants'
 import { useRouter } from 'next/navigation'
-import { useMainStore } from '../Main'
+import { useMainStore } from '../layout/Main'
 
 export default SearchBox
 export { useSearchStore }
@@ -40,22 +40,6 @@ const useSearchStore = create<{
 //
 //
 //
-
-// interface Props {
-//     onSearch: (query: string) => void,
-// }
-
-// interface DataEntry {
-//     text?: string,
-//     type: string,
-//     type_ranking: number,
-//     // heading?: string,
-//     // label?: string,
-//     // listItem?: string,
-//     objectID?: string,
-//     url?: string,
-//     url_relative?: string,
-// }
 
 function SearchBox() {
     //
@@ -245,7 +229,7 @@ function SearchBox() {
     //
 
     return (
-        <form className="relative grid grid-flow-col [grid-template-columns:var(--height-topnav)_auto] items-center" onSubmit={handleSearch}>
+        <form className="w-full relative grid grid-flow-col [grid-template-columns:var(--height-topnav)_auto] items-center" onSubmit={handleSearch}>
             <button type="submit"><i className="p-1 icon-medium material-icons">search</i></button>
             <div className="relative pr-1">
                 {/* search input; */}

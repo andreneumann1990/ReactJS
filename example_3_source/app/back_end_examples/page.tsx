@@ -4,8 +4,8 @@ import { Box, Button, Link, TextField } from '@mui/material'
 import { useFormik } from 'formik'
 import { useEffect, useState } from 'react'
 import * as Yup from 'yup'
-import { useNavigateAndHighlightElement } from '../../hooks/navigation'
-import { backEndHRef } from '../../constants/general'
+import { useNavigateAndHighlightElement } from '../../hooks/navigation_hooks'
+import { backEndHRef } from '../../constants/general_constants'
 
 export default Page
 

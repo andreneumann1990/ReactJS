@@ -3,10 +3,9 @@ import { useSidenavStore } from './Sidenav'
 import Link from 'next/link'
 import { create } from 'zustand'
 import { useMainStore } from './Main'
-import InstantSearch from './algolia/InstantSearchPlaceholder'
-import SearchBox, { useSearchStore } from './algolia/SearchBoxPlaceholder'
-import { isDebugEnabled } from '../constants/general'
-import { triggerFlashEffect } from '../constants/events'
+import SearchBox, { useSearchStore } from '../atoms/SearchBox'
+import { isDebugEnabled } from '../../constants/general_constants'
+import { triggerFlashEffect } from '../../constants/event_constants'
 
 export default Topnav
 export { useTopnavStore }
@@ -207,11 +206,7 @@ function Topnav() {
                         <i className="p-1 icon-medium material-icons">home</i>
                     </Link>
                 </div>
-
-                {/* <Search></Search> */}
-                <InstantSearch>
-                    <SearchBox />
-                </InstantSearch>
+                <SearchBox />
             </div>
         </nav>
     </>)
