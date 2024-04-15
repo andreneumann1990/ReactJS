@@ -5,6 +5,7 @@ import DOMPurify from 'dompurify'
 import Link from 'next/link'
 import { isDebugEnabled } from '../../constants/general_constants'
 import { useRouter } from 'next/navigation'
+import { debounceEventFunction } from '../../constants/event_constants'
 
 export default Search
 export { useSearchStore }
@@ -13,15 +14,14 @@ export { useSearchStore }
 //
 //
 
-//TODO; add delay before searching; otherwise every key input leads to a search;
-//TODO; check index to be within array size();
+interface EntryData {
+    href: string,
+    open: boolean,
+    purifiedInnerHTML: string,
+}
 
 interface SearchData {
-    [url_relative: string]: {
-        href: string,
-        open: boolean,
-        purifiedInnerHTML: string,
-    }[]
+    [url_relative: string]: EntryData[]
 }
 
 const searchClient = algoliasearch('2QYN25VL0K', 'ba0b8a970db7843753c13218f38ae4e2')
@@ -62,11 +62,13 @@ function Search() {
 
     const [isFocused, setIsFocused] = useState<boolean>(false)
     const [isHovering, setIsHovering] = useState<boolean>(false)
+    const [lastSearchQuery, setLastSearchQuery] = useState<string>('')
+    const [previouslyFocusedElement, setPreviouslyFocusedElement] = useState<HTMLElement | null>(null)
 
-    const [lastSearchQuery, setLastSearchQuery] = useState('')
     const [searchResultDataArray, setSearchResultDataArray] = useState<SearchData>({})
     const [searchResultSelectedIndex, setSearchResultSelectedIndex] = useState<[number, number]>([0, 0])
     const [searchQuery, setSearchQuery] = useState('')
+
 
     //
     // functions
@@ -86,13 +88,32 @@ function Search() {
         setSearchResultsElement(element)
     }
 
-    // navigate via arrow keys;
+    // navigate via arrow keys; escape to close;
     function handleKeyDown(event: React.KeyboardEvent) {
+        if (searchInputElement == null) return
+        console.log(event.key)
+        if (event.key == 'Escape') {
+            event.preventDefault()
+            previouslyFocusedElement?.focus()
+            searchInputElement.blur()
+            return
+        }
+
         if (Object.keys(searchResultDataArray).length < 1) return
         const [keyIndex, entryIndex] = searchResultSelectedIndex
 
         if (event.key == 'ArrowDown') {
-            if (entryIndex < Object.values(searchResultDataArray)[keyIndex].length - 1) {
+            const entryArray: EntryData[] | undefined = Object.values(searchResultDataArray)[keyIndex]
+            if (entryArray == null) {
+                if (isDebugEnabled) {
+                    console.log('Search-Warning: Entry array could not be found.')
+                    console.log(`Search-Warning: dataArray ${Object.values(searchResultDataArray)}`)
+                    console.log(`Search-Warning: keyIndex ${keyIndex}`)
+                }
+                return
+            }
+
+            if (entryIndex < entryArray.length - 1) {
                 event.preventDefault()
                 setSearchResultSelectedIndex([keyIndex, entryIndex + 1])
             } else if (keyIndex < Object.keys(searchResultDataArray).length - 1) {
@@ -103,12 +124,22 @@ function Search() {
         }
 
         if (event.key == 'ArrowUp') {
+            const entryArray: EntryData[] | undefined = Object.values(searchResultDataArray)[keyIndex - 1]
+            if (entryArray == null) {
+                if (isDebugEnabled) {
+                    console.log('Search-Warning: Entry array could not be found.')
+                    console.log(`Search-Warning: dataArray ${Object.values(searchResultDataArray)}`)
+                    console.log(`Search-Warning: (keyIndex - 1) ${keyIndex - 1}`)
+                }
+                return
+            }
+
             if (entryIndex > 0) {
                 event.preventDefault()
                 setSearchResultSelectedIndex([keyIndex, entryIndex - 1])
             } else if (keyIndex > 0) {
                 event.preventDefault()
-                setSearchResultSelectedIndex([keyIndex - 1, Object.values(searchResultDataArray)[keyIndex - 1].length - 1])
+                setSearchResultSelectedIndex([keyIndex - 1, entryArray.length - 1])
             }
             return
         }
@@ -131,7 +162,7 @@ function Search() {
         const inputElement = event.target as HTMLInputElement | null
         if (inputElement == null) return
         if (inputElement.value == searchQuery) return
-        if (isDebugEnabled) console.log('Search: Update query.')
+        if (isDebugEnabled) console.log('Search: Update search query.')
         setSearchQuery(inputElement.value)
     }
 
@@ -183,19 +214,18 @@ function Search() {
     useEffect(() => {
         const bodyElement = document.querySelector('body')
         if (bodyElement == null) return
-        let previousElement: HTMLElement | null = null
 
         function handleKeyInputs(event: KeyboardEvent) {
             if (searchInputElement == null) return
             if (event.ctrlKey && event.key == 'k') {
                 event.preventDefault()
                 if (document.activeElement == searchInputElement) {
-                    previousElement?.focus()
+                    previouslyFocusedElement?.focus()
                     searchInputElement.blur()
                     return
                 }
 
-                previousElement = document.activeElement as HTMLElement | null
+                setPreviouslyFocusedElement(document.activeElement as HTMLElement | null)
                 searchInputElement.focus()
             }
         }
@@ -204,7 +234,7 @@ function Search() {
         return (() => {
             bodyElement.removeEventListener('keydown', handleKeyInputs)
         })
-    }, [searchInputElement, setIsSearchOpen])
+    }, [previouslyFocusedElement, searchInputElement, setIsSearchOpen])
 
     // search after query is updated, i.e. onChange();
     useEffect(() => {
@@ -243,9 +273,6 @@ function Search() {
                 //
                 // note that matchedWords can be different from what needs to be highlighted;
                 //
-
-                // TODO
-                // console.log(JSON.stringify(hit, null, 2))
 
                 const innerHTML = hit._highlightResult.text.value
                 const innerText = hit.text
@@ -294,60 +321,59 @@ function Search() {
                 <input name="searchInput" className="w-full px-4 py-1 rounded-2xl peer"
                     type="text"
                     placeholder="Search here..."
-                    value={searchQuery}
                     ref={initializeSearchInputReference}
                     onBlurCapture={handleBlur}
-                    onChange={updateInputField}
+                    onChange={debounceEventFunction(updateInputField, 300)}
                     onFocusCapture={handleFocus}
                     onKeyDown={handleKeyDown}
                 />
 
                 {/* search results; */}
                 <div
-                    // TODO
-                    // className="absolute w-full mt-1 bg-secondary shadow-lg shadow-neutral-950 text-center peer-focus:block hover:block"
-                    className="absolute w-full mt-1 bg-secondary shadow-lg shadow-neutral-950 text-center hidden peer-focus:block hover:block"
+                    className="absolute w-full mt-1 bg-secondary shadow-md text-center hidden peer-focus:block hover:block"
                     ref={initializeSearchResultsReference}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                 >
-                    <span>navigation</span>
-                    <i className="material-icons">arrow_downward</i>
-                    <i className="material-icons">arrow_upward</i>
-                    <span>enter</span>
-                    {/* TODO; */}
-                    {/* <i className="material-icons">arrow_top_right</i> */}
-
-                    {/* <pre className="pl-1 mb-1 text-left">Pretending to search for<span ref={setLoadingDotsElement}>.</span></pre>
-                    <pre className="inline text-wrap break-words">{query}</pre> */}
-                    {Object.entries(searchResultDataArray).map(([url_relative, data], keyIndex) => {
+                    {Object.entries(searchResultDataArray).map(([url_relative, entryArray], keyIndex) => {
                         return (<div key={`d-${keyIndex}`}
                             className="text-left p-2 pl-5 text-xl"
                         >
                             <header>{url_relative}</header>
-                            {data.map((dataEntry, entryIndex) => {
+                            {entryArray.map((entry, entryIndex) => {
                                 return (<Link key={`l-${entryIndex}`}
                                     className={'my-3 text-left grid items-center min-h-10 p-2 px-4 mt-2 border rounded-2xl' + (keyIndex == searchResultSelectedIndex[0] && entryIndex == searchResultSelectedIndex[1] ? ' bg-primary-active' : ' bg-primary')}
-                                    href={dataEntry.href}
+                                    href={entry.href}
                                 >
                                     <div
                                         className="*:bg-yellow-700 text-base"
-                                        dangerouslySetInnerHTML={{ __html: dataEntry.purifiedInnerHTML }}
+                                        dangerouslySetInnerHTML={{ __html: entry.purifiedInnerHTML }}
                                     ></div>
                                 </Link>)
                             })}
                         </div>)
                     })}
-                    <div className="text-right">
-                        <p className="inline-block p-1 text-xs">
-                            Search by
-                        </p>
-                        <img className="inline-block h-5 m-2 ml-1"
-                            src="./icons/Algolia-logo-white.svg"
-                            alt="Algolia logo"
-                            height={20}
-                            width="auto"
-                        ></img>
+                    <div className="text-right flex justify-between items-center my-2 mx-5">
+                        <div className="text-center">
+                            enter to select
+                        </div>
+                        <div>escape to close</div>
+                        <div className="grid grid-flow-col justify-center">
+                            <i className="material-icons text-base">arrow_upward</i>
+                            <i className="material-icons text-base">arrow_downward</i>
+                            <span className="pl-1">to navigate</span>
+                        </div>
+                        <div>
+                            <p className="inline-block p-1 text-xs">
+                                Search by
+                            </p>
+                            <img className="inline-block h-5 ml-1"
+                                src="./icons/Algolia-logo-white.svg"
+                                alt="Algolia logo"
+                                height={20}
+                                width="auto"
+                            ></img>
+                        </div>
                     </div>
                 </div>
             </div >

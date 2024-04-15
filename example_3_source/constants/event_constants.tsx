@@ -1,12 +1,24 @@
 import tinycolor from 'tinycolor2'
 
+export { debounceEventFunction }
 export { triggerFlashEffect }
 
 //
 //
 //
 
-const triggerFlashEffect = function (event: { target: EventTarget | null }) {
+function debounceEventFunction(eventFunction: (...args: any[]) => void, timeout_ms: number) {
+    let timer: number
+    return (...args: any[]) => {
+        clearTimeout(timer)
+        console.log('clear timer')
+        timer = window.setTimeout(() => {
+            eventFunction.apply(window, args)
+        }, timeout_ms)
+    }
+}
+
+function triggerFlashEffect(event: { target: EventTarget | null }): void {
     const element = event.target as HTMLElement | null
     if (element == null) return
 

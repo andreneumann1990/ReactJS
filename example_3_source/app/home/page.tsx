@@ -55,7 +55,7 @@ function Page() {
         </details>
         <ul className="*:my-2 pl-5">
             <li>first back-end steps;</li>
-            <li>added <strong>Algolia</strong> search; TODO: fine tuning;</li>
+            <li>added <strong>Algolia</strong> search; navigation hints and behavior similar to <strong>react.dev</strong>;</li>
         </ul>
 
         <h2 className="my-2 text-2xl font-bold">TODO:</h2>
