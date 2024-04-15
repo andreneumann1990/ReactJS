@@ -20,33 +20,10 @@ function useNavigateAndHighlightElement(pageName?: string): void {
         const searchResultElementArray = Array.from(document.querySelectorAll(indexEntryTypesString)).reduce<HTMLElement[]>((accumulator, current) => {
             if (!(current instanceof HTMLElement)) return accumulator
 
-            //TODO
-            //             function compareStrings(str1: string, str2: string) {
-            //                 let length = Math.max(str1.length, str2.length)
-            //                 let differences = []
-            // 
-            //                 for (let i = 0; i < length; i++) {
-            //                     let char1 = str1[i] || '' // Handle undefined if strings are of different lengths
-            //                     let char2 = str2[i] || ''
-            //                     if (char1 !== char2) {
-            //                         differences.push(`Position ${i}: '${char1}' != '${char2}'`)
-            //                     }
-            //                 }
-            // 
-            //                 return differences.length > 0 ? differences : 'Strings are identical'
-            //             }
-
-            //TODO
-            // console.log(innerText)
-            // console.log(current.innerText)
-            // console.log(current.innerHTML)
-            // console.log(compareStrings(innerText, current.innerText.replaceAll(/[\n\r\t]/g, '')))
-
             // might not work in every case; in some cases the innerText is empty or null 
-            // for some reason; innerHTML can only be used as a substitute if no html tags 
-            // are used inside;
-            //&& current.innerHTML.replaceAll(/[\n\r\t]/g, '') !== innerText //TODO
-            if (current.innerText.replaceAll(/[\n\r\t]/g, '') !== innerText) return accumulator
+            // for some reason; this seems to be happening inside <details> elements; inner
+            // HTML can only be used as a substitute if no html tags are used inside;
+            if (current.innerText.replaceAll(/[\n\r\t]/g, '') !== innerText && current.innerHTML.replaceAll(/[\n\r\t]/g, '') !== innerText) return accumulator
 
             accumulator.push(current)
             return accumulator

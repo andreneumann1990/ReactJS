@@ -5,6 +5,10 @@ module.exports = {
     "./components/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
+    data: {
+        active: 'active',
+        inactive: 'inactive',
+    },
     extend: {
         animation: {
             'fade-in': 'fadeIn 0.3s ease-out forwards'

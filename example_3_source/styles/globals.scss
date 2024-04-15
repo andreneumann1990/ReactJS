@@ -212,7 +212,7 @@ body {
     width: 100%;
 
     background-color: var(--color-background);
-    color: --color-text;
+    color: var(--color-text);
 
     // font-size: 1em;
     // 100% because of problems with internet explorer?;
@@ -244,16 +244,6 @@ code {
 html {
     color-scheme: dark;
     scrollbar-color: hsl(0, 0%, 50%) transparent;
-}
-
-// TODO; use tailwind;
-main.inactive {
-    // background-color: $color-hover-dark;
-    opacity: 0.2;
-    // color: --color-text-passive;
-    overflow-y: hidden;
-    user-select: none;
-    touch-action: none;
 }
 
 strong {

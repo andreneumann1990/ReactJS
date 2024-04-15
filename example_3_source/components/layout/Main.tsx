@@ -1,8 +1,10 @@
 import { useSidenavStore } from './Sidenav'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useDrag } from '@use-gesture/react'
 import { create } from 'zustand'
 import { isDebugEnabled } from '../../constants/general_constants'
+import { useSearchStore } from '../atoms/Search'
+import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 
 export default Main
 export { useMainStore }
@@ -30,19 +32,16 @@ function Main({ children }: React.PropsWithChildren) {
     // parameters and variables
     //
 
-    const mainElement = useMainStore(state => state.element)
-    const setMainElement = useMainStore(state => state.setElement)
+    const mainElement: HTMLElement | null = useMainStore(state => state.element)
+    const sidenavElement: HTMLElement | null = useSidenavStore(state => state.element)
+    const setMainElement: (element: HTMLElement | null) => void = useMainStore(state => state.setElement)
 
-    const sidenavElement = useSidenavStore(state => state.element)
-    const isSidenavOpen = useSidenavStore(state => state.isOpen)
-    const setIsSidenavOpen = useSidenavStore(state => state.setIsOpen)
-
-    //
-    // functions
-    //
+    const isSearchOpen: boolean = useSearchStore(state => state.isOpen)
+    const isSidenavOpen: boolean = useSidenavStore(state => state.isOpen)
+    const setIsSidenavOpen: (isOpen: boolean) => void = useSidenavStore(state => state.setIsOpen)
 
     // close sidebar by swipe / panning gesture;
-    const onDrag = useDrag<PointerEvent>(({ movement: [dx, dy], last }) => {
+    const dragAttributes: ReactDOMAttributes = useDrag<PointerEvent>(({ movement: [dx, dy], last }) => {
         // offset does not reset when panning ends; movement does;
         if (sidenavElement == null) return
         if (dx > -10) return
@@ -71,31 +70,53 @@ function Main({ children }: React.PropsWithChildren) {
         // cannot call applySidenavState() for this since it depends on this function, i.e. enableTouchEvents();
         sidenavElement.style.transition = 'transform 0.5s ease-out 0s'
         sidenavElement.style.transform = `translateX(${sidenavElement.offsetWidth}px)`
-    }, { eventOptions: { capture: true }, enabled: isSidenavOpen })
+    }, { eventOptions: { capture: true }, enabled: isSidenavOpen })()
 
-    const initializeMainReference = (element: HTMLElement | null) => {
+    //
+    // functions
+    //
+
+    function initializeMainReference(element: HTMLElement | null): void {
         if (mainElement != null) return
         if (element == null) return
-        if (isDebugEnabled) console.log('Layout: Initialize main reference.')
+        if (isDebugEnabled) console.log('Main: Initialize main reference.')
         setMainElement(element)
-
-        // only accounts for properties; the reference can still be changed;
-        // Object.freeze(mainElement)
     }
 
     //
+    // effects
+    //
+
+    // update state;
+    useEffect(() => {
+        if (mainElement == null) return
+        if (isDebugEnabled) console.log('Main: Update state.')
+
+        if (isSidenavOpen) {
+            mainElement.dataset.inactive = ''
+            return
+        }
+
+        if (isSearchOpen) {
+            mainElement.dataset.inactive = ''
+            return
+        }
+
+        delete mainElement.dataset.inactive
+    }, [isSearchOpen, isSidenavOpen, mainElement])
+
+    //
     //
     //
 
-    //TODO: export main component;
     return (<>
-        <main ref={initializeMainReference} className="flex flex-col justify-between h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-colors ease-out duration-300" {...onDrag()} tabIndex={1}>
+        <main
+            ref={initializeMainReference}
+            className="flex flex-col justify-between h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-colors ease-out duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
+            {...dragAttributes}
+            tabIndex={1}
+        >
             <div>{children}</div>
-            <div>
-                <footer className="border grid content-center h-32 overflow-hidden">
-                    <h1 className="text-center text-xl">Footer; not sure what I want to do here; TODO;</h1>
-                </footer>
-            </div>
         </main >
     </>)
 }

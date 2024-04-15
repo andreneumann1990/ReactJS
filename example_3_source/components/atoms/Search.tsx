@@ -5,14 +5,16 @@ import DOMPurify from 'dompurify'
 import Link from 'next/link'
 import { isDebugEnabled } from '../../constants/general_constants'
 import { useRouter } from 'next/navigation'
-import { useMainStore } from '../layout/Main'
 
-export default SearchBox
+export default Search
 export { useSearchStore }
 
 //
 //
 //
+
+//TODO; add delay before searching; otherwise every key input leads to a search;
+//TODO; check index to be within array size();
 
 interface SearchData {
     [url_relative: string]: {
@@ -28,11 +30,15 @@ const index = searchClient.initIndex('example_3')
 const useSearchStore = create<{
     inputElement: HTMLInputElement | null
     setInputElement: (element: HTMLInputElement | null) => void
+    isOpen: boolean
+    setIsOpen: (isOpen: boolean) => void
     resultsElement: HTMLDivElement | null
     setResultsElement: (element: HTMLDivElement | null) => void
 }>((set) => ({
     inputElement: null,
     setInputElement: (element) => set(() => ({ inputElement: element })),
+    isOpen: false,
+    setIsOpen: (isOpen) => set(() => ({ isOpen })),
     resultsElement: null,
     setResultsElement: (element) => set(() => ({ resultsElement: element })),
 }))
@@ -41,23 +47,26 @@ const useSearchStore = create<{
 //
 //
 
-function SearchBox() {
+function Search() {
     //
     // variables and parameters
     //
 
-    const mainElement = useMainStore(state => state.element)
     const router = useRouter()
 
+    const setIsSearchOpen = useSearchStore(state => state.setIsOpen)
     const searchInputElement = useSearchStore(state => state.inputElement)
     const setSearchInputElement = useSearchStore(state => state.setInputElement)
-    const searchResultDisplayElement = useSearchStore(state => state.resultsElement)
+    const searchResultsElement = useSearchStore(state => state.resultsElement)
     const setSearchResultsElement = useSearchStore(state => state.setResultsElement)
 
+    const [isFocused, setIsFocused] = useState<boolean>(false)
+    const [isHovering, setIsHovering] = useState<boolean>(false)
+
+    const [lastSearchQuery, setLastSearchQuery] = useState('')
     const [searchResultDataArray, setSearchResultDataArray] = useState<SearchData>({})
     const [searchResultSelectedIndex, setSearchResultSelectedIndex] = useState<[number, number]>([0, 0])
     const [searchQuery, setSearchQuery] = useState('')
-    const [lastSearchQuery, setLastSearchQuery] = useState('')
 
     //
     // functions
@@ -66,14 +75,14 @@ function SearchBox() {
     function initializeSearchInputReference(element: HTMLInputElement) {
         if (searchInputElement != null) return
         if (element == null) return
-        if (isDebugEnabled) console.log('SearchBox: Initialize search input reference.')
+        if (isDebugEnabled) console.log('Search: Initialize search input reference.')
         setSearchInputElement(element)
     }
 
     function initializeSearchResultsReference(element: HTMLDivElement) {
-        if (searchResultDisplayElement != null) return
+        if (searchResultsElement != null) return
         if (element == null) return
-        if (isDebugEnabled) console.log('SearchBox: Initialize search results reference.')
+        if (isDebugEnabled) console.log('Search: Initialize search results reference.')
         setSearchResultsElement(element)
     }
 
@@ -111,12 +120,10 @@ function SearchBox() {
         if (Object.keys(searchResultDataArray).length < 1) return
         const [keyIndex, entryIndex] = searchResultSelectedIndex
         const href = Object.values(searchResultDataArray)[keyIndex][entryIndex].href
-        console.log(href) //TODO
         if (typeof href != 'string') return
 
         router.push(href)
         if (searchInputElement == null) return
-        // searchInputElement.innerText = ''
         searchInputElement.blur()
     }
 
@@ -124,13 +131,53 @@ function SearchBox() {
         const inputElement = event.target as HTMLInputElement | null
         if (inputElement == null) return
         if (inputElement.value == searchQuery) return
-        if (isDebugEnabled) console.log('SearchBox: Update query.')
+        if (isDebugEnabled) console.log('Search: Update query.')
         setSearchQuery(inputElement.value)
+    }
+
+    // set hover; don't close when hovering => update state;
+    function handleMouseEnter(): void {
+        setIsHovering(true)
+    }
+
+    function handleMouseLeave(): void {
+        setIsHovering(false)
+    }
+
+    // set focus; don't close when focused => update state;
+    function handleFocus(): void {
+        setIsFocused(true)
+    }
+
+    function handleBlur(): void {
+        setIsFocused(false)
     }
 
     //
     // effects
     //
+
+    // update state;
+    useEffect(() => {
+        if (searchInputElement == null) return
+        if (isDebugEnabled) console.log('Search: Update state.')
+
+        if (document.activeElement == searchInputElement) {
+            setIsSearchOpen(true)
+            return
+        }
+
+        if (isHovering) {
+            setIsSearchOpen(true)
+            return
+        }
+
+        if (isFocused) {
+            setIsSearchOpen(true)
+            return
+        }
+        setIsSearchOpen(false)
+    }, [isFocused, isHovering, searchInputElement, setIsSearchOpen])
 
     // select search input field by ctrl+k;
     useEffect(() => {
@@ -143,13 +190,11 @@ function SearchBox() {
             if (event.ctrlKey && event.key == 'k') {
                 event.preventDefault()
                 if (document.activeElement == searchInputElement) {
-                    mainElement?.classList.remove('inactive') //TODO; handle this inside an useEffect() in mainElement;
                     previousElement?.focus()
                     searchInputElement.blur()
                     return
                 }
 
-                mainElement?.classList.add('inactive')
                 previousElement = document.activeElement as HTMLElement | null
                 searchInputElement.focus()
             }
@@ -159,7 +204,7 @@ function SearchBox() {
         return (() => {
             bodyElement.removeEventListener('keydown', handleKeyInputs)
         })
-    }, [mainElement?.classList, searchInputElement])
+    }, [searchInputElement, setIsSearchOpen])
 
     // search after query is updated, i.e. onChange();
     useEffect(() => {
@@ -171,43 +216,53 @@ function SearchBox() {
 
         if (searchQuery == lastSearchQuery) return
         setLastSearchQuery(searchQuery)
-        if (isDebugEnabled) console.log(`SearchBox: Search for ${searchQuery}`)
+        if (isDebugEnabled) console.log(`Search: Search for ${searchQuery}`)
 
         index.search(searchQuery).then((response) => {
             let dataArray: SearchData = {}
             response.hits.forEach((hit: any, index) => {
                 //
                 // example of the structure:
-                //   hit: {
-                //   "text": "sidebar animation",
-                //   "type": "listItem",
-                //   "type_ranking": 2,
-                //   "url": "https://andreneumann1990.github.io/reactjs/example_3/home",
-                //   "url_relative": "/home",
-                //   "objectID": "reactjs/example_3/data/7",
+                //   hit: { 
+                //   "text": "Text:",
+                //   "type": "label",
+                //   "type_ranking": 1,
+                //   "url": "https://andreneumann1990.github.io/reactjs/example_3/form_examples",
+                //   "url_relative": "/form_examples",
+                //   "objectID": "reactjs/example_3/data/60",
                 //   "_highlightResult": {
                 //     "text": {
-                //       "value": "<em>sidebar</em> <em>animation</em>",
+                //       "value": "<em>Text</em>:",
                 //       "matchLevel": "full",
                 //       "fullyHighlighted": true,
                 //       "matchedWords": [
-                //         "sidebar",
-                //         "animation"
+                //         "test" 
                 //       ]
                 //     }
                 //   }
                 //
+                // note that matchedWords can be different from what needs to be highlighted;
+                //
+
+                // TODO
+                // console.log(JSON.stringify(hit, null, 2))
 
                 const innerHTML = hit._highlightResult.text.value
                 const innerText = hit.text
-                const matchedWordArray = hit._highlightResult.text.matchedWords
+
+                let matchedWordArray: string[] = []
+                innerHTML.split('<em>').forEach((str: string) => {
+                    if (str == '') return
+                    matchedWordArray.push(str.split('</em>')[0])
+                })
 
                 let searchParams = new URLSearchParams()
                 searchParams.append('search', innerText)
-                searchParams.append('select', matchedWordArray)
-                const queryString = searchParams.toString()
+                searchParams.append('select', matchedWordArray.join(','))
 
+                const queryString = searchParams.toString()
                 dataArray[hit.url_relative] ??= []
+
                 dataArray[hit.url_relative].push({
                     href: `${hit.url_relative}?${queryString}`,
                     open: index == 0,
@@ -229,7 +284,10 @@ function SearchBox() {
     //
 
     return (
-        <form className="w-full relative grid grid-flow-col [grid-template-columns:var(--height-topnav)_auto] items-center" onSubmit={handleSearch}>
+        <form
+            className="w-full relative grid grid-flow-col [grid-template-columns:var(--height-topnav)_auto] items-center"
+            onSubmit={handleSearch}
+        >
             <button type="submit"><i className="p-1 icon-medium material-icons">search</i></button>
             <div className="relative pr-1">
                 {/* search input; */}
@@ -238,7 +296,9 @@ function SearchBox() {
                     placeholder="Search here..."
                     value={searchQuery}
                     ref={initializeSearchInputReference}
+                    onBlurCapture={handleBlur}
                     onChange={updateInputField}
+                    onFocusCapture={handleFocus}
                     onKeyDown={handleKeyDown}
                 />
 
@@ -248,6 +308,8 @@ function SearchBox() {
                     // className="absolute w-full mt-1 bg-secondary shadow-lg shadow-neutral-950 text-center peer-focus:block hover:block"
                     className="absolute w-full mt-1 bg-secondary shadow-lg shadow-neutral-950 text-center hidden peer-focus:block hover:block"
                     ref={initializeSearchResultsReference}
+                    onMouseEnter={handleMouseEnter}
+                    onMouseLeave={handleMouseLeave}
                 >
                     <span>navigation</span>
                     <i className="material-icons">arrow_downward</i>

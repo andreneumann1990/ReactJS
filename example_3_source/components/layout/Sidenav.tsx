@@ -11,6 +11,8 @@ import { triggerFlashEffect } from '../../constants/event_constants'
 export default Sidenav
 export { useSidenavStore }
 
+//TODO; check tab indexes;
+
 //
 //
 //
@@ -146,10 +148,12 @@ function Sidenav() {
     // effects
     //
 
-    // update state
+    // update state;
     useEffect(() => {
+        //TODO; check tab index handling;
         if (sidenavElement == null) return
         if (mainElement == null) return
+        if (isDebugEnabled) console.log('Sidenav: Update state.')
 
         const disableTabIndex = () => {
             if (sidenavElement == null) return

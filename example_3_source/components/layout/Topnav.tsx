@@ -3,7 +3,7 @@ import { useSidenavStore } from './Sidenav'
 import Link from 'next/link'
 import { create } from 'zustand'
 import { useMainStore } from './Main'
-import SearchBox, { useSearchStore } from '../atoms/SearchBox'
+import SearchBox, { useSearchStore } from '../atoms/Search'
 import { isDebugEnabled } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
 
