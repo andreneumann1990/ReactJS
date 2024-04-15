@@ -1,4 +1,20 @@
-function HomeComponent() {
+'use client'
+
+import { useNavigateAndHighlightElement } from '../../hooks/navigation'
+
+export default Page
+
+//
+//
+//
+
+function Page() {
+    useNavigateAndHighlightElement('Home')
+
+    //
+    //
+    //
+
     return (<>
         <h1 className="my-3 text-3xl font-bold">ReactJS Example 3</h1>
 
@@ -10,7 +26,7 @@ function HomeComponent() {
         </ul>
 
         <h2 className="my-2 text-2xl font-bold">Changelog / Features:</h2>
-        <details className="group border rounded-md ml-1 mb-2 open:bg-blend-darken">
+        <details className="group border rounded-md ml-1 mb-2">
             <summary className="group-open:border-b p-2">Example 1</summary>
             <ul className="*:my-2 pl-10">
                 <li>clicking highlights links</li>
@@ -26,7 +42,7 @@ function HomeComponent() {
                 <li>deployed on github.io</li>
             </ul>
         </details>
-        <details className="group border rounded-md ml-1 mb-2 open:bg-blend-darken">
+        <details className="group border rounded-md ml-1 mb-2">
             <summary className="group-open:border-b p-2">Example 2</summary>
             <ul className="*:my-2 pl-10">
                 <li>switched to nextjs; no server-side-rendering (SSR); needs to be static at this point; no back-end yet;</li>
@@ -39,6 +55,7 @@ function HomeComponent() {
         </details>
         <ul className="*:my-2 pl-5">
             <li>first back-end steps;</li>
+            <li>added <strong>Algolia</strong> search; TODO: fine tuning;</li>
         </ul>
 
         <h2 className="my-2 text-2xl font-bold">TODO:</h2>
@@ -51,5 +68,3 @@ function HomeComponent() {
         </ul>
     </>)
 }
-
-export default HomeComponent

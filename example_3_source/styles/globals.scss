@@ -19,8 +19,18 @@
         //TODO export there;
         transition: all 0.3s ease-out;
     }
+}
 
-    .scrollbar-gutter-stable-both {
+@layer utilities {
+    .text-color-passive {
+        opacity: 0.5;
+    }
+
+    .scrollbar-stable {
+        scrollbar-gutter: stable;
+    }
+
+    .scrollbar-stable-both {
         scrollbar-gutter: stable both-edges;
     }
 }
@@ -44,35 +54,19 @@
 //
 
 :root {
-    --color-dark-1: hsl(220, 15%, 16%);
-    --color-light-1: hsl(220, 30%, 30%);
+    --color-background: hsl(220, 15%, 16%);
+    --color-primary: hsl(220, 30%, 30%);
+    --color-primary-active: hsl(220, 30%, 50%);
+    --color-secondary: hsl(220, 20%, 20%);
+    --color-secondary-active: hsl(220, 20%, 40%);
+    --color-text: hsl(0, 0%, 100%);
+    --color-text-passive: hsl(0, 0%, 70%);
+    // hsla(0, 0%, 0%, 0.2);
+
     --height-topnav: 40px;
+    --width-scrollbar: 17px;
 }
 
-$color-active: #04AA6D;
-
-// $color-background-1: #23272f;
-// $color-background-2: #04aa6d63;
-
-$color-hover-dark: hsla(0, 0%, 0%, 0.2);
-$color-hover-light: hsla(0, 0%, 100%, 0.2);
-$color-same: hsla(0, 0%, 0%, 0);
-
-$color-separator: #343A45;
-
-$color-text-1: hsl(0, 0%, 100%);
-$color-text-active: hsl(0, 0%, 100%);
-$color-text-inactive: hsl(0, 0%, 70%);
-// $color-text-1: hsl(220, 20%, 97%);
-$color-text-2: #109FAB;
-
-// color scheme?
-$color-dark-2: hsl(186, 89%, 21%); //TODO
-// $color-light-1: hsl(220, 30%, 30%);
-$color-light-2: hsl(99, 23%, 39%); //TODO
-$color-light-3: hsl(51, 94%, 27%); //TODO
-
-$width-scrollbar: 17px;
 // $height-topnav: 40px;
 
 //
@@ -95,72 +89,9 @@ $width-scrollbar: 17px;
 // based on class;
 //
 
-.flex {
-    display: flex;
-}
-
-.flex-column {
-    // sets flow-direction as well;
-    flex-flow: column;
-
-    > .flex {
-        margin: 3px;
-    }
-}
-
-.flex-row {
-    flex-flow: row;
-
-    > .flex {
-        margin: 3px;
-    }
-}
-
-.fg-space-between {
-    // for grids this applies when rows or columns are not filling the whole container;
-    align-content: space-between;
-    justify-content: space-between;
-}
-
-.fg-space-evenly {
-    align-content: space-evenly;
-    justify-content: space-evenly;
-}
-
-.fg-space-center {
-    align-content: center;
-    justify-content: center;
-}
-
-// for flex containers and grids;
-.fg-items-center {
-    align-items: center;
-
-    // ignored in flex container;
-    justify-items: center;
-}
-
-.fg-items-center-main {
-    align-items: center;
-}
-
-.flex-main-stretch {
-    align-items: stretch;
-}
-
-.flex-self-center {
-    display: flex;
-    justify-content: center;
-    width: 100%;
-}
-
-.grid-dropdown {
-    grid-template-columns: auto 40px;
-}
-
 .mobile-dropdown-content {
-    background-color: var(--color-dark-1);
-    color: $color-text-active;
+    background-color: var(--color-background);
+    color: --color-text;
     display: block;
 
     // TODO
@@ -174,28 +105,24 @@ $width-scrollbar: 17px;
     // transition
 
     &.active {
-        background-color: var(--color-light-1);
+        background-color: var(--color-dark-highlight);
         // height: fit-content;
         // transition: all 0.3s ease-out;
     }
 
     &:not(.active) a {
-        color: $color-text-inactive;
+        color: --color-text-passive;
     }
-}
-
-.mobile-dropdown-content a {
-    padding-left: 30px;
 }
 
 .mobile-dropdown-menu {
     &.active {
-        background-color: var(--color-light-1);
-        color: $color-text-active
+        background-color: var(--color-dark-highlight);
+        color: --color-text;
     }
 
     &:not(.active) a {
-        color: $color-text-inactive
+        color: --color-text-passive
     }
 }
 
@@ -205,35 +132,6 @@ $width-scrollbar: 17px;
 
     // padding-left: 20px;
     padding: 15px 20px 15px 20px;
-}
-
-// I don't like how big this class is; TODO;
-.mobile-sidebar {
-    position: fixed;
-    // box-sizing: content-box; //TODO
-
-    // fill out the whole left side;
-    height: calc(100vh - var(--height-topnav));
-    // height: 100%;
-
-    background-color: var(--color-dark-1);
-    box-shadow: 0px 10px 10px 0px $color-hover-dark;
-    line-height: 2.5em;
-
-    overflow-x: hidden;
-    overflow-y: auto;
-    // scrollbar-color: hsl(0, 0%, 50%) transparent;
-    scrollbar-gutter: stable;
-
-    // question: is it preferable to use 70% and making sure that body / html are 100vw?
-    // there was one case where 100vw lead to scrolling in x; the scrollbar in y direction
-    // added more width or something; hm...; TODO;
-    // probably the other way around; body / html to 100% such that they can adept when 
-    // a scroll bar appears; still in that case 100vw > 100% and lead to overflow in
-    // x; not sure;
-    width: min(500px, 70vw);
-    left: max(-500px, -70vw);
-    z-index: 100;
 }
 
 .mobile-sidebar > a {
@@ -264,11 +162,11 @@ $width-scrollbar: 17px;
 }
 
 .width-full-both-edges {
-    width: calc(100% + 2 * $width-scrollbar);
+    width: calc(100% + 2 * var(--width-scrollbar));
 }
 
 .width-full-edge {
-    width: calc(100% + 1 * $width-scrollbar);
+    width: calc(100% + 1 * var(--width-scrollbar));
 }
 
 //
@@ -284,9 +182,9 @@ a {
     // margin: 2px;
     // box-sizing: border-box;
     // background-color: hsla(0, 0%, 0%, 0.2);
-    color: $color-text-active;
-    // color: $color-text-inactive;
-    // color: $color-text-1;
+    color: --color-text;
+    // color: --color-text-passive;
+    // color: --color-text;
     display: block;
     text-decoration: none;
 
@@ -296,12 +194,12 @@ a {
     }
 
     // &:visited, &:hover {
-    //     color: $color-text-1;
+    //     color: --color-text;
     // }
 }
 
 a.inactive {
-    color: $color-text-inactive;
+    color: --color-text-passive;
 }
 
 body {
@@ -313,8 +211,8 @@ body {
     // otherwise;
     width: 100%;
 
-    background-color: var(--color-dark-1);
-    color: $color-text-1;
+    background-color: var(--color-background);
+    color: --color-text;
 
     // font-size: 1em;
     // 100% because of problems with internet explorer?;
@@ -350,8 +248,9 @@ html {
 
 // TODO; use tailwind;
 main.inactive {
-    background-color: $color-hover-dark;
-    color: $color-text-inactive;
+    // background-color: $color-hover-dark;
+    opacity: 0.2;
+    // color: --color-text-passive;
     overflow-y: hidden;
     user-select: none;
     touch-action: none;

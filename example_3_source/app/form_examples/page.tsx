@@ -6,8 +6,11 @@ import * as Yup from 'yup'
 import { InputCountry1, InputCountry2 } from '../../components/input/Country'
 import Link from 'next/link'
 import { Button } from '@mui/material'
+import { useNavigateAndHighlightElement } from '../../hooks/navigation'
 
 function Page() {
+    useNavigateAndHighlightElement('FormExamples')
+
     //
     // functions
     //
@@ -117,7 +120,7 @@ function Page() {
                     <label>
                         Button:
                         <br />
-                        <input type="button" name="button" value="use cases? use normal button instead?" className="bg-[--color-light-1] border m-1 px-2 py-1 rounded-md" onClick={handleClick} />
+                        <input type="button" name="button" value="use cases? use normal button instead?" className="bg-primary border m-1 px-2 py-1 rounded-md" onClick={handleClick} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
@@ -219,7 +222,7 @@ function Page() {
                     <label>
                         Reset:
                         <br />
-                        <input type="reset" name="reset" value="use cases? use normal button instead?" className="bg-[--color-light-1] border m-1 px-2 py-1 rounded-md" onClick={resetForm} />
+                        <input type="reset" name="reset" value="use cases? use normal button instead?" className="bg-primary border m-1 px-2 py-1 rounded-md" onClick={resetForm} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
@@ -237,7 +240,7 @@ function Page() {
                             <span className="ml-4 px-2 py-1 text-red-500">The form contains invalid fields.</span>
                         }
                         <br />
-                        <input type="submit" name="submit" value="use cases? use normal button instead?" className="bg-[--color-light-1] border m-1 px-2 py-1 rounded-md" onClick={handleClick} />
+                        <input type="submit" name="submit" value="use cases? use normal button instead?" className="bg-primary border m-1 px-2 py-1 rounded-md" onClick={handleClick} />
                     </label>
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">

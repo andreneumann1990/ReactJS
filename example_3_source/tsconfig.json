@@ -3,14 +3,14 @@
         "lib": [
             "dom",
             "dom.iterable",
-            "esnext"
+            "ESNext"
         ],
         "allowJs": true,
         "skipLibCheck": true,
         "strict": true,
         "noEmit": true,
         "esModuleInterop": true,
-        "module": "esnext",
+        "module": "ESNext",
         "moduleResolution": "bundler",
         "resolveJsonModule": true,
         "isolatedModules": true,
@@ -28,16 +28,15 @@
         }
     },
     "include": [
-        "next-env.d.ts",
+        // "next-env.d.ts",
         "**/*.ts",
         "**/*.tsx",
-        ".next/types/**/*.ts",
-        "dist/types/**/*.ts",
-        "exported/types/**/*.ts",
-        "../page2.tsx",
-        "../example_3/types/**/*.ts"
+        ".next/types/**/*.ts"
+        // "dist/types/**/*.ts",
+        // "exported/types/**/*.ts",
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "createIndex.*"
     ]
 }

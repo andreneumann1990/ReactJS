@@ -1,6 +1,6 @@
 {
     "name": "example_3_source",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "private": true,
     "homepage": "https://andreneumann1990.github.io/reactjs/example_3",
     "scripts": {
@@ -15,6 +15,7 @@
         "@emotion/styled": "^11.11.5",
         "@mui/material": "^5.15.15",
         "@use-gesture/react": "^10.3.1",
+        "dompurify": "^3.1.0",
         "formik": "^2.4.5",
         "next": "^14.1.4",
         "next-sitemap": "^4.2.3",
@@ -22,6 +23,7 @@
         "react": "^18",
         "react-dom": "^18",
         "react-instantsearch": "^7.7.1",
+        "react-instantsearch-core": "^7.7.1",
         "react-router-dom": "^6.22.3",
         "sass": "^1.72.0",
         "timers-promises": "^1.0.1",
@@ -31,6 +33,7 @@
     },
     "devDependencies": {
         "@babel/core": "^7.24.3",
+        "@types/dompurify": "^3.0.5",
         "@types/node": "^20",
         "@types/react": "^18",
         "@types/react-dom": "^18",
@@ -89,7 +92,7 @@
             "prefer-const": "off",
             "prefer-rest-params": "error",
             "prefer-spread": "error",
-            "prefer-template": "error",
+            "prefer-template": "off",
             "arrow-spacing": "error",
             "generator-star-spacing": "error",
             "no-duplicate-imports": "error",

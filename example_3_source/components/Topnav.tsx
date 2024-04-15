@@ -1,11 +1,12 @@
 import { KeyboardEvent, useCallback, useEffect } from 'react'
-import { isDebugEnabled, triggerFlashEffect } from './Layout'
 import { useSidenavStore } from './Sidenav'
 import Link from 'next/link'
 import { create } from 'zustand'
 import { useMainStore } from './Main'
-import InstantSearch from './InstantSearchPlaceholder'
-import SearchBox, { useSearchStore } from './SearchBoxPlaceholder'
+import InstantSearch from './algolia/InstantSearchPlaceholder'
+import SearchBox, { useSearchStore } from './algolia/SearchBoxPlaceholder'
+import { isDebugEnabled } from '../constants/general'
+import { triggerFlashEffect } from '../constants/events'
 
 export default Topnav
 export { useTopnavStore }
@@ -168,10 +169,6 @@ function Topnav() {
         }
     }, [focusNextElement, focusPreviousElement, isSidenavOpen, mainElement, menuButtonElement, searchInputElement, sidenavElement, toggleSidenav])
 
-    function handleSearch(query: string): void {
-        if (isDebugEnabled) console.log(`Topnav: search query ${query}`)
-    }
-
     //
     // effects
     //
@@ -199,7 +196,7 @@ function Topnav() {
     //
 
     return (<>
-        <nav ref={initializeTopnavReference} className="bg-[var(--color-dark-1)] h-[var(--height-topnav)] shadow-md">
+        <nav ref={initializeTopnavReference} className="bg-background h-[--height-topnav] shadow-md">
             <div className="grid grid-flow-col [grid-template-columns:20%_60%_20%] justify-items-center justify-between" onKeyUp={handleKeyInputs}>
                 <div className="grid grid-flow-col justify-self-start">
                     <button className="h-[--height-topnav]" ref={initializeMenuButtonReference} onPointerUp={toggleSidenav} tabIndex={2}>
@@ -211,8 +208,9 @@ function Topnav() {
                     </Link>
                 </div>
 
+                {/* <Search></Search> */}
                 <InstantSearch>
-                    <SearchBox onSearch={handleSearch} />
+                    <SearchBox />
                 </InstantSearch>
             </div>
         </nav>

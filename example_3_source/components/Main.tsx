@@ -1,8 +1,8 @@
 import { useSidenavStore } from './Sidenav'
 import React from 'react'
 import { useDrag } from '@use-gesture/react'
-import { isDebugEnabled } from './Layout'
 import { create } from 'zustand'
+import { isDebugEnabled } from '../constants/general'
 
 export default Main
 export { useMainStore }
@@ -89,7 +89,7 @@ function Main({ children }: React.PropsWithChildren) {
 
     //TODO: export main component;
     return (<>
-        <main ref={initializeMainReference} className="flex flex-col justify-between h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-gutter-stable-both transition-colors ease-out duration-300" {...onDrag()} tabIndex={1}>
+        <main ref={initializeMainReference} className="flex flex-col justify-between h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-colors ease-out duration-300" {...onDrag()} tabIndex={1}>
             <div>{children}</div>
             <div>
                 <footer className="border grid content-center h-32 overflow-hidden">

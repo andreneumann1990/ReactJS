@@ -3,42 +3,11 @@
 import Topnav from './Topnav'
 import Sidenav from './Sidenav'
 import React, { useEffect, useState } from 'react'
-import tinycolor from 'tinycolor2'
 import Main from './Main'
+import { isDebugEnabled } from '../constants/general'
+import { triggerFlashEffect } from '../constants/events'
 
 export default Layout
-export { isDebugEnabled }
-export { triggerFlashEffect }
-export { backEndHRef }
-
-//
-//
-//
-
-const isProduction = process.env.NODE_ENV === 'production'
-const backEndHRef = isProduction ? 'https://example-3-b52da596edfb.herokuapp.com' : 'http://localhost:8080'
-
-interface eventData {
-    target: EventTarget | null
-}
-
-const isDebugEnabled = true
-const triggerFlashEffect = function (event: eventData) {
-    const element = event.target as HTMLElement | null
-    if (element == null) return
-
-    const getAnchorContainer = function (target: HTMLElement): HTMLAnchorElement | null {
-        if (target instanceof HTMLAnchorElement) return target
-        if (target.parentElement == null) return null
-        return getAnchorContainer(target.parentElement)
-    }
-
-    const anchorElement = getAnchorContainer(element)
-    if (anchorElement == null) return
-    const backgroundColorString = anchorElement.style.backgroundColor
-    const backgroundColor = tinycolor(anchorElement.style.backgroundColor)
-    anchorElement.animate({ backgroundColor: [backgroundColorString, backgroundColor.brighten(50).toString(), backgroundColorString] }, 300)
-}
 
 //
 // main

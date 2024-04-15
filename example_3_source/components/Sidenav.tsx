@@ -1,11 +1,12 @@
 import { KeyboardEvent, useEffect } from 'react'
 import Dropdown from './Dropdown'
-import { isDebugEnabled, triggerFlashEffect } from './Layout'
 import { create } from 'zustand'
 import Link from 'next/link'
 import { useTopnavStore } from './Topnav'
 import { useMainStore } from './Main'
 import { useClick } from './CustomGestures'
+import { isDebugEnabled } from '../constants/general'
+import { triggerFlashEffect } from '../constants/events'
 
 export default Sidenav
 export { useSidenavStore }
@@ -209,7 +210,7 @@ function Sidenav() {
             if (menuButtonElement == null) return
             if (menuButtonElement.contains(event.target as Node)) return
 
-            if (isDebugEnabled) console.log('Sidenav: Clicked outside. Close sidebar.')
+            if (isDebugEnabled) console.log('Sidenav: Clicked outside. Close sidenav.')
             setIsSidenavOpen(false)
         }
 
@@ -232,22 +233,22 @@ function Sidenav() {
     // if (isLoading) return <></>
 
     return (<>
-        <nav ref={initializeSidenavReference} className="mobile-sidebar" tabIndex={-1} onKeyUp={handleKeyInput}>
+        <nav ref={initializeSidenavReference} className="fixed w-[min(500px,70vw)] h-[calc(100vh-var(--height-topnav))] left-[max(-500px,-70vw)] bg-background shadow-lg shadow-neutral-950 leading-10 overflow-y-auto overflow-x-hidden scrollbar-stable z-[100]" tabIndex={-1} onKeyUp={handleKeyInput}>
             <hr />
-            <Link href="/image_examples" {...useClick(closeSidenav)}>Image Examples</Link><hr />
-            <Link href="/form_examples" {...useClick(closeSidenav)}>Form Examples</Link><hr />
-            <Link href="/back_end_examples" {...useClick(closeSidenav)}>Back-End Examples</Link><hr />
+            <Link href="/image_examples" className="pl-4 py-[2px]" {...useClick(closeSidenav)}>Image Examples</Link><hr />
+            <Link href="/form_examples" className="pl-4 py-[2px]" {...useClick(closeSidenav)}>Form Examples</Link><hr />
+            <Link href="/back_end_examples" className="pl-4 py-[2px]" {...useClick(closeSidenav)}>Back-End Examples</Link><hr />
             <Dropdown text="Dropdown 1">
-                <Link href="#">Link 3</Link>
-                <Link href="#">Link 4</Link>
-                <Link href="#">Link 5</Link>
-                <Link href="#">Link 6</Link>
-                <Link href="#">Link 7</Link>
-                <Link href="#">Link 8</Link>
+                <Link href="#" className="pl-8 py-[2px]">Link 3</Link>
+                <Link href="#" className="pl-8 py-[2px]">Link 4</Link>
+                <Link href="#" className="pl-8 py-[2px]">Link 5</Link>
+                <Link href="#" className="pl-8 py-[2px]">Link 6</Link>
+                <Link href="#" className="pl-8 py-[2px]">Link 7</Link>
+                <Link href="#" className="pl-8 py-[2px]">Link 8</Link>
             </Dropdown><hr />
             <Dropdown text="Dropdown 2">
-                <Link href="#">Link 9</Link>
-                <Link href="#">Link 10</Link>
+                <Link href="#" className="pl-8 py-[2px]">Link 9</Link>
+                <Link href="#" className="pl-8 py-[2px]">Link 10</Link>
             </Dropdown><hr />
         </nav>
     </>)

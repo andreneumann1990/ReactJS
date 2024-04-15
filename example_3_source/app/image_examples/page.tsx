@@ -6,8 +6,11 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useSidenavStore } from '../../components/Sidenav'
 import { useClick } from '../../components/CustomGestures'
+import { useNavigateAndHighlightElement } from '../../hooks/navigation'
 
 function Page() {
+    useNavigateAndHighlightElement('ImageExamples')
+
     //
     // parameters and variables
     //
@@ -58,8 +61,8 @@ function Page() {
 
     return (<>
         {/* overlay; fullscreen picture view; */}
-        <div className="fixed hidden open:block h-[calc(100vh-var(--height-topnav))] w-full p-10 top-[--height-topnav] left-0 overflow-y-auto z-10 bg-[--color-light-1] motion-safe:animate-fade-in" ref={setOverlayElement}>
-            <button className="absolute right-12 top-12 bg-[--color-dark-1]" onClick={closeOverlay}>
+        <div className="fixed hidden open:block h-[calc(100vh-var(--height-topnav))] w-full p-10 top-[--height-topnav] left-0 overflow-y-auto z-10 bg-secondary motion-safe:animate-fade-in" ref={setOverlayElement}>
+            <button className="absolute right-12 top-12 bg-primary" onClick={closeOverlay}>
                 <i className="p-1 icon-medium material-icons">close</i>
             </button>
             <Image className="p-1 mx-auto" src="/icons/logo192.png" alt="" width={0} height={0}></Image>
