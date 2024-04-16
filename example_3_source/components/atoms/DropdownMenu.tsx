@@ -154,7 +154,8 @@ function DropdownMenu({ children, className, text }: {
     return (<>
         {/* the div block is for changing the background color; the anchor changed its bg-color based on hover; */}
         <div ref={menuReference} className={className == null ? 'mobile-dropdown-menu' : 'mobile-dropdown-menu ' + className}>
-            <Link href="#" onPointerUp={toggleContent} onKeyUp={toggleContentKeyInput}>
+            {/* TODO; change to buttons for semantics; */}
+            <Link href="#" className="block" onPointerUp={toggleContent} onKeyUp={toggleContentKeyInput}>
                 <div className="grid grid-cols-2 items-center">
                     {text}
                     <i ref={iconReference} className="icon-medium material-icons justify-self-end">computer</i>

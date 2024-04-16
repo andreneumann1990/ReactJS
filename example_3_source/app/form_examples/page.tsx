@@ -302,7 +302,7 @@ function Page() {
                 </div>
                 <div className="grid px-5 items-center">
                     <div>
-                        Copied from: <Link className="inline-block text-blue-300" href={'https://mui.com/material-ui/react-autocomplete/'}>https://mui.com/material-ui/react-autocomplete/</Link>
+                        Copied from: <Link className="text-blue-300" href={'https://mui.com/material-ui/react-autocomplete/'}>https://mui.com/material-ui/react-autocomplete/</Link>
                         <InputCountry2 className="m-1 px-2 py-1 rounded-md" onChange={(_: SyntheticEvent, { label }: { label: string }) => handleChangeForCountry2(label)} />
                     </div>
                 </div>

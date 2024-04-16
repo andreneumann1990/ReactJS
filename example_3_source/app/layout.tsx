@@ -38,7 +38,16 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
                 <link rel="manifest" href="./manifest.json" />
             </head>
 
-            <body>
+            {/* 
+                `width: 100vw` is problematic; it seems that the scroll bar can add to the total 
+                width otherwise;
+                I read somewhere that `font-size: 100%` helps with some internet explorer problem;
+                I forgot where;
+                originally I copied `-webkit-font-smoothing: antialiased` from the pre-generated
+                index.css file; but this is a non-standard property and it is recommended not to
+                use it; see `https://developer.mozilla.org/en-US/docs/Web/CSS/font-smooth`;
+            */}
+            <body className="w-full bg-background [color:--color-text] [font-size:100%] [font-family:Helvetica,Arial,sans-serif]">
                 <noscript>You need to enable JavaScript to run this app.</noscript>
                 <React.StrictMode>
                     <ThemeProvider theme={darkTheme}>

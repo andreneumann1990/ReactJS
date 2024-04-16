@@ -342,7 +342,7 @@ function Search() {
                             <header>{url_relative}</header>
                             {entryArray.map((entry, entryIndex) => {
                                 return (<Link key={`l-${entryIndex}`}
-                                    className={'my-3 text-left grid items-center min-h-10 p-2 px-4 mt-2 border rounded-2xl' + (keyIndex == searchResultSelectedIndex[0] && entryIndex == searchResultSelectedIndex[1] ? ' bg-primary-active' : ' bg-primary')}
+                                    className={'grid items-center my-3 text-left min-h-10 p-2 px-4 mt-2 border rounded-2xl' + (keyIndex == searchResultSelectedIndex[0] && entryIndex == searchResultSelectedIndex[1] ? ' bg-primary-active' : ' bg-primary')}
                                     href={entry.href}
                                 >
                                     <div
@@ -354,14 +354,18 @@ function Search() {
                         </div>)
                     })}
                     <div className="text-right flex justify-between items-center my-2 mx-5">
-                        <div className="text-center">
-                            enter to select
-                        </div>
-                        <div>escape to close</div>
                         <div className="grid grid-flow-col justify-center">
-                            <i className="material-icons text-base">arrow_upward</i>
-                            <i className="material-icons text-base">arrow_downward</i>
-                            <span className="pl-1">to navigate</span>
+                            <i className="material-icons">arrow_upward</i>
+                            <i className="material-icons">arrow_downward</i>
+                            <span className="inline-block p-1 text-xs">to navigate</span>
+                        </div>
+                        <div className="text-center">
+                            <img className="inline bg-white rounded-md p-1" src="./icons/enter-arrow-svgrepo-com.svg" alt="enter" height="24px" width="24px"></img>
+                            <span className="inline-block p-1 text-xs">to select</span>
+                        </div>
+                        <div>
+                            <img className="inline bg-white rounded-md p-1" src="./icons/esc-a-svgrepo-com.svg" alt="escape" height="24px" width="24px"></img>
+                            <span className="inline-block p-1 text-xs">to close</span>
                         </div>
                         <div>
                             <p className="inline-block p-1 text-xs">

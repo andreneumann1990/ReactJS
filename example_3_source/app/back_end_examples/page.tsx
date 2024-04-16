@@ -75,7 +75,7 @@ function Page() {
         <ul className="*:my-2 pl-10">
             <li>
                 Link:&nbsp;
-                <Link className="inline-block text-blue-300" href={backEndHRef}>{backEndHRef}</Link>
+                <Link className="text-blue-300" href={backEndHRef}>{backEndHRef}</Link>
             </li>
         </ul>
 

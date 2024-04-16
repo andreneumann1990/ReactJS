@@ -239,20 +239,20 @@ function Sidenav() {
     return (<>
         <nav ref={initializeSidenavReference} className="fixed w-[min(500px,70vw)] h-[calc(100vh-var(--height-topnav))] left-[max(-500px,-70vw)] bg-background shadow-lg shadow-neutral-950 leading-10 overflow-y-auto overflow-x-hidden scrollbar-stable z-[100]" tabIndex={-1} onKeyUp={handleKeyInput}>
             <hr />
-            <Link href="/image_examples" className="pl-4 py-[2px]" {...useClick(closeSidenav)}>Image Examples</Link><hr />
-            <Link href="/form_examples" className="pl-4 py-[2px]" {...useClick(closeSidenav)}>Form Examples</Link><hr />
-            <Link href="/back_end_examples" className="pl-4 py-[2px]" {...useClick(closeSidenav)}>Back-End Examples</Link><hr />
+            <Link href="/image_examples" className="block pl-4 py-[2px]" {...useClick(closeSidenav)}>Image Examples</Link><hr />
+            <Link href="/form_examples" className="block pl-4 py-[2px]" {...useClick(closeSidenav)}>Form Examples</Link><hr />
+            <Link href="/back_end_examples" className="block pl-4 py-[2px]" {...useClick(closeSidenav)}>Back-End Examples</Link><hr />
             <DropdownMenu text="Dropdown 1">
-                <Link href="#" className="pl-8 py-[2px]">Link 3</Link>
-                <Link href="#" className="pl-8 py-[2px]">Link 4</Link>
-                <Link href="#" className="pl-8 py-[2px]">Link 5</Link>
-                <Link href="#" className="pl-8 py-[2px]">Link 6</Link>
-                <Link href="#" className="pl-8 py-[2px]">Link 7</Link>
-                <Link href="#" className="pl-8 py-[2px]">Link 8</Link>
+                <Link href="#" className="block pl-8 py-[2px]">Link 3</Link>
+                <Link href="#" className="block pl-8 py-[2px]">Link 4</Link>
+                <Link href="#" className="block pl-8 py-[2px]">Link 5</Link>
+                <Link href="#" className="block pl-8 py-[2px]">Link 6</Link>
+                <Link href="#" className="block pl-8 py-[2px]">Link 7</Link>
+                <Link href="#" className="block pl-8 py-[2px]">Link 8</Link>
             </DropdownMenu><hr />
             <DropdownMenu text="Dropdown 2">
-                <Link href="#" className="pl-8 py-[2px]">Link 9</Link>
-                <Link href="#" className="pl-8 py-[2px]">Link 10</Link>
+                <Link href="#" className="block pl-8 py-[2px]">Link 9</Link>
+                <Link href="#" className="block pl-8 py-[2px]">Link 10</Link>
             </DropdownMenu><hr />
         </nav>
     </>)

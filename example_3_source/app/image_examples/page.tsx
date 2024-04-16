@@ -72,7 +72,7 @@ function Page() {
         <h1 className="my-3 text-3xl font-bold">Image Examples</h1>
         <ul className="pl-5">
             <li>images are taken from
-                <Link className="inline text-blue-300" href="https://pixabay.com/collections/example_2-21740818/"> https://pixabay.com/collections/example_2-21740818/</Link>
+                <Link className="text-blue-300" href="https://pixabay.com/collections/example_2-21740818/"> https://pixabay.com/collections/example_2-21740818/</Link>
             </li>
         </ul>
 

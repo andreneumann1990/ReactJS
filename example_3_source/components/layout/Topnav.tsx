@@ -202,7 +202,7 @@ function Topnav() {
                         <i className="p-1 icon-medium material-icons">menu</i>
                         <i className="p-1 icon-medium material-icons hidden">close</i>
                     </button>
-                    <Link className="h-[--height-topnav]" href="/home" tabIndex={1000}>
+                    <Link className="block h-[--height-topnav]" href="/home" tabIndex={1000}>
                         <i className="p-1 icon-medium material-icons">home</i>
                     </Link>
                 </div>

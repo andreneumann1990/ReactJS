@@ -6,6 +6,14 @@
 @import 'tailwindcss/utilities';
 
 @layer base {
+    a {
+        text-decoration: none;
+
+        &:hover, &:focus-visible {
+            background-color: hsla(0, 0%, 100%, 0.3)
+        }
+    }
+
     button {
         line-height: normal;
     }
@@ -20,21 +28,9 @@
         //TODO export there;
         transition: all 0.3s ease-out;
     }
-
-    // .shadow-md-center {
-    //     // --tw-shadow: 0 2px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    //     --tw-shadow: 4px 3px 6px -2px rgb(0 0 0 / 0.1), -4px 3px 6px -2px rgb(0 0 0 / 0.1);
-    //     --tw-shadow-colored: 4px 3px 6px -2px var(--tw-shadow-color), -4px 3px 6px -2px var(--tw-shadow-color);
-    //     // box-shadow: var(--tw-shadow);
-    //     box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), var(--tw-shadow);
-    // }
 }
 
 @layer utilities {
-    .text-color-passive {
-        opacity: 0.5;
-    }
-
     .scrollbar-stable {
         scrollbar-gutter: stable;
     }
@@ -47,6 +43,16 @@
 //
 //
 //
+
+@-webkit-keyframes fadeIn {
+    0% {
+        opacity: 0;
+    }
+
+    100% {
+        opacity: 100;
+    }
+}
 
 @keyframes fadeIn {
     0% {
@@ -76,15 +82,9 @@
     --width-scrollbar: 17px;
 }
 
-// $height-topnav: 40px;
-
 //
 // TODO
 //
-
-* {
-    box-sizing: border-box;
-}
 
 :focus-visible {
     outline-offset: -1px;
@@ -181,69 +181,6 @@
 //
 // based on type;
 //
-
-a {
-    // for navigating with keyboard; does not help;
-    // border: 2px solid transparent;
-    // background-color: $color-same;
-    // padding: 0;
-
-    // margin: 2px;
-    // box-sizing: border-box;
-    // background-color: hsla(0, 0%, 0%, 0.2);
-    color: --color-text;
-    // color: --color-text-passive;
-    // color: --color-text;
-    display: block;
-    text-decoration: none;
-
-    //TODO
-    &:hover, &:focus-visible {
-        background-color: hsla(0, 0%, 100%, 0.3)
-    }
-
-    // &:visited, &:hover {
-    //     color: --color-text;
-    // }
-}
-
-a.inactive {
-    color: --color-text-passive;
-}
-
-body {
-    // prevent unintended scrolling;
-    // height: 100vh;
-    // height: 100%;
-
-    // 100vw is problematic; it seems that the scroll bar can add to the total width
-    // otherwise;
-    width: 100%;
-
-    background-color: var(--color-background);
-    color: var(--color-text);
-
-    // font-size: 1em;
-    // 100% because of problems with internet explorer?;
-    font-size: 100%;
-    font-family: Helvetica, Arial, sans-serif;
-
-    // margin: 0;
-    // padding: 0;
-
-    // google fonts;
-    // font-family: "Sofia", sans-serif;
-
-    // copied from index.css;
-    // font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-
-    // bug?; otherwise, makes it still scroll a pixel or so; no it is because top 
-    // does not account for borders; it scrolls the border-width amount;
-    // border-top: 0px; 
-    // border-bottom: 0px;
-}
 
 code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
