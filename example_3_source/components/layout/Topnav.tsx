@@ -6,6 +6,7 @@ import SearchBox, { useSearchStore } from '../atoms/Search'
 import { isDebugEnabled, tabIndexGroupDefault, tabIndexGroupSidenav, tabIndexGroupTopnav } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
 import { useLayoutStore } from './Layout'
+import { useMainStore } from './Main'
 
 export default Topnav
 export { useTopnavStore }
@@ -40,6 +41,7 @@ function Topnav() {
     //
 
     const layoutStore = useLayoutStore()
+    const mainStore = useMainStore()
     const searchStore = useSearchStore()
     const sidenavStore = useSidenavStore()
     const topnavStore = useTopnavStore()
@@ -113,9 +115,16 @@ function Topnav() {
                 topnavStore.menuButtonElement?.focus()
                 return
             }
+
+            if (event.key == 'ArrowDown') {
+                event.preventDefault()
+                mainStore.element?.focus()
+                return
+            }
+            return
         }
 
-        if (event.key == 'Escape' && layoutStore.activeTabIndexGroup != 0) {
+        if (event.key == 'Escape') {
             event.preventDefault()
             layoutStore.resetActiveTabIndexGroup()
             topnavStore.element?.focus()

@@ -6,9 +6,13 @@ import { isDebugEnabled, tabIndexGroupMain } from '../../constants/general_const
 import { useSearchStore } from '../atoms/Search'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 import { useLayoutStore } from './Layout'
+import { useTopnavStore } from './Topnav'
 
 export default Main
 export { useMainStore }
+
+//TODO; focus child elements;
+//TODO; uparrow for focus topnav;
 
 //
 //
@@ -43,6 +47,9 @@ function Main({ children }: React.PropsWithChildren) {
     const mainStore = useMainStore()
     const sidenavStore = useSidenavStore()
     const searchStore = useSearchStore()
+    const topnavStore = useTopnavStore()
+
+    const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"]), input:not([tabindex="-1"]), summary:not([tabindex="-1"])'
 
     // close sidenav by swipe / panning gesture;
     const dragAttributes: ReactDOMAttributes = useDrag<PointerEvent>(({ movement: [dx, dy], last }) => {
@@ -88,21 +95,90 @@ function Main({ children }: React.PropsWithChildren) {
         mainStore.setElement(element)
     }
 
-    function handleKeyInputTabIndex(event: KeyboardEvent): void {
-        if (event.key == 'Enter' && layoutStore.activeTabIndexGroup != tabIndexGroupMain) {
-            event.preventDefault()
-            layoutStore.setActiveTabIndexGroup(tabIndexGroupMain)
-            focusAnchor.current?.focus()
+    function focusNextElement() {
+        const mainElement = mainStore.element
+        if (mainElement == null) return
+        const focusedElement = document.activeElement as HTMLAnchorElement | null
+        if (focusedElement == null) return
+
+        const focusableElements = Array.from(mainElement.querySelectorAll<HTMLAnchorElement>(queryString))
+        const nextIndex = Math.min(focusableElements.indexOf(focusedElement) + 1, focusableElements.length - 1)
+        focusableElements[nextIndex]?.focus()
+    }
+
+    function focusPreviousElement() {
+        const mainElement = mainStore.element
+        if (mainElement == null) return
+        let focusedElement = document.activeElement as HTMLElement | null
+        if (focusedElement == null) return
+
+        // previousIndex is -1 if the element is not found or null;
+        const focusableElements = Array.from(mainElement.querySelectorAll<HTMLElement>(queryString))
+        const previousIndex = Math.max(focusableElements.indexOf(focusedElement) - 1, 0)
+        focusableElements[previousIndex]?.focus()
+    }
+
+    //TODO
+    function handleKeyInput(event: KeyboardEvent): void {
+        //TODO check other places for consistency; maybe one handleKeyInput() function per component;
+        if (isDebugEnabled) console.log('Main: Handle key input.')
+
+        if (document.activeElement == mainStore.element) {
+            if (event.key == 'Enter') {
+                event.preventDefault()
+                layoutStore.setActiveTabIndexGroup(tabIndexGroupMain)
+                // focusAnchor.current?.focus()
+                focusPreviousElement()
+                return
+            }
+
+            if (event.key == 'ArrowUp') {
+                event.preventDefault()
+                topnavStore.element?.focus()
+                return
+            }
             return
         }
 
-        if (event.key == 'Escape' && layoutStore.activeTabIndexGroup != 0) {
+        //TODO
+        if (document.activeElement?.tagName == 'SUMMARY') {
+            if (event.key == 'ArrowRight') {
+                event.preventDefault()
+                event.stopPropagation()
+                document.activeElement.parentElement?.setAttribute('open', '')
+                return
+            }
+
+            if (event.key == 'ArrowLeft') {
+                event.preventDefault()
+                event.stopPropagation()
+                document.activeElement.parentElement?.removeAttribute('open')
+                return
+            }
+        }
+
+        if (event.key == 'Escape') {
             event.preventDefault()
             layoutStore.setActiveTabIndexGroup(0)
             mainStore.element?.focus()
             return
         }
+
+        if (event.key == 'ArrowDown') {
+            event.preventDefault()
+            event.stopPropagation()
+            focusNextElement()
+            return
+        }
+
+        if (event.key == 'ArrowUp') {
+            event.preventDefault()
+            event.stopPropagation()
+            focusPreviousElement()
+            return
+        }
     }
+
 
     //
     // effects
@@ -133,11 +209,11 @@ function Main({ children }: React.PropsWithChildren) {
 
     return (<>
         <main
+            {...dragAttributes}
             className="h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-colors ease-out duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
+            onKeyDown={handleKeyInput}
             ref={initializeMainReference}
             tabIndex={(mainStore.isActive && layoutStore.activeTabIndexGroup == 0 ? 0 : -1)}
-            onKeyDown={handleKeyInputTabIndex}
-            {...dragAttributes}
         >
             <div
                 ref={focusAnchor}

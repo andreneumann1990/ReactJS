@@ -1,9 +1,9 @@
 'use client'
 
-import Topnav from './Topnav'
+import Topnav, { useTopnavStore } from './Topnav'
 import Sidenav from './Sidenav'
 import React, { useEffect } from 'react'
-import Main from './Main'
+import Main, { useMainStore } from './Main'
 import { isDebugEnabled, tabIndexGroupDefault } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
 import { create } from 'zustand'
@@ -45,30 +45,50 @@ function Layout({ children }: React.PropsWithChildren) {
     //TODO
     // const isSearchOpen: boolean = useSearchStore(state => state.isOpen)
     // const isSidenavOpen = useSidenavStore(state => state.isOpen)
+    const layoutStore = useLayoutStore()
+    const mainStore = useMainStore()
+    const topnavStore = useTopnavStore()
+
+    //
+    // functions
+    //
 
     //
     // effects
     //
 
-    // click highlights links;
+    // click highlights links; up / down selects topnav / main;
     useEffect(() => {
-        const pressKey = function (event: KeyboardEvent) {
-            if (event.key !== 'Enter') return
+        const handleKeyInput = function (event: KeyboardEvent) {
             const element = event.target as HTMLElement | null
             if (element == null) return
-            if (element.tagName != 'A' && element.tagName != 'button') return
-            if (isDebugEnabled) console.log('Layout: Enter pressed.')
-            triggerFlashEffect(event)
+
+            if (layoutStore.activeTabIndexGroup == tabIndexGroupDefault) {
+                if (event.key == 'ArrowUp') {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    topnavStore.element?.focus()
+                    return
+                }
+
+                if (event.key == 'ArrowDown') {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    mainStore.element?.focus()
+                    return
+                }
+                return
+            }
         }
 
         document.addEventListener('pointerup', triggerFlashEffect)
-        document.addEventListener('keypress', pressKey)
+        document.addEventListener('keydown', handleKeyInput)
 
         return () => {
             document.removeEventListener('pointerup', triggerFlashEffect)
-            document.removeEventListener('keypress', pressKey)
+            document.removeEventListener('keydown', handleKeyInput)
         }
-    }, [])
+    }, [layoutStore.activeTabIndexGroup, mainStore.element, topnavStore.element])
 
     //
     //

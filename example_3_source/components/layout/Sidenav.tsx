@@ -11,8 +11,7 @@ import { useLayoutStore } from './Layout'
 export default Sidenav
 export { useSidenavStore }
 
-//TODO; check tab indexes;
-//TODO; add holding button;
+//TODO; holding arrow keys;
 
 //
 //
@@ -62,9 +61,8 @@ function Sidenav() {
     const closeSidenav = useCallback(() => {
         layoutStore.resetActiveTabIndexGroup()
         sidenavStore.setIsOpen(false)
-        // topnavStore.element?.focus()
-        topnavStore.menuButtonElement?.focus()
-    }, [layoutStore, sidenavStore, topnavStore.menuButtonElement])
+        topnavStore.element?.focus()
+    }, [layoutStore, sidenavStore, topnavStore.element])
 
     function focusNextElement() {
         const menuButtonElement = topnavStore.menuButtonElement
@@ -75,13 +73,8 @@ function Sidenav() {
         if (focusedElement == null) return
 
         const focusableElements = [menuButtonElement, ...Array.from(sidenavElement.querySelectorAll<HTMLAnchorElement>(queryString))]
-        const currentIndex = focusableElements.indexOf(focusedElement)
-        const nextIndex = (currentIndex + 1) % focusableElements.length
-        const nextElement = focusableElements[nextIndex]
-
-        if (nextElement == null) return
-        if (nextElement === menuButtonElement) return
-        nextElement.focus()
+        const nextIndex = Math.min(focusableElements.indexOf(focusedElement) + 1, focusableElements.length - 1)
+        focusableElements[nextIndex]?.focus()
     }
 
     function focusPreviousElement() {
@@ -93,18 +86,14 @@ function Sidenav() {
         if (focusedElement == null) return
 
         const focusableElements = [menuButtonElement, ...Array.from(sidenavElement.querySelectorAll<HTMLElement>(queryString))]
-        const currentIndex = focusableElements.indexOf(focusedElement)
-        const previousIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length
-        const previousElement = focusableElements[previousIndex]
-
-        if (previousElement == null) return
-        previousElement.focus()
+        const previousIndex = Math.max(focusableElements.indexOf(focusedElement) - 1, 0)
+        focusableElements[previousIndex]?.focus()
     }
 
     function handleKeyInput(event: KeyboardEvent): void {
-        if (isDebugEnabled) console.log('Sidenav: Handle key inputs.')
+        if (isDebugEnabled) console.log('Sidenav: Handle key input.')
 
-        if (event.key === 'Enter') {
+        if (event.key == 'Enter') {
             // preventDefault() does not prevent links from being triggered;
             event.preventDefault()
             event.stopPropagation()
@@ -115,21 +104,28 @@ function Sidenav() {
             return
         }
 
-        if (event.key === 'ArrowDown') {
+        if (event.key == 'Escape') {
+            event.preventDefault()
+            event.stopPropagation()
+            closeSidenav()
+            return
+        }
+
+        if (event.key == 'ArrowDown') {
             event.preventDefault()
             event.stopPropagation()
             focusNextElement()
             return
         }
 
-        if (event.key === 'ArrowUp') {
+        if (event.key == 'ArrowUp') {
             event.preventDefault()
             event.stopPropagation()
             focusPreviousElement()
             return
         }
 
-        if (event.key === 'ArrowLeft' && sidenavStore.isOpen) {
+        if (event.key == 'ArrowLeft') {
             event.preventDefault()
             event.stopPropagation()
             closeSidenav()
