@@ -7,6 +7,7 @@ import { isDebugEnabled, tabIndexGroupTopnav } from '../../constants/general_con
 import { useRouter } from 'next/navigation'
 import { debounceEventFunction } from '../../constants/event_constants'
 import { useLayoutStore } from '../layout/Layout'
+import { useSidenavStore } from '../layout/Sidenav'
 
 export default Search
 export { useSearchStore }
@@ -56,12 +57,8 @@ function Search() {
     const router = useRouter()
 
     const layoutStore = useLayoutStore()
-    //TODO
-    const setIsSearchOpen = useSearchStore(state => state.setIsOpen)
-    const searchInputElement = useSearchStore(state => state.inputElement)
-    const setSearchInputElement = useSearchStore(state => state.setInputElement)
-    const searchResultsElement = useSearchStore(state => state.resultsElement)
-    const setSearchResultsElement = useSearchStore(state => state.setResultsElement)
+    const searchStore = useSearchStore()
+    const sidenavStore = useSidenavStore()
 
     const [isFocused, setIsFocused] = useState<boolean>(false)
     const [isHovering, setIsHovering] = useState<boolean>(false)
@@ -78,27 +75,31 @@ function Search() {
     //
 
     function initializeSearchInputReference(element: HTMLInputElement) {
-        if (searchInputElement != null) return
+        if (searchStore.inputElement != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Search: Initialize search input reference.')
-        setSearchInputElement(element)
+        searchStore.setInputElement(element)
     }
 
     function initializeSearchResultsReference(element: HTMLDivElement) {
-        if (searchResultsElement != null) return
+        if (searchStore.resultsElement != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Search: Initialize search results reference.')
-        setSearchResultsElement(element)
+        searchStore.setResultsElement(element)
     }
 
     // navigate via arrow keys; escape to close;
     function handleKeyDown(event: React.KeyboardEvent) {
-        if (searchInputElement == null) return
-        console.log(event.key)
+        if (searchStore.inputElement == null) return
+        if (event.key == 'ArrowLeft' || event.key == 'ArrowRight') {
+            event.preventDefault()
+            return
+        }
+
         if (event.key == 'Escape') {
             event.preventDefault()
             previouslyFocusedElement?.focus()
-            searchInputElement.blur()
+            searchStore.inputElement.blur()
             return
         }
 
@@ -127,20 +128,20 @@ function Search() {
         }
 
         if (event.key == 'ArrowUp') {
-            const entryArray: EntryData[] | undefined = Object.values(searchResultDataArray)[keyIndex - 1]
-            if (entryArray == null) {
-                if (isDebugEnabled) {
-                    console.log('Search-Warning: Entry array could not be found.')
-                    console.log(`Search-Warning: dataArray ${Object.values(searchResultDataArray)}`)
-                    console.log(`Search-Warning: (keyIndex - 1) ${keyIndex - 1}`)
-                }
-                return
-            }
-
             if (entryIndex > 0) {
                 event.preventDefault()
                 setSearchResultSelectedIndex([keyIndex, entryIndex - 1])
             } else if (keyIndex > 0) {
+                const entryArray: EntryData[] | undefined = Object.values(searchResultDataArray)[keyIndex - 1]
+                if (entryArray == null) {
+                    if (isDebugEnabled) {
+                        console.log('Search-Warning: Entry array could not be found.')
+                        console.log(`Search-Warning: dataArray ${Object.values(searchResultDataArray)}`)
+                        console.log(`Search-Warning: (keyIndex - 1) ${keyIndex - 1}`)
+                    }
+                    return
+                }
+
                 event.preventDefault()
                 setSearchResultSelectedIndex([keyIndex - 1, entryArray.length - 1])
             }
@@ -157,8 +158,8 @@ function Search() {
         if (typeof href != 'string') return
 
         router.push(href)
-        if (searchInputElement == null) return
-        searchInputElement.blur()
+        if (searchStore.inputElement == null) return
+        searchStore.inputElement.blur()
     }
 
     function updateInputField(event: ChangeEvent): void {
@@ -180,6 +181,7 @@ function Search() {
 
     // set focus; don't close when focused => update state;
     function handleFocus(): void {
+        layoutStore.setActiveTabIndexGroup(tabIndexGroupTopnav)
         setIsFocused(true)
     }
 
@@ -193,25 +195,36 @@ function Search() {
 
     // update state;
     useEffect(() => {
-        if (searchInputElement == null) return
+        if (searchStore.inputElement == null) return
         if (isDebugEnabled) console.log('Search: Update state.')
 
-        if (document.activeElement == searchInputElement) {
-            setIsSearchOpen(true)
+        if (document.activeElement == searchStore.inputElement) {
+            if (searchStore.isOpen) return
+            searchStore.setIsOpen(true)
+            return
+        }
+
+        if (sidenavStore.isOpen) {
+            if (!searchStore.isOpen) return
+            searchStore.setIsOpen(false)
             return
         }
 
         if (isHovering) {
-            setIsSearchOpen(true)
+            if (searchStore.isOpen) return
+            searchStore.setIsOpen(true)
             return
         }
 
         if (isFocused) {
-            setIsSearchOpen(true)
+            if (searchStore.isOpen) return
+            searchStore.setIsOpen(true)
             return
         }
-        setIsSearchOpen(false)
-    }, [isFocused, isHovering, searchInputElement, setIsSearchOpen])
+
+        if (!searchStore.isOpen) return
+        searchStore.setIsOpen(false)
+    }, [isFocused, isHovering, searchStore, sidenavStore.isOpen])
 
     // select search input field by ctrl+k;
     useEffect(() => {
@@ -219,17 +232,17 @@ function Search() {
         if (bodyElement == null) return
 
         function handleKeyInputs(event: KeyboardEvent) {
-            if (searchInputElement == null) return
+            if (searchStore.inputElement == null) return
             if (event.ctrlKey && event.key == 'k') {
                 event.preventDefault()
-                if (document.activeElement == searchInputElement) {
+                if (document.activeElement == searchStore.inputElement) {
                     previouslyFocusedElement?.focus()
-                    searchInputElement.blur()
+                    searchStore.inputElement.blur()
                     return
                 }
 
                 setPreviouslyFocusedElement(document.activeElement as HTMLElement | null)
-                searchInputElement.focus()
+                searchStore.inputElement.focus()
             }
         }
 
@@ -237,7 +250,7 @@ function Search() {
         return (() => {
             bodyElement.removeEventListener('keydown', handleKeyInputs)
         })
-    }, [previouslyFocusedElement, searchInputElement, setIsSearchOpen])
+    }, [previouslyFocusedElement, searchStore.inputElement])
 
     // search after query is updated, i.e. onChange();
     useEffect(() => {
@@ -339,7 +352,7 @@ function Search() {
 
                 {/* search results; */}
                 <div
-                    className="absolute w-full mt-1 bg-secondary shadow-md text-center hidden peer-focus:block hover:block"
+                    className={`absolute w-full mt-1 bg-secondary shadow-md text-center hidden peer-focus:block hover:${searchStore.isOpen}`}
                     ref={initializeSearchResultsReference}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}

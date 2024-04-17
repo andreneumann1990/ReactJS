@@ -193,7 +193,7 @@ function Page() {
                 </div>
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
-                        <span className="after:content-['*'] after:ml-1 after:text-red-500">Password:</span>
+                        <span className="before:content-['*'] after:content-['*'] after:ml-1 after:text-red-500">Password:</span>
                         {!form1.touched.password ? null : form1.errors.password ?
                             <span className="ml-4 px-2 py-1 text-red-500">{form1.errors.password}</span>
                             : <span className="ml-4 px-2 py-1 text-green-500">That&apos;s the right password!</span>

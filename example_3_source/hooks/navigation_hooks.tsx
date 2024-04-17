@@ -5,7 +5,16 @@ import { indexEntryTypesString, isDebugEnabled } from '../constants/general_cons
 export { useNavigateAndHighlightElement }
 
 //
+// functions
 //
+
+function getTextNode(element: ChildNode): ChildNode {
+    if (element.firstChild == null) return element
+    return getTextNode(element.firstChild)
+}
+
+//
+// main
 //
 
 function useNavigateAndHighlightElement(pageName?: string): void {
@@ -36,24 +45,22 @@ function useNavigateAndHighlightElement(pageName?: string): void {
         }
 
         if (isDebugEnabled) console.log('Home: Found element from search params.')
-        const searchResultElement = searchResultElementArray[0]
-        searchResultElement.focus()
+        const firstSearchResultElement = searchResultElementArray[0]
+        firstSearchResultElement.focus()
 
-        const detailsElement = searchResultElement.closest('details')
+        const detailsElement = firstSearchResultElement.closest('details')
         if (detailsElement != null) detailsElement.setAttribute('open', '')
         const highlightWordArray = searchParams.get('select')?.split(',')
         const selection = window.getSelection()
 
         if (highlightWordArray != null && selection != null) {
             selection.removeAllRanges()
-            const textElement = searchResultElement.firstChild
+            const textElement = getTextNode(firstSearchResultElement)
 
             highlightWordArray.forEach((word) => {
                 if (textElement == null) return
                 if (textElement.textContent == null) return
                 const startIndex = textElement.textContent.toLowerCase().indexOf(word.toLowerCase())
-                console.log(textElement.textContent.toLowerCase())
-                console.log(word)
                 if (startIndex == -1) return
 
                 const range = document.createRange()

@@ -4,7 +4,18 @@ export { debounceEventFunction }
 export { triggerFlashEffect }
 
 //
+// functions
 //
+
+const getFocusableContainer = function (target: HTMLElement): HTMLElement | null {
+    if (target instanceof HTMLAnchorElement) return target
+    if (target instanceof HTMLButtonElement) return target
+    if (target.parentElement == null) return null
+    return getFocusableContainer(target.parentElement)
+}
+
+//
+// main
 //
 
 function debounceEventFunction(eventFunction: (...args: any[]) => void, timeout_ms: number): (...args: any[]) => void {
@@ -21,16 +32,10 @@ function debounceEventFunction(eventFunction: (...args: any[]) => void, timeout_
 function triggerFlashEffect(event: { target: EventTarget | null }): void {
     const element = event.target as HTMLElement | null
     if (element == null) return
+    const containerElement = getFocusableContainer(element)
+    if (containerElement == null) return
 
-    const getAnchorContainer = function (target: HTMLElement): HTMLAnchorElement | null {
-        if (target instanceof HTMLAnchorElement) return target
-        if (target.parentElement == null) return null
-        return getAnchorContainer(target.parentElement)
-    }
-
-    const anchorElement = getAnchorContainer(element)
-    if (anchorElement == null) return
-    const backgroundColorString = anchorElement.style.backgroundColor
-    const backgroundColor = tinycolor(anchorElement.style.backgroundColor)
-    anchorElement.animate({ backgroundColor: [backgroundColorString, backgroundColor.brighten(50).toString(), backgroundColorString] }, 300)
+    const backgroundColorString = containerElement.style.backgroundColor
+    const backgroundColor = tinycolor(containerElement.style.backgroundColor)
+    containerElement.animate({ backgroundColor: [backgroundColorString, backgroundColor.brighten(50).toString(), backgroundColorString] }, 300)
 }

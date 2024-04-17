@@ -3,7 +3,7 @@ import { useSidenavStore } from './Sidenav'
 import Link from 'next/link'
 import { create } from 'zustand'
 import SearchBox, { useSearchStore } from '../atoms/Search'
-import { isDebugEnabled, tabIndexGroupTopnav } from '../../constants/general_constants'
+import { isDebugEnabled, tabIndexGroupDefault, tabIndexGroupSidenav, tabIndexGroupTopnav } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
 import { useLayoutStore } from './Layout'
 
@@ -39,12 +39,16 @@ function Topnav() {
     // parameters and variables
     //
 
-    const focusAnchor = useRef<HTMLDivElement | null>(null)
-
     const layoutStore = useLayoutStore()
-    const sidenavStore = useSidenavStore()
     const searchStore = useSearchStore()
+    const sidenavStore = useSidenavStore()
     const topnavStore = useTopnavStore()
+
+    const menuIconRef = useRef<HTMLElement | null>(null)
+    const closeIconRef = useRef<HTMLElement | null>(null)
+
+    const sidenavQueryString = 'a, button'
+    const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"]), input:not([tabindex="-1"])'
 
     //
     // functions
@@ -65,54 +69,61 @@ function Topnav() {
     }
 
     const focusNextElement = useCallback(() => {
-        const menuButtonElement = topnavStore.menuButtonElement
-        if (menuButtonElement == null) return
         const topnavElement = topnavStore.element
         if (topnavElement == null) return
         const focusedElement = document.activeElement as HTMLAnchorElement | null
         if (focusedElement == null) return
 
-        const focusableElements = [menuButtonElement, ...Array.from(topnavElement.querySelectorAll<HTMLAnchorElement>('a[tabindex="1000"]'))]
-        const currentIndex = focusableElements.indexOf(focusedElement)
-        const nextIndex = (currentIndex + 1) % focusableElements.length
+        const focusableElements = Array.from(topnavElement.querySelectorAll<HTMLElement>(queryString))
+        const nextIndex = Math.min(focusableElements.indexOf(focusedElement) + 1, focusableElements.length - 1)
         const nextElement = focusableElements[nextIndex]
 
-        if (nextElement == null) return
-        if (nextElement === menuButtonElement) return
-        nextElement.focus()
-    }, [topnavStore.element, topnavStore.menuButtonElement])
+        if (searchStore.resultsElement != null && searchStore.resultsElement.contains(nextElement)) return
+        nextElement?.focus()
+    }, [searchStore.resultsElement, topnavStore.element])
 
     const focusPreviousElement = useCallback(() => {
-        const menuButtonElement = topnavStore.menuButtonElement
-        if (menuButtonElement == null) return
         const topnavElement = topnavStore.element
         if (topnavElement == null) return
         const focusedElement = document.activeElement as HTMLElement | null
         if (focusedElement == null) return
 
-        if (focusedElement === menuButtonElement) return
-        const focusableElements = [menuButtonElement, ...Array.from(topnavElement.querySelectorAll<HTMLElement>('a[tabindex="1000"]'))]
-        const currentIndex = focusableElements.indexOf(focusedElement)
-        const previousIndex = (currentIndex - 1 + focusableElements.length) % focusableElements.length
-
+        const focusableElements = Array.from(topnavElement.querySelectorAll<HTMLElement>(queryString))
+        const previousIndex = Math.max(focusableElements.indexOf(focusedElement) - 1, 0)
         const previousElement = focusableElements[previousIndex]
-        if (previousElement == null) return
-        previousElement.focus()
-    }, [topnavStore.element, topnavStore.menuButtonElement])
+        previousElement?.focus()
+    }, [topnavStore.element])
 
     function toggleSidenav(): void {
         if (isDebugEnabled) console.log('Topnav: Toggle sidenav.')
+        if (!sidenavStore.isOpen) {
+            layoutStore.setActiveTabIndexGroup(tabIndexGroupSidenav)
+        } else if (document.activeElement == topnavStore.menuButtonElement) {
+            layoutStore.setActiveTabIndexGroup(tabIndexGroupTopnav)
+        }
         sidenavStore.setIsOpen(!sidenavStore.isOpen)
     }
 
     function handleKeyInput(event: KeyboardEvent): void {
-        if (document.activeElement == searchStore.inputElement) return
-        // if (mainElement == null) return
-        // if (menuButtonElement == null) return
-        // if (sidenavElement == null) return
+        // if (document.activeElement == searchStore.inputElement) return
+        if (document.activeElement == topnavStore.element) {
+            if (event.key == 'Enter') {
+                event.preventDefault()
+                event.stopPropagation()
+                topnavStore.menuButtonElement?.focus()
+                return
+            }
+        }
 
-        if (document.activeElement === topnavStore.menuButtonElement) {
-            if (event.key === 'Enter') {
+        if (event.key == 'Escape' && layoutStore.activeTabIndexGroup != 0) {
+            event.preventDefault()
+            layoutStore.resetActiveTabIndexGroup()
+            topnavStore.element?.focus()
+            return
+        }
+
+        if (document.activeElement == topnavStore.menuButtonElement) {
+            if (event.key == 'Enter') {
                 event.preventDefault()
                 event.stopPropagation()
                 toggleSidenav()
@@ -121,12 +132,12 @@ function Topnav() {
             }
 
             // ignore ArrowRight because other icons are displayed to the right;
-            // but for consistency it would be nice; hmmm...;
-            if (event.key === 'ArrowDown') {
+            // but for consistency it would be nice; hmmm...; //TODO
+            if (event.key == 'ArrowDown') {
                 if (sidenavStore.isOpen) {
                     event.preventDefault()
                     event.stopPropagation()
-                    const firstElement = sidenavStore.element?.querySelector<HTMLAnchorElement>('a')
+                    const firstElement = sidenavStore.element?.querySelector<HTMLAnchorElement>(sidenavQueryString)
                     if (firstElement == null) return
                     firstElement.focus()
                     return
@@ -139,7 +150,7 @@ function Topnav() {
                 return
             }
 
-            if ((event.key === 'ArrowLeft' || event.key === 'ArrowUp') && sidenavStore.isOpen) {
+            if ((event.key == 'ArrowLeft' || event.key == 'ArrowUp' || event.key == 'ArrowRight') && sidenavStore.isOpen) {
                 event.preventDefault()
                 event.stopPropagation()
                 toggleSidenav()
@@ -148,15 +159,14 @@ function Topnav() {
             }
         }
 
-        // if (event.key === 'ArrowUp' && sidenavContext.openState.isOpen) {
-        if (event.key === 'ArrowLeft') {
+        if (event.key == 'ArrowLeft') {
             event.preventDefault()
             event.stopPropagation()
             focusPreviousElement()
             return
         }
 
-        if (event.key === 'ArrowRight') {
+        if (event.key == 'ArrowRight') {
             event.preventDefault()
             event.stopPropagation()
             focusNextElement()
@@ -164,22 +174,16 @@ function Topnav() {
         }
     }
 
-    function handleKeyInputTabIndex(event: KeyboardEvent): void {
-        console.log('input')
-        if (event.key == 'Enter' && layoutStore.activeTabIndexGroup != tabIndexGroupTopnav) {
-            event.preventDefault()
-            layoutStore.setActiveTabIndexGroup(tabIndexGroupTopnav)
-            // topnavStore.menuButtonElement?.focus()
-            focusAnchor.current?.focus()
+    function handleKeyInputHome(event: KeyboardEvent): void {
+        if (event.key == 'Enter') {
+            triggerFlashEffect(event)
             return
         }
+    }
 
-        if (event.key == 'Escape' && layoutStore.activeTabIndexGroup != 0) {
-            event.preventDefault()
-            layoutStore.setActiveTabIndexGroup(0)
-            topnavStore.element?.focus()
-            return
-        }
+    function setActiveTabIndexGroupToTopnav() {
+        console.log('focus') //TODO
+        layoutStore.setActiveTabIndexGroup(tabIndexGroupTopnav)
     }
 
     //
@@ -190,19 +194,17 @@ function Topnav() {
     useEffect(() => {
         const menuButtonElement = topnavStore.menuButtonElement
         if (menuButtonElement == null) return
-        if (menuButtonElement.children.length < 2) return
-
-        const menuIcon = menuButtonElement.children[0] as HTMLElement
-        const closeIcon = menuButtonElement.children[1] as HTMLElement
+        if (menuIconRef.current == null) return
+        if (closeIconRef.current == null) return
 
         if (sidenavStore.isOpen) {
-            menuIcon.classList.add('hidden')
-            closeIcon.classList.remove('hidden')
+            menuIconRef.current.classList.add('hidden')
+            closeIconRef.current.classList.remove('hidden')
             return
         }
 
-        menuIcon.classList.remove('hidden')
-        closeIcon.classList.add('hidden')
+        menuIconRef.current.classList.remove('hidden')
+        closeIconRef.current.classList.add('hidden')
     }, [sidenavStore.isOpen, topnavStore.menuButtonElement])
 
     //
@@ -211,33 +213,43 @@ function Topnav() {
 
     // tabIndex for onFocus(); TODO;
     return (<>
+        {/* TODO; does not work; you tab behind the elements afterwards for some reason; */}
+        {/* <div
+            ref={focusAnchorRef}
+            tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupTopnav ? 0 : -1}
+        >test</div> */}
+
         <nav
             className="bg-background h-[--height-topnav] shadow-md"
+            // onKeyUp={handleKeyInputTabIndex}
+            onKeyUp={handleKeyInput}
             ref={initializeTopnavReference}
-            onKeyDown={handleKeyInputTabIndex}
-            tabIndex={layoutStore.activeTabIndexGroup == 0 ? 0 : -1}
+            tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupDefault ? 0 : -1}
         >
             <div
-                ref={focusAnchor}
-                tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupTopnav ? 0 : -1}
-            />
-            <div
                 className="grid grid-flow-col [grid-template-columns:20%_60%_20%] justify-items-center justify-between"
-                onKeyUp={handleKeyInput}
             >
                 <div className="grid grid-flow-col justify-self-start">
                     <button
                         className="h-[--height-topnav]"
+                        onFocusCapture={setActiveTabIndexGroupToTopnav}
                         onPointerUp={toggleSidenav}
                         ref={initializeMenuButtonReference}
                         tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
                     >
-                        <i className="p-1 icon-medium material-icons">menu</i>
-                        <i className="p-1 icon-medium material-icons hidden">close</i>
+                        <i
+                            className="p-1 icon-medium material-icons"
+                            ref={menuIconRef}
+                        >menu</i>
+                        <i
+                            className="p-1 icon-medium material-icons hidden"
+                            ref={closeIconRef}
+                        >close</i>
                     </button>
                     <Link
                         className="block h-[--height-topnav]"
                         href="/home"
+                        onKeyDownCapture={handleKeyInputHome}
                         tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
                     >
                         <i className="p-1 icon-medium material-icons">home</i>

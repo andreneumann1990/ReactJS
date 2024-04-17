@@ -59,7 +59,7 @@ function Page() {
                 <li>closing sidenav by clicking outside</li>
                 <li>dropdown expansion animation</li>
                 <li>only one dropdown menu open at a time</li>
-                <li>passing data around using <strong>useContext()</strong></li>
+                <li>passing data around using <b>useContext()</b></li>
                 <li>exporting references of non-unmounting elements as globals instead (bad?)</li>
                 <li>tabindex management & navigation via keyboard</li>
                 <li>deployed on github.io</li>
@@ -74,24 +74,25 @@ function Page() {
             <ul className="*:my-2 pl-10">
                 <li>switched to nextjs; no server-side-rendering (SSR); needs to be static at this point; no back-end yet;</li>
                 <li>switched to tailwindcss in most cases;</li>
-                <li>using <strong>Zustand</strong> for sharing data and states; less boilerplate than <strong>Redux</strong>?;</li>
+                <li>using <b>Zustand</b> for sharing data and states; less boilerplate than <b>Redux</b>?;</li>
                 <li>added a search bar placeholder; there is no back-end yet; maybe you could work around that and handle search entries and stuff; let&apos;s not bother just yet;</li>
-                <li>using <strong>formik</strong> and <strong>Yap</strong> for form handling and validation;</li>
-                <li>using <strong>MUI</strong> for pre-defined country input field; TODO: check how much stuff can be done with these pre-defined elements;</li>
+                <li>using <b>formik</b> and <b>Yap</b> for form handling and validation;</li>
+                <li>using <b>MUI</b> for pre-defined country input field; TODO: check how much stuff can be done with these pre-defined elements;</li>
             </ul >
         </details>
         <ul className="*:my-2 pl-5">
             <li>first back-end steps;</li>
-            <li>added <strong>Algolia</strong> search; navigation hints and behavior similar to <strong>react.dev</strong>;</li>
+            <li>added <b>Algolia</b> search; navigation hints and behavior similar to <b>react.dev</b>;</li>
         </ul>
 
         <h2 className="my-2 text-2xl font-bold">TODO:</h2>
         <ul className="*:my-2 pl-5">
             <li>user login;</li>
-            <li>search bar;</li>
             <li>back-end?; Node.js, java and c# are options;</li>
             <li>light / dark theme switch;</li>
             <li>some more standard stuff; forms, maps, videos / iframes, lists maybe;</li>
+            <li>database with pictures; pre-loading with <b>Node.js</b>?, placeholder?;</li>
+            <li>tables;</li>
         </ul>
     </>)
 }

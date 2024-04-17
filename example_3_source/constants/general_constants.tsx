@@ -2,6 +2,7 @@ export { backEndHRef }
 export { indexEntryTypesString }
 export { isDebugEnabled }
 
+export { tabIndexGroupDefault }
 export { tabIndexGroupMain }
 export { tabIndexGroupTopnav }
 export { tabIndexGroupSidenav }
@@ -12,6 +13,7 @@ const isProduction = process.env.NODE_ENV === 'production'
 const backEndHRef = isProduction ? 'https://example-3-b52da596edfb.herokuapp.com' : 'http://localhost:8080'
 
 // used to group focusable elements;
+const tabIndexGroupDefault = 0
 const tabIndexGroupMain = 10
 const tabIndexGroupTopnav = 20
 const tabIndexGroupSidenav = 30

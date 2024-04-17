@@ -4,7 +4,7 @@ import Topnav from './Topnav'
 import Sidenav from './Sidenav'
 import React, { useEffect } from 'react'
 import Main from './Main'
-import { isDebugEnabled } from '../../constants/general_constants'
+import { isDebugEnabled, tabIndexGroupDefault } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
 import { create } from 'zustand'
 
@@ -18,9 +18,17 @@ export { useLayoutStore }
 const useLayoutStore = create<{
     activeTabIndexGroup: number,
     setActiveTabIndexGroup: (tabIndex: number) => void,
+    resetActiveTabIndexGroup: () => void,
 }>(set => ({
     activeTabIndexGroup: 0,
-    setActiveTabIndexGroup: (tabIndex) => set(() => ({ activeTabIndexGroup: tabIndex })),
+    setActiveTabIndexGroup: (tabIndex) => set(() => {
+        if (isDebugEnabled) console.log(`Layout: tabIndex ${tabIndex}`)
+        return { activeTabIndexGroup: tabIndex }
+    }),
+    resetActiveTabIndexGroup: () => set(() => {
+        if (isDebugEnabled) console.log(`Layout: tabIndex ${tabIndexGroupDefault}`)
+        return { activeTabIndexGroup: tabIndexGroupDefault }
+    })
 }))
 
 //
@@ -28,6 +36,8 @@ const useLayoutStore = create<{
 //
 
 function Layout({ children }: React.PropsWithChildren) {
+    useEffect(() => { console.log(document.activeElement) }, [])
+
     //
     // parameters and variables
     //
@@ -46,8 +56,8 @@ function Layout({ children }: React.PropsWithChildren) {
             if (event.key !== 'Enter') return
             const element = event.target as HTMLElement | null
             if (element == null) return
-            if (element.tagName !== 'A') return
-            if (isDebugEnabled) console.log('Layout: Enter pressed on anchor element.')
+            if (element.tagName != 'A' && element.tagName != 'button') return
+            if (isDebugEnabled) console.log('Layout: Enter pressed.')
             triggerFlashEffect(event)
         }
 
@@ -59,16 +69,6 @@ function Layout({ children }: React.PropsWithChildren) {
             document.removeEventListener('keypress', pressKey)
         }
     }, [])
-
-    // manage tabIndexGroup; //TODO
-    // useEffect(() => {
-    //     if ()
-    // }, [])
-
-    // is this still used??; TODO;
-    // const [isLoading, setIsLoading] = useState(true)
-    // useEffect(() => setIsLoading(false), [])
-    // if (isLoading) return <></>
 
     //
     //
