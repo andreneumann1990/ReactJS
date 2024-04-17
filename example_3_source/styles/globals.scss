@@ -5,44 +5,23 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-@layer base {
-    a {
-        text-decoration: none;
-
-        &:hover, &:focus-visible {
-            background-color: hsla(0, 0%, 100%, 0.3)
-        }
-    }
-
-    button {
-        line-height: normal;
-    }
-}
-
-@layer components {
-    .icon-medium {
-        font-size: calc(-8px + var(--height-topnav));
-        // padding: 4px; // do it manually;
-
-        // used in dropdown menu icons;
-        //TODO export there;
-        transition: all 0.3s ease-out;
-    }
-}
-
-@layer utilities {
-    .scrollbar-stable {
-        scrollbar-gutter: stable;
-    }
-
-    .scrollbar-stable-both {
-        scrollbar-gutter: stable both-edges;
-    }
-}
-
 //
+// parameters and variables
 //
-//
+
+:root {
+    --color-background: hsl(220, 15%, 16%);
+    --color-primary: hsl(220, 30%, 30%);
+    --color-primary-active: hsl(220, 30%, 50%);
+    --color-secondary: hsl(220, 20%, 20%);
+    --color-secondary-active: hsl(220, 20%, 40%);
+    --color-text: hsl(0, 0%, 100%);
+    --color-text-passive: hsl(0, 0%, 70%);
+    // hsla(0, 0%, 0%, 0.2);
+
+    --height-topnav: 40px;
+    --width-scrollbar: 17px;
+}
 
 @-webkit-keyframes fadeIn {
     0% {
@@ -65,139 +44,145 @@
 }
 
 //
-// parameters and variables
+// classes
 //
 
-:root {
-    --color-background: hsl(220, 15%, 16%);
-    --color-primary: hsl(220, 30%, 30%);
-    --color-primary-active: hsl(220, 30%, 50%);
-    --color-secondary: hsl(220, 20%, 20%);
-    --color-secondary-active: hsl(220, 20%, 40%);
-    --color-text: hsl(0, 0%, 100%);
-    --color-text-passive: hsl(0, 0%, 70%);
-    // hsla(0, 0%, 0%, 0.2);
+@layer base {
+    *:focus-visible {
+        outline-offset: -1px;
 
-    --height-topnav: 40px;
-    --width-scrollbar: 17px;
-}
-
-//
-// TODO
-//
-
-:focus-visible {
-    outline-offset: -1px;
-
-    // kinda works unless the mouse hovers over the element before you tab to it;
-    // without this you have a little bit of background outside the outline;
-    // border-radius: 10px;
-}
-
-//
-// based on class;
-//
-
-.mobile-dropdown-content {
-    background-color: var(--color-background);
-    color: --color-text;
-    display: block;
-
-    // TODO
-    // height: 0;
-    height: 0;
-    transition: all 0.3s ease-out;
-    overflow-y: hidden;
-    // margin-top: -100%;
-    // position: relative;
-    // z-index: 0;
-    // transition
-
-    &.active {
-        background-color: var(--color-dark-highlight);
-        // height: fit-content;
-        // transition: all 0.3s ease-out;
+        // kinda works unless the mouse hovers over the element before you tab to it;
+        // without this you have a little bit of background outside the outline;
+        // border-radius: 10px;
     }
 
-    &:not(.active) a {
-        color: --color-text-passive;
+    a {
+        text-decoration: none;
+    }
+
+    button {
+        line-height: normal;
+    }
+
+    a:hover, a:focus-visible, button:hover, button:focus-visible {
+        background-color: hsla(0, 0%, 100%, 0.3)
+    }
+
+    code {
+        font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+            monospace;
+    }
+
+    html {
+        color-scheme: dark;
+        scrollbar-color: hsl(0, 0%, 50%) transparent;
+    }
+
+    ul {
+        list-style: "- ";
     }
 }
 
-.mobile-dropdown-menu {
-    &.active {
-        background-color: var(--color-dark-highlight);
-        color: --color-text;
-    }
-
-    &:not(.active) a {
-        color: --color-text-passive
+@layer components {
+    .icon-medium {
+        font-size: calc(-8px + var(--height-topnav));
     }
 }
 
-.mobile-dropdown-menu > a {
-    // otherwise, overriden by user agent;
-    font-size: 1.5em;
+@layer utilities {
+    .scrollbar-stable {
+        scrollbar-gutter: stable;
+    }
 
-    // padding-left: 20px;
-    padding: 15px 20px 15px 20px;
+    .scrollbar-stable-both {
+        scrollbar-gutter: stable both-edges;
+    }
 }
 
-.mobile-sidebar > a {
-    padding-left: 15px;
-}
+//
+//
+//
 
-.mobile-sidebar a {
-    // border-top: 2px solid transparent;
-    // border-bottom: 2px solid transparent;
-    border: 2px solid transparent;
-    display: block;
+// .mobile-dropdown-content {
+//     background-color: var(--color-background);
+//     color: --color-text;
+//     display: block;
+// 
+//     // TODO
+//     // height: 0;
+//     height: 0;
+//     transition: all 0.3s ease-out;
+//     overflow-y: hidden;
+//     // margin-top: -100%;
+//     // position: relative;
+//     // z-index: 0;
+//     // transition
+// 
+//     &.active {
+//         background-color: var(--color-dark-highlight);
+//         // height: fit-content;
+//         // transition: all 0.3s ease-out;
+//     }
+// 
+//     &:not(.active) a {
+//         color: --color-text-passive;
+//     }
+// }
+// 
+// .mobile-dropdown-menu {
+//     &.active {
+//         background-color: var(--color-dark-highlight);
+//         color: --color-text;
+//     }
+// 
+//     &:not(.active) a {
+//         color: --color-text-passive
+//     }
+// }
 
-    margin-top: 0;
-    // margin-right: -$width-scrollbar - 2px;
-    margin-bottom: 0;
-    // margin-left: -2px;
+// .mobile-dropdown-menu > a {
+//     // otherwise, overriden by user agent;
+//     font-size: 1.5em;
+// 
+//     // padding-left: 20px;
+//     padding: 15px 20px 15px 20px;
+// }
 
-    // &:hover, &:focus-visible {
-    //     background-color: $color-hover-dark
-    // }
-}
+// .mobile-sidenav > a {
+//     padding-left: 15px;
+// }
+// 
+// .mobile-sidenav a {
+//     // border-top: 2px solid transparent;
+//     // border-bottom: 2px solid transparent;
+//     border: 2px solid transparent;
+//     display: block;
+// 
+//     margin-top: 0;
+//     // margin-right: -$width-scrollbar - 2px;
+//     margin-bottom: 0;
+//     // margin-left: -2px;
+// 
+//     // &:hover, &:focus-visible {
+//     //     background-color: $color-hover-dark
+//     // }
+// }
 
-.sticky {
-    position: -webkit-sticky;
-    position: sticky;
-    top: 0px;
-    z-index: 100;
-}
-
-.width-full-both-edges {
-    width: calc(100% + 2 * var(--width-scrollbar));
-}
-
-.width-full-edge {
-    width: calc(100% + 1 * var(--width-scrollbar));
-}
+// .width-full-both-edges {
+//     width: calc(100% + 2 * var(--width-scrollbar));
+// }
+// 
+// .width-full-edge {
+//     width: calc(100% + 1 * var(--width-scrollbar));
+// }
 
 //
 // based on type;
 //
 
-code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-        monospace;
-}
 
-html {
-    color-scheme: dark;
-    scrollbar-color: hsl(0, 0%, 50%) transparent;
-}
 
-strong {
-    // font-weight: 800
-    font-family: math;
-}
-
-ul {
-    list-style: "- ";
-    // font-size: 1.6em;
-}
+// strong {
+//     // font-weight: 800
+//     font-family: math;
+// }

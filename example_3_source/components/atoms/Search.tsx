@@ -3,9 +3,10 @@ import { create } from 'zustand'
 import algoliasearch from 'algoliasearch/lite'
 import DOMPurify from 'dompurify'
 import Link from 'next/link'
-import { isDebugEnabled } from '../../constants/general_constants'
+import { isDebugEnabled, tabIndexGroupTopnav } from '../../constants/general_constants'
 import { useRouter } from 'next/navigation'
 import { debounceEventFunction } from '../../constants/event_constants'
+import { useLayoutStore } from '../layout/Layout'
 
 export default Search
 export { useSearchStore }
@@ -54,6 +55,8 @@ function Search() {
 
     const router = useRouter()
 
+    const layoutStore = useLayoutStore()
+    //TODO
     const setIsSearchOpen = useSearchStore(state => state.setIsOpen)
     const searchInputElement = useSearchStore(state => state.inputElement)
     const setSearchInputElement = useSearchStore(state => state.setInputElement)
@@ -315,7 +318,12 @@ function Search() {
             className="w-full relative grid grid-flow-col [grid-template-columns:var(--height-topnav)_auto] items-center"
             onSubmit={handleSearch}
         >
-            <button type="submit"><i className="p-1 icon-medium material-icons">search</i></button>
+            <button
+                type="submit"
+                tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
+            >
+                <i className="p-1 icon-medium material-icons">search</i>
+            </button>
             <div className="relative pr-1">
                 {/* search input; */}
                 <input name="searchInput" className="w-full px-4 py-1 rounded-2xl peer"
@@ -326,6 +334,7 @@ function Search() {
                     onChange={debounceEventFunction(updateInputField, 300)}
                     onFocusCapture={handleFocus}
                     onKeyDown={handleKeyDown}
+                    tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
                 />
 
                 {/* search results; */}

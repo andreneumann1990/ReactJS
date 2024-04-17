@@ -7,7 +7,7 @@ export { triggerFlashEffect }
 //
 //
 
-function debounceEventFunction(eventFunction: (...args: any[]) => void, timeout_ms: number) {
+function debounceEventFunction(eventFunction: (...args: any[]) => void, timeout_ms: number): (...args: any[]) => void {
     let timer: number
     return (...args: any[]) => {
         clearTimeout(timer)

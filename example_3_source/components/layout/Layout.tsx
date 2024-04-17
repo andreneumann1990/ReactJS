@@ -2,18 +2,40 @@
 
 import Topnav from './Topnav'
 import Sidenav from './Sidenav'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect } from 'react'
 import Main from './Main'
 import { isDebugEnabled } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
+import { create } from 'zustand'
 
 export default Layout
+export { useLayoutStore }
+
+//
+//
+//
+
+const useLayoutStore = create<{
+    activeTabIndexGroup: number,
+    setActiveTabIndexGroup: (tabIndex: number) => void,
+}>(set => ({
+    activeTabIndexGroup: 0,
+    setActiveTabIndexGroup: (tabIndex) => set(() => ({ activeTabIndexGroup: tabIndex })),
+}))
 
 //
 // main
 //
 
 function Layout({ children }: React.PropsWithChildren) {
+    //
+    // parameters and variables
+    //
+
+    //TODO
+    // const isSearchOpen: boolean = useSearchStore(state => state.isOpen)
+    // const isSidenavOpen = useSidenavStore(state => state.isOpen)
+
     //
     // effects
     //
@@ -38,16 +60,22 @@ function Layout({ children }: React.PropsWithChildren) {
         }
     }, [])
 
-    const [isLoading, setIsLoading] = useState(true)
-    useEffect(() => setIsLoading(false), [])
-    if (isLoading) return <></>
+    // manage tabIndexGroup; //TODO
+    // useEffect(() => {
+    //     if ()
+    // }, [])
+
+    // is this still used??; TODO;
+    // const [isLoading, setIsLoading] = useState(true)
+    // useEffect(() => setIsLoading(false), [])
+    // if (isLoading) return <></>
 
     //
     //
     //
 
     return (<>
-        <div className="mobile sticky">
+        <div className="sticky top-0 z-[100]">
             <header><Topnav /></header>
             <aside><Sidenav /></aside>
         </div>

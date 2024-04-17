@@ -1,11 +1,11 @@
-import { KeyboardEvent, useCallback, useEffect } from 'react'
+import { KeyboardEvent, useCallback, useEffect, useRef } from 'react'
 import { useSidenavStore } from './Sidenav'
 import Link from 'next/link'
 import { create } from 'zustand'
-import { useMainStore } from './Main'
 import SearchBox, { useSearchStore } from '../atoms/Search'
-import { isDebugEnabled } from '../../constants/general_constants'
+import { isDebugEnabled, tabIndexGroupTopnav } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
+import { useLayoutStore } from './Layout'
 
 export default Topnav
 export { useTopnavStore }
@@ -39,39 +39,35 @@ function Topnav() {
     // parameters and variables
     //
 
-    const mainElement = useMainStore(state => state.element)
+    const focusAnchor = useRef<HTMLDivElement | null>(null)
 
-    const searchInputElement = useSearchStore(state => state.inputElement)
-
-    const sidenavElement = useSidenavStore(state => state.element)
-    const isSidenavOpen = useSidenavStore(state => state.isOpen)
-    const setIsSidenavOpen = useSidenavStore(state => state.setIsOpen)
-
-    const topnavElement = useTopnavStore(state => state.element)
-    const setTopnavElement = useTopnavStore(state => state.setElement)
-    const menuButtonElement = useTopnavStore(state => state.menuButtonElement)
-    const setMenuButtonElement = useTopnavStore(state => state.setMenuButtonElement)
+    const layoutStore = useLayoutStore()
+    const sidenavStore = useSidenavStore()
+    const searchStore = useSearchStore()
+    const topnavStore = useTopnavStore()
 
     //
     // functions
     //
 
     const initializeMenuButtonReference = (element: HTMLButtonElement | null) => {
-        if (menuButtonElement != null) return
+        if (topnavStore.menuButtonElement != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Topnav: Initialize menu reference.')
-        setMenuButtonElement(element)
+        topnavStore.setMenuButtonElement(element)
     }
 
     const initializeTopnavReference = (element: HTMLElement | null) => {
-        if (topnavElement != null) return
+        if (topnavStore.element != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Topnav: Initialize topbar reference.')
-        setTopnavElement(element)
+        topnavStore.setElement(element)
     }
 
     const focusNextElement = useCallback(() => {
+        const menuButtonElement = topnavStore.menuButtonElement
         if (menuButtonElement == null) return
+        const topnavElement = topnavStore.element
         if (topnavElement == null) return
         const focusedElement = document.activeElement as HTMLAnchorElement | null
         if (focusedElement == null) return
@@ -84,10 +80,12 @@ function Topnav() {
         if (nextElement == null) return
         if (nextElement === menuButtonElement) return
         nextElement.focus()
-    }, [menuButtonElement, topnavElement])
+    }, [topnavStore.element, topnavStore.menuButtonElement])
 
     const focusPreviousElement = useCallback(() => {
+        const menuButtonElement = topnavStore.menuButtonElement
         if (menuButtonElement == null) return
+        const topnavElement = topnavStore.element
         if (topnavElement == null) return
         const focusedElement = document.activeElement as HTMLElement | null
         if (focusedElement == null) return
@@ -100,22 +98,20 @@ function Topnav() {
         const previousElement = focusableElements[previousIndex]
         if (previousElement == null) return
         previousElement.focus()
-    }, [menuButtonElement, topnavElement])
+    }, [topnavStore.element, topnavStore.menuButtonElement])
 
-    const toggleSidenav = useCallback(() => {
-        if (isDebugEnabled) console.log('Topnav: Toggle sidebar.')
+    function toggleSidenav(): void {
+        if (isDebugEnabled) console.log('Topnav: Toggle sidenav.')
+        sidenavStore.setIsOpen(!sidenavStore.isOpen)
+    }
 
-        // not updated immediately;
-        setIsSidenavOpen(!isSidenavOpen)
-    }, [isSidenavOpen, setIsSidenavOpen])
+    function handleKeyInput(event: KeyboardEvent): void {
+        if (document.activeElement == searchStore.inputElement) return
+        // if (mainElement == null) return
+        // if (menuButtonElement == null) return
+        // if (sidenavElement == null) return
 
-    const handleKeyInputs = useCallback((event: KeyboardEvent) => {
-        if (document.activeElement == searchInputElement) return
-        if (mainElement == null) return
-        if (menuButtonElement == null) return
-        if (sidenavElement == null) return
-
-        if (document.activeElement === menuButtonElement) {
+        if (document.activeElement === topnavStore.menuButtonElement) {
             if (event.key === 'Enter') {
                 event.preventDefault()
                 event.stopPropagation()
@@ -127,10 +123,10 @@ function Topnav() {
             // ignore ArrowRight because other icons are displayed to the right;
             // but for consistency it would be nice; hmmm...;
             if (event.key === 'ArrowDown') {
-                if (isSidenavOpen) {
+                if (sidenavStore.isOpen) {
                     event.preventDefault()
                     event.stopPropagation()
-                    const firstElement = sidenavElement.querySelector<HTMLAnchorElement>('a')
+                    const firstElement = sidenavStore.element?.querySelector<HTMLAnchorElement>('a')
                     if (firstElement == null) return
                     firstElement.focus()
                     return
@@ -143,7 +139,7 @@ function Topnav() {
                 return
             }
 
-            if ((event.key === 'ArrowLeft' || event.key === 'ArrowUp') && isSidenavOpen) {
+            if ((event.key === 'ArrowLeft' || event.key === 'ArrowUp') && sidenavStore.isOpen) {
                 event.preventDefault()
                 event.stopPropagation()
                 toggleSidenav()
@@ -152,7 +148,7 @@ function Topnav() {
             }
         }
 
-        // if (event.key === 'ArrowUp' && sidebarContext.openState.isOpen) {
+        // if (event.key === 'ArrowUp' && sidenavContext.openState.isOpen) {
         if (event.key === 'ArrowLeft') {
             event.preventDefault()
             event.stopPropagation()
@@ -166,21 +162,40 @@ function Topnav() {
             focusNextElement()
             return
         }
-    }, [focusNextElement, focusPreviousElement, isSidenavOpen, mainElement, menuButtonElement, searchInputElement, sidenavElement, toggleSidenav])
+    }
+
+    function handleKeyInputTabIndex(event: KeyboardEvent): void {
+        console.log('input')
+        if (event.key == 'Enter' && layoutStore.activeTabIndexGroup != tabIndexGroupTopnav) {
+            event.preventDefault()
+            layoutStore.setActiveTabIndexGroup(tabIndexGroupTopnav)
+            // topnavStore.menuButtonElement?.focus()
+            focusAnchor.current?.focus()
+            return
+        }
+
+        if (event.key == 'Escape' && layoutStore.activeTabIndexGroup != 0) {
+            event.preventDefault()
+            layoutStore.setActiveTabIndexGroup(0)
+            topnavStore.element?.focus()
+            return
+        }
+    }
 
     //
     // effects
     //
 
-    // switch image for the sidebar toggle button;
+    // switch image for the sidenav toggle button;
     useEffect(() => {
+        const menuButtonElement = topnavStore.menuButtonElement
         if (menuButtonElement == null) return
         if (menuButtonElement.children.length < 2) return
 
         const menuIcon = menuButtonElement.children[0] as HTMLElement
         const closeIcon = menuButtonElement.children[1] as HTMLElement
 
-        if (isSidenavOpen) {
+        if (sidenavStore.isOpen) {
             menuIcon.classList.add('hidden')
             closeIcon.classList.remove('hidden')
             return
@@ -188,26 +203,48 @@ function Topnav() {
 
         menuIcon.classList.remove('hidden')
         closeIcon.classList.add('hidden')
-    }, [isSidenavOpen, menuButtonElement])
+    }, [sidenavStore.isOpen, topnavStore.menuButtonElement])
 
     //
     //
     //
 
+    // tabIndex for onFocus(); TODO;
     return (<>
-        <nav ref={initializeTopnavReference} className="bg-background h-[--height-topnav] shadow-md">
-            <div className="grid grid-flow-col [grid-template-columns:20%_60%_20%] justify-items-center justify-between" onKeyUp={handleKeyInputs}>
+        <nav
+            className="bg-background h-[--height-topnav] shadow-md"
+            ref={initializeTopnavReference}
+            onKeyDown={handleKeyInputTabIndex}
+            tabIndex={layoutStore.activeTabIndexGroup == 0 ? 0 : -1}
+        >
+            <div
+                ref={focusAnchor}
+                tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupTopnav ? 0 : -1}
+            />
+            <div
+                className="grid grid-flow-col [grid-template-columns:20%_60%_20%] justify-items-center justify-between"
+                onKeyUp={handleKeyInput}
+            >
                 <div className="grid grid-flow-col justify-self-start">
-                    <button className="h-[--height-topnav]" ref={initializeMenuButtonReference} onPointerUp={toggleSidenav} tabIndex={2}>
+                    <button
+                        className="h-[--height-topnav]"
+                        onPointerUp={toggleSidenav}
+                        ref={initializeMenuButtonReference}
+                        tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
+                    >
                         <i className="p-1 icon-medium material-icons">menu</i>
                         <i className="p-1 icon-medium material-icons hidden">close</i>
                     </button>
-                    <Link className="block h-[--height-topnav]" href="/home" tabIndex={1000}>
+                    <Link
+                        className="block h-[--height-topnav]"
+                        href="/home"
+                        tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
+                    >
                         <i className="p-1 icon-medium material-icons">home</i>
                     </Link>
                 </div>
                 <SearchBox />
             </div>
-        </nav>
+        </nav >
     </>)
 }

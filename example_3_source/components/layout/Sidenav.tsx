@@ -3,7 +3,6 @@ import DropdownMenu from '../atoms/DropdownMenu'
 import { create } from 'zustand'
 import Link from 'next/link'
 import { useTopnavStore } from './Topnav'
-import { useMainStore } from './Main'
 import { useClick } from '../../hooks/gesture_hooks'
 import { isDebugEnabled } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
@@ -48,25 +47,21 @@ function Sidenav() {
     // paramters and variables
     //
 
-    const mainElement = useMainStore(state => state.element)
-
-    const sidenavElement = useSidenavStore(state => state.element)
-    const setSidenavElement = useSidenavStore(state => state.setElement)
-    const isSidenavOpen = useSidenavStore(state => state.isOpen)
-    const setIsSidenavOpen = useSidenavStore(state => state.setIsOpen)
-
-    const menuButtonElement = useTopnavStore(state => state.menuButtonElement)
+    const sidenavStore = useSidenavStore()
+    const topnavStore = useTopnavStore()
 
     //
     // functions
     //
 
     function closeSidenav(): void {
-        setIsSidenavOpen(false)
+        sidenavStore.setIsOpen(false)
     }
 
     function focusNextElement() {
+        const menuButtonElement = topnavStore.menuButtonElement
         if (menuButtonElement == null) return
+        const sidenavElement = sidenavStore.element
         if (sidenavElement == null) return
         const focusedElement = document.activeElement as HTMLAnchorElement | null
         if (focusedElement == null) return
@@ -82,7 +77,9 @@ function Sidenav() {
     }
 
     function focusPreviousElement() {
+        const menuButtonElement = topnavStore.menuButtonElement
         if (menuButtonElement == null) return
+        const sidenavElement = sidenavStore.element
         if (sidenavElement == null) return
         const focusedElement = document.activeElement as HTMLElement | null
         if (focusedElement == null) return
@@ -123,14 +120,13 @@ function Sidenav() {
             return
         }
 
-        if (event.key === 'ArrowLeft' && isSidenavOpen) {
+        if (event.key === 'ArrowLeft' && sidenavStore.isOpen) {
             event.preventDefault()
             event.stopPropagation()
-            setIsSidenavOpen(false)
+            sidenavStore.setIsOpen(false)
 
             setTimeout(() => {
-                if (menuButtonElement == null) return
-                menuButtonElement.focus()
+                topnavStore.menuButtonElement?.focus()
             }, 500)
             return
         }
@@ -138,10 +134,10 @@ function Sidenav() {
 
     // this is called when the component mounts or unmounts; and called when it re-renders;
     const initializeSidenavReference = (element: HTMLElement | null) => {
-        if (sidenavElement != null) return
+        if (sidenavStore.element != null) return
         if (element == null) return // should never happen!! since it gets never unmounted;
         if (isDebugEnabled) console.log('Sidenav: Initialize sidenav reference.')
-        setSidenavElement(element)
+        sidenavStore.setElement(element)
     }
 
     //
@@ -151,8 +147,8 @@ function Sidenav() {
     // update state;
     useEffect(() => {
         //TODO; check tab index handling;
+        const sidenavElement = sidenavStore.element
         if (sidenavElement == null) return
-        if (mainElement == null) return
         if (isDebugEnabled) console.log('Sidenav: Update state.')
 
         const disableTabIndex = () => {
@@ -176,19 +172,22 @@ function Sidenav() {
 
         //TODO; make changes by adding and removing classes only??; not possible if the value is dynamic;
         sidenavElement.style.transition = 'transform 0.5s ease-out 0s'
-        if (isDebugEnabled) console.log(`Sidenav: isOpen ${isSidenavOpen}`)
+        if (isDebugEnabled) console.log(`Sidenav: isOpen ${sidenavStore.isOpen}`)
 
-        if (isSidenavOpen) {
-            enableTabIndex()
-            mainElement.classList.add('inactive')
+        if (sidenavStore.isOpen) {
+            //TODO
+            // enableTabIndex()
+            sidenavElement.removeAttribute('disabled')
+            // mainElement.classList.add('inactive')
             sidenavElement.style.transform = `translateX(${sidenavElement.offsetWidth}px)`
             return
         }
 
-        disableTabIndex()
-        mainElement.classList.remove('inactive')
+        sidenavElement.setAttribute('disabled', '')
+        // disableTabIndex()
+        // mainElement.classList.remove('inactive')
         sidenavElement.style.transform = 'translateX(0)'
-    }, [isSidenavOpen, mainElement, sidenavElement])
+    }, [sidenavStore.element, sidenavStore.isOpen])
 
     // click event listener
     useEffect(() => {
@@ -207,15 +206,15 @@ function Sidenav() {
 
         const handlePointerUp = (event: PointerEvent) => {
             if (distanceSquared(event.screenX - startX, event.screenY - startY) > thresholdSquared) return
-            if (!isSidenavOpen) return
-            if (sidenavElement == null) return
-            if (sidenavElement.contains(event.target as Node)) return
+            if (!sidenavStore.isOpen) return
+            if (sidenavStore.element == null) return
+            if (sidenavStore.element.contains(event.target as Node)) return
 
-            if (menuButtonElement == null) return
-            if (menuButtonElement.contains(event.target as Node)) return
+            if (topnavStore.menuButtonElement == null) return
+            if (topnavStore.menuButtonElement.contains(event.target as Node)) return
 
             if (isDebugEnabled) console.log('Sidenav: Clicked outside. Close sidenav.')
-            setIsSidenavOpen(false)
+            sidenavStore.setIsOpen(false)
         }
 
         document.addEventListener('pointerdown', handlePointerDown)
@@ -225,24 +224,40 @@ function Sidenav() {
             document.removeEventListener('pointerdown', handlePointerDown)
             document.removeEventListener('pointerup', handlePointerUp)
         }
-    }, [isSidenavOpen, menuButtonElement, setIsSidenavOpen, sidenavElement])
+    }, [sidenavStore, topnavStore.menuButtonElement])
 
     //
     //
     //
-
-    //TODO; was this strictly necessary?;
-    // const [isLoading, setIsLoading] = useState(true)
-    // useEffect(() => setIsLoading(false), [])
-    // if (isLoading) return <></>
 
     return (<>
-        <nav ref={initializeSidenavReference} className="fixed w-[min(500px,70vw)] h-[calc(100vh-var(--height-topnav))] left-[max(-500px,-70vw)] bg-background shadow-lg shadow-neutral-950 leading-10 overflow-y-auto overflow-x-hidden scrollbar-stable z-[100]" tabIndex={-1} onKeyUp={handleKeyInput}>
+        <nav
+            className="fixed w-[min(500px,70vw)] h-[calc(100vh-var(--height-topnav))] left-[max(-500px,-70vw)] bg-background shadow-lg shadow-neutral-950 leading-10 overflow-y-auto overflow-x-hidden scrollbar-stable z-[100]"
+            ref={initializeSidenavReference}
+            onKeyUp={handleKeyInput}
+        // tabIndex={-1}
+        >
             <hr />
-            <Link href="/image_examples" className="block pl-4 py-[2px]" {...useClick(closeSidenav)}>Image Examples</Link><hr />
-            <Link href="/form_examples" className="block pl-4 py-[2px]" {...useClick(closeSidenav)}>Form Examples</Link><hr />
-            <Link href="/back_end_examples" className="block pl-4 py-[2px]" {...useClick(closeSidenav)}>Back-End Examples</Link><hr />
+            <Link
+                className="block pl-4 py-[2px]"
+                href="/image_examples"
+                {...useClick(closeSidenav)}
+                tabIndex={sidenavStore.isOpen ? undefined : -1}
+            >Image Examples</Link><hr />
+            <Link
+                className="block pl-4 py-[2px]"
+                href="/form_examples"
+                {...useClick(closeSidenav)}
+                tabIndex={sidenavStore.isOpen ? undefined : -1}
+            >Form Examples</Link><hr />
+            <Link
+                className="block pl-4 py-[2px]"
+                href="/back_end_examples"
+                {...useClick(closeSidenav)}
+                tabIndex={sidenavStore.isOpen ? undefined : -1}
+            >Back-End Examples</Link><hr />
             <DropdownMenu text="Dropdown 1">
+                {/* TODO; tabIndex; */}
                 <Link href="#" className="block pl-8 py-[2px]">Link 3</Link>
                 <Link href="#" className="block pl-8 py-[2px]">Link 4</Link>
                 <Link href="#" className="block pl-8 py-[2px]">Link 5</Link>

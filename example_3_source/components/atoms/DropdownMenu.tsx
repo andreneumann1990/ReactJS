@@ -1,5 +1,4 @@
 import { KeyboardEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
 import { useSidenavStore } from '../layout/Sidenav'
 import { triggerFlashEffect } from '../../constants/event_constants'
 import { isDebugEnabled } from '../../constants/general_constants'
@@ -19,15 +18,14 @@ function DropdownMenu({ children, className, text }: {
     // parameters and variables
     //
 
-    // const sidebarContext = useContext(SidenavContext)
+    const sidenavStore = useSidenavStore()
+
     const menuReference = useRef<HTMLDivElement | null>(null)
-    const contentReference = useRef<HTMLDivElement | null>(null)
     const iconReference = useRef<HTMLElement | null>(null)
 
+    const [contentReference, setContentReference] = useState<HTMLElement | null>(null)
+    // const [contentHeight, setContentHeight] = useState<number>(0)
     const [isDropdownOpen, setIsDropdownOpen] = useState<boolean>(false)
-    const isSidenavOpen = useSidenavStore(state => state.isOpen)
-    const lastActiveDropdownElement = useSidenavStore(state => state.lastActiveDropdownElement)
-    const setLastActiveDropdownElement = useSidenavStore(state => state.setLastActiveDropdownElement)
 
     //
     // functions
@@ -73,59 +71,102 @@ function DropdownMenu({ children, className, text }: {
 
     const toggleContent = useCallback(() => {
         if (menuReference.current === null) return
-        if (contentReference.current === null) return
+        if (contentReference === null) return
 
         if (iconReference.current === null) return
         if (isDebugEnabled) console.log(`Dropdown: isOpen ${!isDropdownOpen}`)
 
         if (isDropdownOpen) {
             setIsDropdownOpen(false)
-            menuReference.current.classList.remove('active')
-            contentReference.current.classList.add('hidden')
+            delete menuReference.current.dataset.active
+            delete contentReference.dataset.active
+            console.log('deactivate')
 
-            contentReference.current.classList.remove('active')
-            contentReference.current.style.height = '0'
+            // menuReference.current.classList.remove('active') //TODO
+            // contentReference.current.classList.add('hidden')
+            // contentReference.current.classList.remove('active')
+
+            contentReference.style.height = '0' //TODO
             iconReference.current.style.transform = 'rotate(0deg)'
             return
         }
 
+        setIsDropdownOpen(true)
+        menuReference.current.dataset.active = ''
+        console.log('activate')
+        contentReference.dataset.active = ''
+
         let contentHeight = 0
-        contentReference.current.childNodes.forEach((element: Node) => {
+        contentReference.childNodes.forEach((element: Node) => {
             if (!(element instanceof HTMLAnchorElement)) return
             contentHeight += element.offsetHeight
         })
+        console.log('content height ' + contentHeight) //TODO
 
-        setIsDropdownOpen(true)
-        menuReference.current.classList.add('active')
-        contentReference.current.classList.remove('hidden')
+        // contentReference.current.classList.remove('hidden')
+        // contentReference.current.classList.add('active')
+        contentReference.style.height = `${contentHeight}px`
 
-        contentReference.current.classList.add('active')
-        contentReference.current.style.height = `${contentHeight}px`
         iconReference.current.style.transform = 'rotate(-180deg)'
-        setLastActiveDropdownElement(menuReference.current)
-    }, [isDropdownOpen, setLastActiveDropdownElement])
+        sidenavStore.setLastActiveDropdownElement(menuReference.current)
+    },
+        [contentReference, isDropdownOpen, sidenavStore])
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // [isDropdownOpen, sidenavStore.setLastActiveDropdownElement])
 
     //
     // effects
     //
 
+    useEffect(() => {
+        if (contentReference == null) return
+        // let contentHeight = 0
+        // contentReference.childNodes.forEach((element: Node) => {
+        //     if (!(element instanceof HTMLAnchorElement)) return
+        //     contentHeight += element.offsetHeight
+        // })
+        // console.log(contentReference.childNodes)
+        // if (children == null) return
+        // console.log(typeof children.valueOf())
+        // React.Children.forEach(children, (element) => {
+        //     console.log(element)
+        //     if (!(element instanceof HTMLAnchorElement)) return
+        //     // contentHeight += element.offsetHeight
+        // })
+        // const contentHeight = Object.values(children.valueOf()).reduce((accumulator, current) => {
+        //     console.log(current)
+        //     if (!(current instanceof HTMLAnchorElement)) return accumulator
+        //     accumulator += current.offsetHeight
+        // }, 0)
+        // console.log(Object.values(children.valueOf()))
+        // if (!(children implements Iterable<ReactNode>)) return
+        // children.forEach((element: Node) => {
+        //     if (!(element instanceof HTMLAnchorElement)) return
+        //     contentHeight += element.offsetHeight
+        // })
+        // console.log('contentHeight ' + contentHeight)
+        // setContentHeight(contentHeight)
+    }, [children, contentReference])
+
     // close this one if another dropdown menu got opened;
     useEffect(() => {
         if (isDebugEnabled) console.log(`Dropdown: isOpen ${isDropdownOpen}`)
         if (!isDropdownOpen) return
-        if (lastActiveDropdownElement == null) return
+        if (sidenavStore.lastActiveDropdownElement == null) return
 
         if (menuReference.current == null) return
-        if (menuReference.current === lastActiveDropdownElement) return
+        if (menuReference.current === sidenavStore.lastActiveDropdownElement) return
         toggleContent()
-    }, [isDropdownOpen, lastActiveDropdownElement, toggleContent])
+    }, [isDropdownOpen, sidenavStore.lastActiveDropdownElement, toggleContent])
 
+    //TODO
     // update tabindex;
     useEffect(() => {
-        if (contentReference.current == null) return
+        if (contentReference == null) return
         if (menuReference.current == null) return
 
-        if (!isSidenavOpen) {
+        if (!sidenavStore.isOpen) {
             menuReference.current.querySelectorAll('a').forEach(element => {
                 element.tabIndex = -1
             })
@@ -133,19 +174,19 @@ function DropdownMenu({ children, className, text }: {
         }
 
         const menuButton = menuReference.current.querySelector('a')
-        if (menuButton != null) menuButton.tabIndex = 100
+        if (menuButton != null) menuButton.removeAttribute('tabIndex')
 
         if (isDropdownOpen) {
-            contentReference.current.querySelectorAll('a').forEach(element => {
-                element.tabIndex = 100
+            contentReference.querySelectorAll('a').forEach(element => {
+                element.removeAttribute('tabIndex')
             })
             return
         }
 
-        contentReference.current.querySelectorAll('a').forEach(element => {
+        contentReference.querySelectorAll('a').forEach(element => {
             element.tabIndex = -1
         })
-    }, [isDropdownOpen, isSidenavOpen])
+    }, [contentReference, isDropdownOpen, sidenavStore.isOpen])
 
     //
     //
@@ -153,15 +194,29 @@ function DropdownMenu({ children, className, text }: {
 
     return (<>
         {/* the div block is for changing the background color; the anchor changed its bg-color based on hover; */}
-        <div ref={menuReference} className={className == null ? 'mobile-dropdown-menu' : 'mobile-dropdown-menu ' + className}>
+        <div
+            ref={menuReference}
+            className={(className == null ? '' : className)}
+        >
             {/* TODO; change to buttons for semantics; */}
-            <Link href="#" className="block" onPointerUp={toggleContent} onKeyUp={toggleContentKeyInput}>
+            <button
+                className="block p-5 w-full text-left text-2xl"
+                onKeyUp={toggleContentKeyInput}
+                onPointerUp={toggleContent}
+            >
                 <div className="grid grid-cols-2 items-center">
                     {text}
-                    <i ref={iconReference} className="icon-medium material-icons justify-self-end">computer</i>
+                    <i ref={iconReference} className="icon-medium material-icons justify-self-end transition-all ease-out duration-300">computer</i>
                 </div>
-            </Link>
-            <div ref={contentReference} className="mobile-dropdown-content hidden" onKeyUp={handleArrowLeft}>
+            </button>
+            <div
+                ref={setContentReference}
+                // the height needs to be directly changed; otherwise, the transition will not 
+                // work;
+                className="bg-background transition-all duration-300 ease-out overflow-y-hidden"
+                style={{ height: 0 }}
+                onKeyUp={handleArrowLeft}
+            >
                 {children}
             </div>
         </div>
