@@ -7,7 +7,6 @@ import { InputCountry1, InputCountry2 } from '../../components/atoms/InputCountr
 import Link from 'next/link'
 import { Button } from '@mui/material'
 import { useNavigateAndHighlightElement } from '../../hooks/navigation_hooks'
-import { useMainStore } from '../../components/layout/Main'
 import { useLayoutStore } from '../../components/layout/Layout'
 import { tabIndexGroupMain } from '../../constants/general_constants'
 
@@ -21,7 +20,6 @@ function Page() {
     //
 
     const layoutStore = useLayoutStore()
-    const mainStore = useMainStore()
 
     //
     // functions
@@ -100,7 +98,7 @@ function Page() {
     function handleClick(event: MouseEvent): void {
         const element = event.target as HTMLInputElement | null
         if (element == null) return
-        if (element.name == '') return
+        if (element.name === '') return
         form1.setFieldValue(element.name, 'clicked')
     }
 
@@ -136,7 +134,7 @@ function Page() {
                             className="bg-primary border m-1 px-2 py-1 rounded-md"
                             name="button"
                             onClick={handleClick}
-                            tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupMain ? undefined : -1}
+                            tabIndex={layoutStore.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
                             type="button"
                             value="use cases? use normal button instead?"
                         />

@@ -48,7 +48,7 @@ function Page() {
         <details
             className="group border rounded-md ml-1 mb-2"
             onFocusCapture={setTabIndex}
-            tabIndex={activeTabIndexGroup == tabIndexGroupMain ? undefined : -1}
+            tabIndex={activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
         >
             <summary className="group-open:border-b p-2">Example 1</summary>
             <ul className="*:my-2 pl-10">
@@ -68,7 +68,7 @@ function Page() {
         <details
             className="group border rounded-md ml-1 mb-2"
             onFocusCapture={setTabIndex}
-            tabIndex={activeTabIndexGroup == tabIndexGroupMain ? undefined : -1}
+            tabIndex={activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
         >
             <summary className="group-open:border-b p-2">Example 2</summary>
             <ul className="*:my-2 pl-10">

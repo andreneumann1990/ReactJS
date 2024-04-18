@@ -91,12 +91,12 @@ function Search() {
     // navigate via arrow keys; escape to close;
     function handleKeyDown(event: React.KeyboardEvent) {
         if (searchStore.inputElement == null) return
-        if (event.key == 'ArrowLeft' || event.key == 'ArrowRight') {
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             event.preventDefault()
             return
         }
 
-        if (event.key == 'Escape') {
+        if (event.key === 'Escape') {
             event.preventDefault()
             previouslyFocusedElement?.focus()
             searchStore.inputElement.blur()
@@ -106,7 +106,7 @@ function Search() {
         if (Object.keys(searchResultDataArray).length < 1) return
         const [keyIndex, entryIndex] = searchResultSelectedIndex
 
-        if (event.key == 'ArrowDown') {
+        if (event.key === 'ArrowDown') {
             const entryArray: EntryData[] | undefined = Object.values(searchResultDataArray)[keyIndex]
             if (entryArray == null) {
                 if (isDebugEnabled) {
@@ -127,7 +127,7 @@ function Search() {
             return
         }
 
-        if (event.key == 'ArrowUp') {
+        if (event.key === 'ArrowUp') {
             if (entryIndex > 0) {
                 event.preventDefault()
                 setSearchResultSelectedIndex([keyIndex, entryIndex - 1])
@@ -165,7 +165,7 @@ function Search() {
     function updateInputField(event: ChangeEvent): void {
         const inputElement = event.target as HTMLInputElement | null
         if (inputElement == null) return
-        if (inputElement.value == searchQuery) return
+        if (inputElement.value === searchQuery) return
         if (isDebugEnabled) console.log('Search: Update search query.')
         setSearchQuery(inputElement.value)
     }
@@ -198,7 +198,7 @@ function Search() {
         if (searchStore.inputElement == null) return
         if (isDebugEnabled) console.log('Search: Update state.')
 
-        if (document.activeElement == searchStore.inputElement) {
+        if (document.activeElement === searchStore.inputElement) {
             if (searchStore.isOpen) return
             searchStore.setIsOpen(true)
             return
@@ -228,14 +228,17 @@ function Search() {
 
     // select search input field by ctrl+k;
     useEffect(() => {
-        const bodyElement = document.querySelector('body')
-        if (bodyElement == null) return
-
-        function handleKeyInputs(event: KeyboardEvent) {
-            if (searchStore.inputElement == null) return
-            if (event.ctrlKey && event.key == 'k') {
+        function handleKeyDownInput(event: KeyboardEvent): void {
+            if (event.ctrlKey && event.key === 'k') {
                 event.preventDefault()
-                if (document.activeElement == searchStore.inputElement) {
+            }
+        }
+
+        function handleKeyUpInput(event: KeyboardEvent): void {
+            if (searchStore.inputElement == null) return
+            if (event.ctrlKey && event.key === 'k') {
+                event.preventDefault()
+                if (document.activeElement === searchStore.inputElement) {
                     previouslyFocusedElement?.focus()
                     searchStore.inputElement.blur()
                     return
@@ -246,21 +249,25 @@ function Search() {
             }
         }
 
-        bodyElement.addEventListener('keydown', handleKeyInputs)
+        // for some reason `keypress` does not trigger??;
+        document.addEventListener('keydown', handleKeyDownInput)
+        document.addEventListener('keyup', handleKeyUpInput)
+
         return (() => {
-            bodyElement.removeEventListener('keydown', handleKeyInputs)
+            document.removeEventListener('keydown', handleKeyDownInput)
+            document.removeEventListener('keyup', handleKeyUpInput)
         })
     }, [previouslyFocusedElement, searchStore.inputElement])
 
     // search after query is updated, i.e. onChange();
     useEffect(() => {
-        if (searchQuery == '') {
+        if (searchQuery === '') {
             if (Object.keys(searchResultDataArray).length < 1) return
             setSearchResultDataArray({})
             return
         }
 
-        if (searchQuery == lastSearchQuery) return
+        if (searchQuery === lastSearchQuery) return
         setLastSearchQuery(searchQuery)
         if (isDebugEnabled) console.log(`Search: Search for ${searchQuery}`)
 
@@ -295,7 +302,7 @@ function Search() {
 
                 let matchedWordArray: string[] = []
                 innerHTML.split('<em>').forEach((str: string) => {
-                    if (str == '') return
+                    if (str === '') return
                     matchedWordArray.push(str.split('</em>')[0])
                 })
 
@@ -308,7 +315,7 @@ function Search() {
 
                 dataArray[hit.url_relative].push({
                     href: `${hit.url_relative}?${queryString}`,
-                    open: index == 0,
+                    open: index === 0,
                     purifiedInnerHTML: DOMPurify.sanitize(innerHTML),
                 })
             })
@@ -333,7 +340,7 @@ function Search() {
         >
             <button
                 type="submit"
-                tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
+                tabIndex={layoutStore.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
             >
                 <i className="p-1 icon-medium material-icons">search</i>
             </button>
@@ -347,7 +354,7 @@ function Search() {
                     onChange={debounceEventFunction(updateInputField, 300)}
                     onFocusCapture={handleFocus}
                     onKeyDown={handleKeyDown}
-                    tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
+                    tabIndex={layoutStore.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
                 />
 
                 {/* search results; */}
@@ -364,7 +371,7 @@ function Search() {
                             <header>{url_relative}</header>
                             {entryArray.map((entry, entryIndex) => {
                                 return (<Link key={`l-${entryIndex}`}
-                                    className={'grid items-center my-3 text-left min-h-10 p-2 px-4 mt-2 border rounded-2xl' + (keyIndex == searchResultSelectedIndex[0] && entryIndex == searchResultSelectedIndex[1] ? ' bg-primary-active' : ' bg-primary')}
+                                    className={'grid items-center my-3 text-left min-h-10 p-2 px-4 mt-2 border rounded-2xl' + (keyIndex === searchResultSelectedIndex[0] && entryIndex === searchResultSelectedIndex[1] ? ' bg-primary-active' : ' bg-primary')}
                                     href={entry.href}
                                 >
                                     <div

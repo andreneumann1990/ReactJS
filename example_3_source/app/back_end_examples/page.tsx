@@ -81,7 +81,7 @@ function Page() {
 
         <h2 className="my-1 text-xl font-bold">GET requests:</h2>
         <ul className="*:my-2 pl-10">
-            {greetingResponse == '' ?
+            {greetingResponse === '' ?
                 (<li>no response yet</li>) :
                 (<li>{`Back-End: <${greetingResponse}>`}</li>)
             }

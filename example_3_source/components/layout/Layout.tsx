@@ -59,19 +59,19 @@ function Layout({ children }: React.PropsWithChildren) {
 
     // click highlights links; up / down selects topnav / main;
     useEffect(() => {
-        const handleKeyInput = function (event: KeyboardEvent) {
+        const handleKeyUpInput = function (event: KeyboardEvent) {
             const element = event.target as HTMLElement | null
             if (element == null) return
 
-            if (layoutStore.activeTabIndexGroup == tabIndexGroupDefault) {
-                if (event.key == 'ArrowUp') {
+            if (layoutStore.activeTabIndexGroup === tabIndexGroupDefault) {
+                if (event.key === 'ArrowUp') {
                     event.preventDefault()
                     event.stopPropagation()
                     topnavStore.element?.focus()
                     return
                 }
 
-                if (event.key == 'ArrowDown') {
+                if (event.key === 'ArrowDown') {
                     event.preventDefault()
                     event.stopPropagation()
                     mainStore.element?.focus()
@@ -82,11 +82,11 @@ function Layout({ children }: React.PropsWithChildren) {
         }
 
         document.addEventListener('pointerup', triggerFlashEffect)
-        document.addEventListener('keydown', handleKeyInput)
+        document.addEventListener('keyup', handleKeyUpInput)
 
         return () => {
             document.removeEventListener('pointerup', triggerFlashEffect)
-            document.removeEventListener('keydown', handleKeyInput)
+            document.removeEventListener('keyup', handleKeyUpInput)
         }
     }, [layoutStore.activeTabIndexGroup, mainStore.element, topnavStore.element])
 

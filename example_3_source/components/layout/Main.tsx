@@ -119,12 +119,11 @@ function Main({ children }: React.PropsWithChildren) {
     }
 
     //TODO
-    function handleKeyInput(event: KeyboardEvent): void {
-        //TODO check other places for consistency; maybe one handleKeyInput() function per component;
-        if (isDebugEnabled) console.log('Main: Handle key input.')
+    function handleKeyUpInput(event: KeyboardEvent): void {
+        if (isDebugEnabled) console.log('Main: Handle key-up input.')
 
-        if (document.activeElement == mainStore.element) {
-            if (event.key == 'Enter') {
+        if (document.activeElement === mainStore.element) {
+            if (event.key === 'Enter') {
                 event.preventDefault()
                 layoutStore.setActiveTabIndexGroup(tabIndexGroupMain)
                 // focusAnchor.current?.focus()
@@ -132,7 +131,7 @@ function Main({ children }: React.PropsWithChildren) {
                 return
             }
 
-            if (event.key == 'ArrowUp') {
+            if (event.key === 'ArrowUp') {
                 event.preventDefault()
                 topnavStore.element?.focus()
                 return
@@ -141,15 +140,15 @@ function Main({ children }: React.PropsWithChildren) {
         }
 
         //TODO
-        if (document.activeElement?.tagName == 'SUMMARY') {
-            if (event.key == 'ArrowRight') {
+        if (document.activeElement?.tagName === 'SUMMARY') {
+            if (event.key === 'ArrowRight') {
                 event.preventDefault()
                 event.stopPropagation()
                 document.activeElement.parentElement?.setAttribute('open', '')
                 return
             }
 
-            if (event.key == 'ArrowLeft') {
+            if (event.key === 'ArrowLeft') {
                 event.preventDefault()
                 event.stopPropagation()
                 document.activeElement.parentElement?.removeAttribute('open')
@@ -157,21 +156,21 @@ function Main({ children }: React.PropsWithChildren) {
             }
         }
 
-        if (event.key == 'Escape') {
+        if (event.key === 'Escape') {
             event.preventDefault()
             layoutStore.setActiveTabIndexGroup(0)
             mainStore.element?.focus()
             return
         }
 
-        if (event.key == 'ArrowDown') {
+        if (event.key === 'ArrowDown') {
             event.preventDefault()
             event.stopPropagation()
             focusNextElement()
             return
         }
 
-        if (event.key == 'ArrowUp') {
+        if (event.key === 'ArrowUp') {
             event.preventDefault()
             event.stopPropagation()
             focusPreviousElement()
@@ -186,7 +185,7 @@ function Main({ children }: React.PropsWithChildren) {
 
     // update state;
     useEffect(() => {
-        if (mainStore.isActive == (!sidenavStore.isOpen && !searchStore.isOpen)) return
+        if (mainStore.isActive === (!sidenavStore.isOpen && !searchStore.isOpen)) return
         mainStore.setIsActive(!mainStore.isActive)
     }, [mainStore, searchStore.isOpen, sidenavStore.isOpen])
 
@@ -211,13 +210,13 @@ function Main({ children }: React.PropsWithChildren) {
         <main
             {...dragAttributes}
             className="h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-colors ease-out duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
-            onKeyDown={handleKeyInput}
+            onKeyUp={handleKeyUpInput}
             ref={initializeMainReference}
-            tabIndex={(mainStore.isActive && layoutStore.activeTabIndexGroup == 0 ? 0 : -1)}
+            tabIndex={(mainStore.isActive && layoutStore.activeTabIndexGroup === 0 ? 0 : -1)}
         >
             <div
                 ref={focusAnchor}
-                tabIndex={layoutStore.activeTabIndexGroup == tabIndexGroupMain ? 0 : -1}
+                tabIndex={layoutStore.activeTabIndexGroup === tabIndexGroupMain ? 0 : -1}
             />
             {children}
         </main >

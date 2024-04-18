@@ -61,7 +61,7 @@ function useNavigateAndHighlightElement(pageName?: string): void {
                 if (textElement == null) return
                 if (textElement.textContent == null) return
                 const startIndex = textElement.textContent.toLowerCase().indexOf(word.toLowerCase())
-                if (startIndex == -1) return
+                if (startIndex === -1) return
 
                 const range = document.createRange()
                 if (selection.rangeCount < 1) {

@@ -33,7 +33,7 @@ function DropdownMenu(props: {
     //
 
     function handleArrowLeft(event: KeyboardEvent): void {
-        if (event.key == 'ArrowLeft' && isDropdownOpen) {
+        if (event.key === 'ArrowLeft' && isDropdownOpen) {
             event.preventDefault()
             event.stopPropagation()
             toggleContent()
@@ -43,7 +43,7 @@ function DropdownMenu(props: {
     }
 
     function toggleContentKeyInput(event: KeyboardEvent): void {
-        if (event.key == 'Enter') {
+        if (event.key === 'Enter') {
             event.preventDefault()
             event.stopPropagation()
             toggleContent()
@@ -51,7 +51,7 @@ function DropdownMenu(props: {
             return
         }
 
-        if (event.key == 'ArrowRight' && !isDropdownOpen) {
+        if (event.key === 'ArrowRight' && !isDropdownOpen) {
             event.preventDefault()
             event.stopPropagation()
             toggleContent()
@@ -59,7 +59,7 @@ function DropdownMenu(props: {
             return
         }
 
-        if (event.key == 'ArrowLeft' && isDropdownOpen) {
+        if (event.key === 'ArrowLeft' && isDropdownOpen) {
             event.preventDefault()
             event.stopPropagation()
             toggleContent()
@@ -107,7 +107,7 @@ function DropdownMenu(props: {
         if (sidenavStore.lastActiveDropdownElement == null) return
 
         if (buttonRef.current == null) return
-        if (buttonRef.current == sidenavStore.lastActiveDropdownElement) return
+        if (buttonRef.current === sidenavStore.lastActiveDropdownElement) return
         toggleContent()
     }, [isDropdownOpen, sidenavStore.lastActiveDropdownElement, toggleContent])
 

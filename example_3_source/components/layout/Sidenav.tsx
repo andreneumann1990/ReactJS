@@ -1,10 +1,10 @@
-import { KeyboardEvent, useCallback, useEffect } from 'react'
+import { KeyboardEvent, useCallback, useEffect, useRef } from 'react'
 import DropdownMenu from '../atoms/DropdownMenu'
 import { create } from 'zustand'
 import Link from 'next/link'
 import { useTopnavStore } from './Topnav'
 import { useClick } from '../../hooks/gesture_hooks'
-import { isDebugEnabled } from '../../constants/general_constants'
+import { initialDelay, isDebugEnabled, noRepeatDelay, repeatDelay } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
 import { useLayoutStore } from './Layout'
 
@@ -53,10 +53,17 @@ function Sidenav() {
     const topnavStore = useTopnavStore()
 
     const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"])'
+    let keyDownTimeoutRef = useRef<NodeJS.Timeout | undefined>()
 
     //
     // functions
     //
+
+    function clearKeyDownTimeout(): void {
+        if (isDebugEnabled) console.log('Sidenav: Clear key-down timeout.')
+        clearTimeout(keyDownTimeoutRef.current)
+        keyDownTimeoutRef.current = undefined
+    }
 
     const closeSidenav = useCallback(() => {
         layoutStore.resetActiveTabIndexGroup()
@@ -90,47 +97,77 @@ function Sidenav() {
         focusableElements[previousIndex]?.focus()
     }
 
-    function handleKeyInput(event: KeyboardEvent): void {
-        if (isDebugEnabled) console.log('Sidenav: Handle key input.')
+    function handleKeyDownInput(event: KeyboardEvent): void {
+        if (keyDownTimeoutRef.current != null) return
+        if (isDebugEnabled) console.log('Sidenav: Handle key-down input.')
+        let isNoRepeat = true
 
-        if (event.key == 'Enter') {
-            // preventDefault() does not prevent links from being triggered;
-            event.preventDefault()
-            event.stopPropagation()
+        function handleInput(event: KeyboardEvent): void {
+            if (sidenavStore.element == null) return
+            if (!sidenavStore.element.contains(document.activeElement)) {
+                clearTimeout(keyDownTimeoutRef.current)
+                keyDownTimeoutRef.current = undefined
+                return
+            }
 
-            closeSidenav()
-            triggerFlashEffect(event)
-            setTimeout(() => { console.log(document.activeElement) }, 1000) //TODO
-            return
+            if (event.key === 'ArrowDown') {
+                event.preventDefault()
+                event.stopPropagation()
+
+                focusNextElement()
+                keyDownTimeoutRef.current = setTimeout(() => { handleInput(event) }, repeatDelay)
+                isNoRepeat = false
+                return
+            }
+
+            if (event.key === 'ArrowUp') {
+                event.preventDefault()
+                event.stopPropagation()
+
+                console.log('focus previous element')
+                focusPreviousElement()
+                keyDownTimeoutRef.current = setTimeout(() => { handleInput(event) }, repeatDelay)
+                isNoRepeat = false
+                return
+            }
+
+            if (event.key === 'Enter') {
+                //TODO
+                // preventDefault() does not prevent links from being triggered;
+                // event.preventDefault()
+                // event.stopPropagation()
+
+                console.log('input')
+                // closeSidenav()
+                triggerFlashEffect(event)
+                // keyDownTimeoutRef.current = setTimeout(() => { handleInput(event) }, noRepeatDelay)
+                return
+            }
+
+            if (event.key === 'Escape') {
+                event.preventDefault()
+                event.stopPropagation()
+                closeSidenav()
+                keyDownTimeoutRef.current = setTimeout(() => { handleInput(event) }, noRepeatDelay)
+                return
+            }
+
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault()
+                event.stopPropagation()
+                closeSidenav()
+                keyDownTimeoutRef.current = setTimeout(() => { handleInput(event) }, noRepeatDelay)
+                return
+            }
         }
 
-        if (event.key == 'Escape') {
-            event.preventDefault()
-            event.stopPropagation()
-            closeSidenav()
-            return
-        }
+        handleInput(event)
+        if (isNoRepeat) return
+        clearTimeout(keyDownTimeoutRef.current)
 
-        if (event.key == 'ArrowDown') {
-            event.preventDefault()
-            event.stopPropagation()
-            focusNextElement()
-            return
-        }
-
-        if (event.key == 'ArrowUp') {
-            event.preventDefault()
-            event.stopPropagation()
-            focusPreviousElement()
-            return
-        }
-
-        if (event.key == 'ArrowLeft') {
-            event.preventDefault()
-            event.stopPropagation()
-            closeSidenav()
-            return
-        }
+        keyDownTimeoutRef.current = setTimeout(() => {
+            handleInput(event)
+        }, initialDelay)
     }
 
     // this is called when the component mounts or unmounts; and called when it re-renders;
@@ -203,7 +240,10 @@ function Sidenav() {
         <nav
             className="fixed w-[min(500px,70vw)] h-[calc(100vh-var(--height-topnav))] left-[max(-500px,-70vw)] bg-background shadow-lg shadow-neutral-950 leading-10 overflow-y-auto overflow-x-hidden scrollbar-stable z-[100]"
             ref={initializeSidenavReference}
-            onKeyUp={handleKeyInput}
+            onBlur={clearKeyDownTimeout}
+            onFocus={clearKeyDownTimeout}
+            onKeyDown={handleKeyDownInput}
+            onKeyUp={clearKeyDownTimeout}
         >
             <hr />
             <Link
