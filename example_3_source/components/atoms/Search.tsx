@@ -6,8 +6,6 @@ import Link from 'next/link'
 import { isDebugEnabled, tabIndexGroupTopnav } from '../../constants/general_constants'
 import { useRouter } from 'next/navigation'
 import { debounceEventFunction } from '../../constants/event_constants'
-import { useLayoutStore } from '../layout/Layout'
-import { useSidenavStore } from '../layout/Sidenav'
 import { useGlobalStore } from '../../hooks/stores'
 
 export default Search

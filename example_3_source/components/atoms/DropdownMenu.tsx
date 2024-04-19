@@ -1,33 +1,12 @@
 import React, { KeyboardEvent, ReactNode, useEffect } from 'react'
-import { useSidenavStore } from '../layout/Sidenav'
 import { triggerFlashEffect } from '../../constants/event_constants'
 import { initialDelay, maximumDelay, isDebugEnabled } from '../../constants/general_constants'
 import { NullableBoolean, NullableBooleanRef, BooleanRef, DropdownMenu, DropdownMenuState, DropdownMenuStore, GlobalState, SidenavState, TimeoutRef } from '../../constants/types'
 import { create } from 'zustand'
-import { useGlobalStore } from '../../hooks/stores'
+import { useDropdownMenuStoreArray, useGlobalStore, useSidenavStore } from '../../hooks/stores'
 
 export default DropdownMenu
-export { useDropdownMenuStoreArray }
 export { handleKeyDownInput as handleKeyDownInput_DropdownMenu }
-
-//
-// parameters and variables
-//
-
-const useDropdownMenuStoreArray: DropdownMenuStore[] = [...Array(2)].map(() => (create<DropdownMenuState>((set) => ({
-    buttonElement: null,
-    setButtonElement: (buttonElement) => set(() => ({ buttonElement })),
-    contentElement: null,
-    setContentElement: (contentElement) => set(() => ({ contentElement })),
-
-    element: null,
-    setElement: (element) => set(() => ({ element })),
-    iconElement: null,
-    setIconElement: (iconElement) => set(() => ({ iconElement })),
-
-    isOpen: false,
-    setIsOpen: (isOpen) => set(() => ({ isOpen })),
-}))))
 
 //
 // functions

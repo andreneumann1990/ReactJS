@@ -1,35 +1,113 @@
-import { useSidenavStore } from './Sidenav'
 import React, { KeyboardEvent, useEffect, useRef } from 'react'
 import { useDrag } from '@use-gesture/react'
 import { create } from 'zustand'
 import { isDebugEnabled, tabIndexGroupMain } from '../../constants/general_constants'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
-import { useLayoutStore } from './Layout'
-import { useGlobalStore } from '../../hooks/stores'
+import { useGlobalStore, useMainStore } from '../../hooks/stores'
+import { NullableBoolean } from '../../constants/types'
 
 export default Main
-export { useMainStore }
+export { handleKeyDownInput as handleKeyDownInput_Main }
 
 //TODO; focus child elements;
 //TODO; uparrow for focus topnav;
 
 //
-//
+// paramters and variables
 //
 
-interface mainState {
-    element: HTMLElement | null,
-    setElement: (element: HTMLElement | null) => void,
-    isActive: boolean,
-    setIsActive: (isActive: boolean) => void,
+const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"]), input:not([tabindex="-1"]), summary:not([tabindex="-1"])'
+
+//
+// functions
+//
+
+function focusNextElement() {
+    const mainElement = useMainStore.getState().element
+    if (mainElement == null) return
+    const focusedElement = document.activeElement as HTMLAnchorElement | null
+    if (focusedElement == null) return
+
+    const focusableElements = Array.from(mainElement.querySelectorAll<HTMLAnchorElement>(queryString))
+    //TODO
+    console.log(focusableElements)
+    const nextIndex = Math.min(focusableElements.indexOf(focusedElement) + 1, focusableElements.length - 1)
+    focusableElements[nextIndex]?.focus()
 }
 
-const useMainStore = create<mainState>((set) => ({
-    element: null,
-    setElement: (element) => set(() => ({ element })),
-    isActive: true,
-    setIsActive: (isActive) => set(() => ({ isActive })),
-}))
+function focusPreviousElement() {
+    const mainElement = useMainStore.getState().element
+    if (mainElement == null) return
+    let focusedElement = document.activeElement as HTMLElement | null
+    if (focusedElement == null) return
+
+    // previousIndex is -1 if the element is not found or null;
+    const focusableElements = Array.from(mainElement.querySelectorAll<HTMLElement>(queryString))
+    const previousIndex = Math.max(focusableElements.indexOf(focusedElement) - 1, 0)
+    focusableElements[previousIndex]?.focus()
+}
+
+function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
+    const { layoutState, mainState, topnavState } = useGlobalStore.getState()
+    if (mainState.element == null) return null
+    if (!mainState.element.contains(document.activeElement)) return null
+
+    if (document.activeElement === mainState.element) {
+        if (event.key === 'Enter') {
+            event.preventDefault()
+            layoutState.setActiveTabIndexGroup(tabIndexGroupMain)
+            // focusPreviousElement()
+            setTimeout(() => focusNextElement(), 1)
+            return false
+        }
+
+        if (event.key === 'ArrowUp') {
+            event.preventDefault()
+            topnavState.element?.focus()
+            return false
+        }
+        return null
+    }
+
+    //TODO
+    if (document.activeElement?.tagName === 'SUMMARY') {
+        if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            event.stopPropagation()
+            document.activeElement.parentElement?.setAttribute('open', '')
+            return false
+        }
+
+        if (event.key === 'ArrowLeft') {
+            event.preventDefault()
+            event.stopPropagation()
+            document.activeElement.parentElement?.removeAttribute('open')
+            return false
+        }
+    }
+
+    if (event.key === 'Escape') {
+        event.preventDefault()
+        layoutState.setActiveTabIndexGroup(0)
+        mainState.element?.focus()
+        return false
+    }
+
+    if (event.key === 'ArrowDown') {
+        event.preventDefault()
+        event.stopPropagation()
+        focusNextElement()
+        return true
+    }
+
+    if (event.key === 'ArrowUp') {
+        event.preventDefault()
+        event.stopPropagation()
+        focusPreviousElement()
+        return true
+    }
+    return null
+}
 
 //
 // main
@@ -42,8 +120,6 @@ function Main({ children }: React.PropsWithChildren) {
 
     const focusAnchor = useRef<HTMLDivElement | null>(null)
     const { layoutState, mainState, searchState, sidenavState, topnavState } = useGlobalStore()
-
-    const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"]), input:not([tabindex="-1"]), summary:not([tabindex="-1"])'
 
     // close sidenav by swipe / panning gesture;
     const dragAttributes: ReactDOMAttributes = useDrag<PointerEvent>(({ movement: [dx, dy], last }) => {
@@ -89,90 +165,6 @@ function Main({ children }: React.PropsWithChildren) {
         mainState.setElement(element)
     }
 
-    function focusNextElement() {
-        const mainElement = mainState.element
-        if (mainElement == null) return
-        const focusedElement = document.activeElement as HTMLAnchorElement | null
-        if (focusedElement == null) return
-
-        const focusableElements = Array.from(mainElement.querySelectorAll<HTMLAnchorElement>(queryString))
-        const nextIndex = Math.min(focusableElements.indexOf(focusedElement) + 1, focusableElements.length - 1)
-        focusableElements[nextIndex]?.focus()
-    }
-
-    function focusPreviousElement() {
-        const mainElement = mainState.element
-        if (mainElement == null) return
-        let focusedElement = document.activeElement as HTMLElement | null
-        if (focusedElement == null) return
-
-        // previousIndex is -1 if the element is not found or null;
-        const focusableElements = Array.from(mainElement.querySelectorAll<HTMLElement>(queryString))
-        const previousIndex = Math.max(focusableElements.indexOf(focusedElement) - 1, 0)
-        focusableElements[previousIndex]?.focus()
-    }
-
-    //TODO
-    function handleKeyUpInput(event: KeyboardEvent): void {
-        if (isDebugEnabled) console.log('Main: Handle key-up input.')
-
-        if (document.activeElement === mainState.element) {
-            if (event.key === 'Enter') {
-                event.preventDefault()
-                layoutState.setActiveTabIndexGroup(tabIndexGroupMain)
-                // focusAnchor.current?.focus()
-                focusPreviousElement()
-                return
-            }
-
-            if (event.key === 'ArrowUp') {
-                event.preventDefault()
-                topnavState.element?.focus()
-                return
-            }
-            return
-        }
-
-        //TODO
-        if (document.activeElement?.tagName === 'SUMMARY') {
-            if (event.key === 'ArrowRight') {
-                event.preventDefault()
-                event.stopPropagation()
-                document.activeElement.parentElement?.setAttribute('open', '')
-                return
-            }
-
-            if (event.key === 'ArrowLeft') {
-                event.preventDefault()
-                event.stopPropagation()
-                document.activeElement.parentElement?.removeAttribute('open')
-                return
-            }
-        }
-
-        if (event.key === 'Escape') {
-            event.preventDefault()
-            layoutState.setActiveTabIndexGroup(0)
-            mainState.element?.focus()
-            return
-        }
-
-        if (event.key === 'ArrowDown') {
-            event.preventDefault()
-            event.stopPropagation()
-            focusNextElement()
-            return
-        }
-
-        if (event.key === 'ArrowUp') {
-            event.preventDefault()
-            event.stopPropagation()
-            focusPreviousElement()
-            return
-        }
-    }
-
-
     //
     // effects
     //
@@ -204,7 +196,6 @@ function Main({ children }: React.PropsWithChildren) {
         <main
             {...dragAttributes}
             className="h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-colors ease-out duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
-            onKeyUp={handleKeyUpInput}
             ref={initializeMainReference}
             tabIndex={(mainState.isActive && layoutState.activeTabIndexGroup === 0 ? 0 : -1)}
         >

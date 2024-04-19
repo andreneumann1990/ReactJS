@@ -1,5 +1,5 @@
 import { KeyboardEvent, MutableRefObject, useCallback, useEffect, useRef } from 'react'
-import DropdownMenu, { handleKeyDownInput_DropdownMenu, useDropdownMenuStoreArray } from '../atoms/DropdownMenu'
+import DropdownMenu, { handleKeyDownInput_DropdownMenu } from '../atoms/DropdownMenu'
 import { create } from 'zustand'
 import Link from 'next/link'
 import { useClick } from '../../hooks/gesture_hooks'
@@ -11,7 +11,6 @@ import { useGlobalStore } from '../../hooks/stores'
 import { immer } from 'zustand/middleware/immer'
 
 export default Sidenav
-export { useSidenavStore }
 export { handleKeyDownInput as handleInput_Sidenav }
 
 //TODO; holding arrow keys;
@@ -21,15 +20,6 @@ export { handleKeyDownInput as handleInput_Sidenav }
 //
 
 const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"])'
-const useSidenavStore: SidenavStore = create<SidenavState>((set) => ({
-    element: null,
-    setElement: (element) => set(() => ({ element })),
-    isOpen: false,
-    setIsOpen: (isOpen) => set(() => ({ isOpen })),
-
-    lastActiveDropdownElement: null,
-    setLastActiveDropdownElement: (element) => set(() => ({ lastActiveDropdownElement: element })),
-}))
 
 //
 // functions

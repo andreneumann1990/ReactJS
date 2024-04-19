@@ -1,11 +1,8 @@
 import { KeyboardEvent, useCallback, useEffect, useRef } from 'react'
-import { useSidenavStore } from './Sidenav'
 import Link from 'next/link'
 import SearchBox from '../atoms/Search'
 import { initialDelay, maximumDelay, repeatDelay, isDebugEnabled, tabIndexGroupDefault, tabIndexGroupSidenav, tabIndexGroupTopnav } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
-import { useLayoutStore } from './Layout'
-import { useMainStore } from './Main'
 import { GlobalState, NullableBoolean, TopnavState } from '../../constants/types'
 import { useGlobalStore, useSearchStore, useTopnavStore } from '../../hooks/stores'
 
@@ -91,13 +88,7 @@ function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
             event.preventDefault()
             event.stopPropagation()
 
-            if (!sidenavState.isOpen) {
-                const firstElement = sidenavState.element?.querySelector<HTMLElement>(sidenavQueryString)
-                firstElement?.focus()
-            } else {
-                triggerFlashEffect(event)
-            }
-
+            triggerFlashEffect(event)
             toggleSidenav()
             return false
         }
@@ -119,13 +110,22 @@ function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
             return true
         }
 
-        if ((event.key === 'ArrowLeft' || event.key === 'ArrowUp' || event.key === 'ArrowRight') && sidenavState.isOpen) {
+        if ((event.key === 'ArrowLeft' || event.key === 'ArrowUp') && sidenavState.isOpen) {
             event.preventDefault()
             event.stopPropagation()
 
             toggleSidenav()
             triggerFlashEffect(event)
             return false
+        }
+
+        if (event.key === 'ArrowRight' && sidenavState.isOpen) {
+            event.preventDefault()
+            event.stopPropagation()
+
+            toggleSidenav()
+            triggerFlashEffect(event)
+            return true
         }
     }
 

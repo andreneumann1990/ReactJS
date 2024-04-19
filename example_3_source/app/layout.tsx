@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation'
 import { useGlobalStore, useKeyboardStore } from '../hooks/stores'
 import { NullableBooleanRef, GlobalState } from '../constants/types'
 import { handleKeyInput_Topnav as handleKeyDownInput_Topnav } from '../components/layout/Topnav'
+import { handleKeyDownInput_Main } from '../components/layout/Main'
 
 export default RootLayout
 
@@ -50,14 +51,20 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
             const globalState = useGlobalStore.getState()
             const event = globalState.keyboardState.event
             if (event == null) return
+            let isKeyInputRepeating = null
 
-            let isKeyInputRepeating = handleKeyDownInput_Sidenav(event, globalState, router)
+            isKeyInputRepeating = handleKeyDownInput_Main(event)
             if (isKeyInputRepeating != null) {
                 keyDownTimeoutRef.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)
                 return
             }
 
-            console.log('test')
+            isKeyInputRepeating = handleKeyDownInput_Sidenav(event, globalState, router)
+            if (isKeyInputRepeating != null) {
+                keyDownTimeoutRef.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)
+                return
+            }
+
             isKeyInputRepeating = handleKeyDownInput_Topnav(event)
             if (isKeyInputRepeating != null) {
                 keyDownTimeoutRef.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)

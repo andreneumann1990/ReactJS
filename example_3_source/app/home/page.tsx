@@ -1,8 +1,8 @@
 'use client'
 
-import { useLayoutStore } from '../../components/layout/Layout'
 import { tabIndexGroupMain } from '../../constants/general_constants'
 import { useNavigateAndHighlightElement } from '../../hooks/navigation_hooks'
+import { useLayoutStore } from '../../hooks/stores'
 
 export default Page
 
@@ -15,14 +15,13 @@ function Page() {
     // parameters and variables
     //
 
-    const activeTabIndexGroup = useLayoutStore(state => state.activeTabIndexGroup)
-    const setActiveTabIndexGroup = useLayoutStore(state => state.setActiveTabIndexGroup)
+    const layoutState = useLayoutStore()
 
     //
     // functions
     //
 
-    function setTabIndex() { setActiveTabIndexGroup(tabIndexGroupMain) }
+    function setTabIndex() { layoutState.setActiveTabIndexGroup(tabIndexGroupMain) }
 
     //
     // effects
@@ -48,7 +47,7 @@ function Page() {
         <details
             className="group border rounded-md ml-1 mb-2"
             onFocusCapture={setTabIndex}
-            tabIndex={activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
+            tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
         >
             <summary className="group-open:border-b p-2">Example 1</summary>
             <ul className="*:my-2 pl-10">
@@ -68,7 +67,7 @@ function Page() {
         <details
             className="group border rounded-md ml-1 mb-2"
             onFocusCapture={setTabIndex}
-            tabIndex={activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
+            tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
         >
             <summary className="group-open:border-b p-2">Example 2</summary>
             <ul className="*:my-2 pl-10">

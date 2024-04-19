@@ -3,7 +3,7 @@
 import Topnav from './Topnav'
 import Sidenav from './Sidenav'
 import React, { useEffect } from 'react'
-import Main, { useMainStore } from './Main'
+import Main from './Main'
 import { isDebugEnabled, tabIndexGroupDefault } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
 import { create } from 'zustand'
@@ -11,27 +11,6 @@ import { GlobalState } from '../../constants/types'
 import { useGlobalStore } from '../../hooks/stores'
 
 export default Layout
-export { useLayoutStore }
-
-//
-//
-//
-
-const useLayoutStore = create<{
-    activeTabIndexGroup: number,
-    setActiveTabIndexGroup: (tabIndex: number) => void,
-    resetActiveTabIndexGroup: () => void,
-}>(set => ({
-    activeTabIndexGroup: 0,
-    setActiveTabIndexGroup: (tabIndex) => set(() => {
-        if (isDebugEnabled) console.log(`Layout: tabIndex ${tabIndex}`)
-        return { activeTabIndexGroup: tabIndex }
-    }),
-    resetActiveTabIndexGroup: () => set(() => {
-        if (isDebugEnabled) console.log(`Layout: tabIndex ${tabIndexGroupDefault}`)
-        return { activeTabIndexGroup: tabIndexGroupDefault }
-    })
-}))
 
 //
 // main
