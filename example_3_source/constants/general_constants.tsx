@@ -9,7 +9,7 @@ export { tabIndexGroupSidenav }
 
 export { initialDelay }
 export { repeatDelay }
-export { noRepeatDelay }
+export { maximumDelay }
 
 //
 //
@@ -27,5 +27,5 @@ const tabIndexGroupTopnav = 20
 const tabIndexGroupSidenav = 30
 
 const initialDelay = 400
-const repeatDelay = 200
-const noRepeatDelay = 2147483647
+const maximumDelay = 2147483647
+const repeatDelay = 100

@@ -1,4 +1,5 @@
 import tinycolor from 'tinycolor2'
+import { isDebugEnabled } from './general_constants'
 
 export { debounceEventFunction }
 export { triggerFlashEffect }
@@ -22,10 +23,8 @@ function debounceEventFunction(eventFunction: (...args: any[]) => void, timeout_
     let timer: number
     return (...args: any[]) => {
         clearTimeout(timer)
-        console.log('clear timer')
-        timer = window.setTimeout(() => {
-            eventFunction.apply(window, args)
-        }, timeout_ms)
+        if (isDebugEnabled) console.log('EventConstants: Clear debounce timer.')
+        timer = window.setTimeout(() => { eventFunction.apply(window, args) }, timeout_ms)
     }
 }
 

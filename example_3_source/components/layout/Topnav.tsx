@@ -3,7 +3,7 @@ import { useSidenavStore } from './Sidenav'
 import Link from 'next/link'
 import { create } from 'zustand'
 import SearchBox, { useSearchStore } from '../atoms/Search'
-import { initialDelay, isDebugEnabled, noRepeatDelay, repeatDelay, tabIndexGroupDefault, tabIndexGroupSidenav, tabIndexGroupTopnav } from '../../constants/general_constants'
+import { initialDelay, maximumDelay, repeatDelay, isDebugEnabled, tabIndexGroupDefault, tabIndexGroupSidenav, tabIndexGroupTopnav } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
 import { useLayoutStore } from './Layout'
 import { useMainStore } from './Main'
@@ -40,11 +40,11 @@ function Topnav() {
     // parameters and variables
     //
 
-    const layoutStore = useLayoutStore()
-    const mainStore = useMainStore()
+    const layoutState = useLayoutStore()
+    // const mainState = useMainStore()
     const searchStore = useSearchStore()
-    const sidenavStore = useSidenavStore()
-    const topnavStore = useTopnavStore()
+    const sidenavState = useSidenavStore()
+    const topnavState = useTopnavStore()
 
     const homeLinkRef = useRef<HTMLAnchorElement | null>(null)
     const menuIconRef = useRef<HTMLElement | null>(null)
@@ -53,33 +53,34 @@ function Topnav() {
     const sidenavQueryString = 'a, button'
     const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"]), input:not([tabindex="-1"])'
     let keyDownTimeoutRef = useRef<NodeJS.Timeout | undefined>()
+    console.log(keyDownTimeoutRef.current)
 
     //
     // functions
     //
 
     function clearKeyDownTimeout(): void {
-        // if (isDebugEnabled) console.log('Topnav: Clear key-down timeout.')
+        if (isDebugEnabled) console.log('Topnav: Clear key-down timeout.')
         clearTimeout(keyDownTimeoutRef.current)
         keyDownTimeoutRef.current = undefined
     }
 
     const initializeMenuButtonReference = (element: HTMLButtonElement | null) => {
-        if (topnavStore.menuButtonElement != null) return
+        if (topnavState.menuButtonElement != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Topnav: Initialize menu reference.')
-        topnavStore.setMenuButtonElement(element)
+        topnavState.setMenuButtonElement(element)
     }
 
     const initializeTopnavReference = (element: HTMLElement | null) => {
-        if (topnavStore.element != null) return
+        if (topnavState.element != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Topnav: Initialize topbar reference.')
-        topnavStore.setElement(element)
+        topnavState.setElement(element)
     }
 
     const focusNextElement = useCallback(() => {
-        const topnavElement = topnavStore.element
+        const topnavElement = topnavState.element
         if (topnavElement == null) return
         const focusedElement = document.activeElement as HTMLAnchorElement | null
         if (focusedElement == null) return
@@ -90,10 +91,10 @@ function Topnav() {
 
         if (searchStore.resultsElement != null && searchStore.resultsElement.contains(nextElement)) return
         nextElement?.focus()
-    }, [searchStore.resultsElement, topnavStore.element])
+    }, [searchStore.resultsElement, topnavState.element])
 
     const focusPreviousElement = useCallback(() => {
-        const topnavElement = topnavStore.element
+        const topnavElement = topnavState.element
         if (topnavElement == null) return
         const focusedElement = document.activeElement as HTMLElement | null
         if (focusedElement == null) return
@@ -102,38 +103,54 @@ function Topnav() {
         const previousIndex = Math.max(focusableElements.indexOf(focusedElement) - 1, 0)
         const previousElement = focusableElements[previousIndex]
         previousElement?.focus()
-    }, [topnavStore.element])
+    }, [topnavState.element])
 
     function toggleSidenav(): void {
         if (isDebugEnabled) console.log('Topnav: Toggle sidenav.')
-        if (!sidenavStore.isOpen) {
-            layoutStore.setActiveTabIndexGroup(tabIndexGroupSidenav)
-        } else if (document.activeElement === topnavStore.menuButtonElement) {
-            layoutStore.setActiveTabIndexGroup(tabIndexGroupTopnav)
+        if (!sidenavState.isOpen) {
+            layoutState.setActiveTabIndexGroup(tabIndexGroupSidenav)
+        } else if (document.activeElement === topnavState.menuButtonElement) {
+            layoutState.setActiveTabIndexGroup(tabIndexGroupTopnav)
         }
-        sidenavStore.setIsOpen(!sidenavStore.isOpen)
+        sidenavState.setIsOpen(!sidenavState.isOpen)
     }
 
     function handleKeyDownInput(event: KeyboardEvent): void {
-        if (keyDownTimeoutRef.current != null) return
+        if (keyDownTimeoutRef.current != null) {
+            console.log('timeout ' + keyDownTimeoutRef.current)
+            return
+        }
+
         if (isDebugEnabled) console.log('Topnav: Handle element key-down input.')
-        let isNoRepeat = true
+        let isKeyInputRepeating = false
 
         function handleKeyInput(event: KeyboardEvent): void {
-            if (document.activeElement === topnavStore.element) {
+            const layoutState = useLayoutStore.getState()
+            const mainState = useMainStore.getState()
+            const sidenavState = useSidenavStore.getState()
+            const topnavState = useTopnavStore.getState()
+
+            if (topnavState.element == null) return
+            if (!topnavState.element.contains(document.activeElement)) {
+                if (isDebugEnabled) console.log('Topnav: Stop key-down input.')
+                clearKeyDownTimeout()
+                return
+            }
+
+            if (document.activeElement === topnavState.element) {
                 if (event.key === 'Enter') {
                     event.preventDefault()
                     event.stopPropagation()
 
-                    topnavStore.menuButtonElement?.focus()
-                    keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, noRepeatDelay)
+                    topnavState.menuButtonElement?.focus()
+                    keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, maximumDelay)
                     return
                 }
 
                 if (event.key === 'ArrowDown') {
                     event.preventDefault()
-                    mainStore.element?.focus()
-                    keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, noRepeatDelay)
+                    mainState.element?.focus()
+                    keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, maximumDelay)
                     return
                 }
                 return
@@ -141,53 +158,50 @@ function Topnav() {
 
             if (event.key === 'Escape') {
                 event.preventDefault()
-                layoutStore.resetActiveTabIndexGroup()
-                topnavStore.element?.focus()
-                keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, noRepeatDelay)
+                layoutState.resetActiveTabIndexGroup()
+                topnavState.element?.focus()
+                keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, maximumDelay)
                 return
             }
 
-            if (document.activeElement === topnavStore.menuButtonElement) {
+            if (document.activeElement === topnavState.menuButtonElement) {
                 if (event.key === 'Enter') {
                     event.preventDefault()
                     event.stopPropagation()
 
-                    toggleSidenav()
-                    triggerFlashEffect(event)
-                    keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, noRepeatDelay)
-                    return
-                }
-
-                // ignore ArrowRight because other icons are displayed to the right;
-                // but for consistency it would be nice; hmmm...; //TODO
-                if (event.key === 'ArrowDown') {
-                    if (sidenavStore.isOpen) {
-                        event.preventDefault()
-                        event.stopPropagation()
-
-                        const firstElement = sidenavStore.element?.querySelector<HTMLAnchorElement>(sidenavQueryString)
+                    if (!sidenavState.isOpen) {
+                        const firstElement = sidenavState.element?.querySelector<HTMLElement>(sidenavQueryString)
                         firstElement?.focus()
-                        keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, noRepeatDelay)
-                        return
+                    } else {
+                        triggerFlashEffect(event)
                     }
 
-                    event.preventDefault()
-                    event.stopPropagation()
-
-                    console.log('input')
                     toggleSidenav()
-                    triggerFlashEffect(event)
-                    keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, noRepeatDelay)
+                    keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, maximumDelay)
                     return
                 }
 
-                if ((event.key === 'ArrowLeft' || event.key === 'ArrowUp' || event.key === 'ArrowRight') && sidenavStore.isOpen) {
+                if (event.key === 'ArrowDown') {
+                    event.preventDefault()
+                    event.stopPropagation()
+
+                    // for some reason repeating the down-arrow input skips the focus of the first 
+                    // element of the sidenav panel; jump directly to the first element when opening 
+                    // instead;
+                    if (!sidenavState.isOpen) toggleSidenav()
+                    const firstElement = sidenavState.element?.querySelector<HTMLElement>(sidenavQueryString)
+                    firstElement?.focus()
+                    keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, maximumDelay)
+                    return
+                }
+
+                if ((event.key === 'ArrowLeft' || event.key === 'ArrowUp' || event.key === 'ArrowRight') && sidenavState.isOpen) {
                     event.preventDefault()
                     event.stopPropagation()
 
                     toggleSidenav()
                     triggerFlashEffect(event)
-                    keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, noRepeatDelay)
+                    keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, maximumDelay)
                     return
                 }
             }
@@ -195,8 +209,8 @@ function Topnav() {
             if (document.activeElement === homeLinkRef.current) {
                 if (event.key === 'Enter') {
                     triggerFlashEffect(event)
-                    keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, noRepeatDelay)
-                    isNoRepeat = true
+                    keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, maximumDelay)
+                    isKeyInputRepeating = true
                     return
                 }
             }
@@ -207,7 +221,7 @@ function Topnav() {
 
                 focusPreviousElement()
                 keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, repeatDelay)
-                isNoRepeat = false
+                isKeyInputRepeating = true
                 return
             }
 
@@ -216,15 +230,15 @@ function Topnav() {
                 event.stopPropagation()
 
                 focusNextElement()
-                // keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, noRepeatDelay)
+                // keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, delay_noRepeat)
                 keyDownTimeoutRef.current = setTimeout(() => { handleKeyInput(event) }, repeatDelay)
-                isNoRepeat = false
+                isKeyInputRepeating = true
                 return
             }
         }
 
         handleKeyInput(event)
-        if (isNoRepeat) return
+        if (!isKeyInputRepeating) return
         clearTimeout(keyDownTimeoutRef.current)
 
         keyDownTimeoutRef.current = setTimeout(() => {
@@ -234,7 +248,7 @@ function Topnav() {
 
     function setActiveTabIndexGroupToTopnav() {
         console.log('focus') //TODO
-        layoutStore.setActiveTabIndexGroup(tabIndexGroupTopnav)
+        layoutState.setActiveTabIndexGroup(tabIndexGroupTopnav)
     }
 
     //
@@ -243,12 +257,12 @@ function Topnav() {
 
     // switch image for the sidenav toggle button;
     useEffect(() => {
-        const menuButtonElement = topnavStore.menuButtonElement
+        const menuButtonElement = topnavState.menuButtonElement
         if (menuButtonElement == null) return
         if (menuIconRef.current == null) return
         if (closeIconRef.current == null) return
 
-        if (sidenavStore.isOpen) {
+        if (sidenavState.isOpen) {
             menuIconRef.current.classList.add('hidden')
             closeIconRef.current.classList.remove('hidden')
             return
@@ -256,7 +270,7 @@ function Topnav() {
 
         menuIconRef.current.classList.remove('hidden')
         closeIconRef.current.classList.add('hidden')
-    }, [sidenavStore.isOpen, topnavStore.menuButtonElement])
+    }, [sidenavState.isOpen, topnavState.menuButtonElement])
 
     //
     //
@@ -267,17 +281,15 @@ function Topnav() {
         {/* TODO; does not work; you tab behind the elements afterwards for some reason; */}
         {/* <div
             ref={focusAnchorRef}
-            tabIndex={layoutStore.activeTabIndexGroup === tabIndexGroupTopnav ? 0 : -1}
+            tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupTopnav ? 0 : -1}
         >test</div> */}
 
         <nav
             className="bg-background h-[--height-topnav] shadow-md"
-            onBlur={clearKeyDownTimeout}
-            onFocus={clearKeyDownTimeout}
             onKeyDown={handleKeyDownInput}
             onKeyUp={clearKeyDownTimeout}
             ref={initializeTopnavReference}
-            tabIndex={layoutStore.activeTabIndexGroup === tabIndexGroupDefault ? 0 : -1}
+            tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupDefault ? 0 : -1}
         >
             <div
                 className="grid grid-flow-col [grid-template-columns:20%_60%_20%] justify-items-center justify-between"
@@ -288,7 +300,7 @@ function Topnav() {
                         onFocusCapture={setActiveTabIndexGroupToTopnav}
                         onPointerUp={toggleSidenav}
                         ref={initializeMenuButtonReference}
-                        tabIndex={layoutStore.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
+                        tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
                     >
                         <i
                             className="p-1 icon-medium material-icons"
@@ -303,7 +315,7 @@ function Topnav() {
                         className="block h-[--height-topnav]"
                         href="/home"
                         ref={homeLinkRef}
-                        tabIndex={layoutStore.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
+                        tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
                     >
                         <i className="p-1 icon-medium material-icons">home</i>
                     </Link>

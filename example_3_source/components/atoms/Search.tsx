@@ -56,9 +56,9 @@ function Search() {
 
     const router = useRouter()
 
-    const layoutStore = useLayoutStore()
+    const layoutState = useLayoutStore()
     const searchStore = useSearchStore()
-    const sidenavStore = useSidenavStore()
+    const sidenavState = useSidenavStore()
 
     const [isFocused, setIsFocused] = useState<boolean>(false)
     const [isHovering, setIsHovering] = useState<boolean>(false)
@@ -181,7 +181,7 @@ function Search() {
 
     // set focus; don't close when focused => update state;
     function handleFocus(): void {
-        layoutStore.setActiveTabIndexGroup(tabIndexGroupTopnav)
+        layoutState.setActiveTabIndexGroup(tabIndexGroupTopnav)
         setIsFocused(true)
     }
 
@@ -204,7 +204,7 @@ function Search() {
             return
         }
 
-        if (sidenavStore.isOpen) {
+        if (sidenavState.isOpen) {
             if (!searchStore.isOpen) return
             searchStore.setIsOpen(false)
             return
@@ -224,7 +224,7 @@ function Search() {
 
         if (!searchStore.isOpen) return
         searchStore.setIsOpen(false)
-    }, [isFocused, isHovering, searchStore, sidenavStore.isOpen])
+    }, [isFocused, isHovering, searchStore, sidenavState.isOpen])
 
     // select search input field by ctrl+k;
     useEffect(() => {
@@ -340,7 +340,7 @@ function Search() {
         >
             <button
                 type="submit"
-                tabIndex={layoutStore.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
+                tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
             >
                 <i className="p-1 icon-medium material-icons">search</i>
             </button>
@@ -354,7 +354,7 @@ function Search() {
                     onChange={debounceEventFunction(updateInputField, 300)}
                     onFocusCapture={handleFocus}
                     onKeyDown={handleKeyDown}
-                    tabIndex={layoutStore.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
+                    tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
                 />
 
                 {/* search results; */}

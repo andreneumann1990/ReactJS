@@ -45,9 +45,9 @@ function Layout({ children }: React.PropsWithChildren) {
     //TODO
     // const isSearchOpen: boolean = useSearchStore(state => state.isOpen)
     // const isSidenavOpen = useSidenavStore(state => state.isOpen)
-    const layoutStore = useLayoutStore()
-    const mainStore = useMainStore()
-    const topnavStore = useTopnavStore()
+    const layoutState = useLayoutStore()
+    const mainState = useMainStore()
+    const topnavState = useTopnavStore()
 
     //
     // functions
@@ -63,18 +63,18 @@ function Layout({ children }: React.PropsWithChildren) {
             const element = event.target as HTMLElement | null
             if (element == null) return
 
-            if (layoutStore.activeTabIndexGroup === tabIndexGroupDefault) {
+            if (layoutState.activeTabIndexGroup === tabIndexGroupDefault) {
                 if (event.key === 'ArrowUp') {
                     event.preventDefault()
                     event.stopPropagation()
-                    topnavStore.element?.focus()
+                    topnavState.element?.focus()
                     return
                 }
 
                 if (event.key === 'ArrowDown') {
                     event.preventDefault()
                     event.stopPropagation()
-                    mainStore.element?.focus()
+                    mainState.element?.focus()
                     return
                 }
                 return
@@ -88,7 +88,7 @@ function Layout({ children }: React.PropsWithChildren) {
             document.removeEventListener('pointerup', triggerFlashEffect)
             document.removeEventListener('keyup', handleKeyUpInput)
         }
-    }, [layoutStore.activeTabIndexGroup, mainStore.element, topnavStore.element])
+    }, [layoutState.activeTabIndexGroup, mainState.element, topnavState.element])
 
     //
     //

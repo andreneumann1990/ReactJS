@@ -1,11 +1,21 @@
 'use client'
 
 import '../styles/globals.scss'
-import React from 'react'
+import React, { KeyboardEvent, useRef } from 'react'
 import Layout from '../components/layout/Layout'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { initialDelay, maximumDelay, repeatDelay } from '../constants/general_constants'
+import { handleInput_Sidenav } from '../components/layout/Sidenav'
+import { useRouter } from 'next/navigation'
+import { useGlobalStore } from '../hooks/general'
+import { GlobalState } from '../constants/types'
 
 export default RootLayout
+
+//
+// function
+//
+
 
 //
 //
@@ -18,6 +28,40 @@ const darkTheme = createTheme({
 })
 
 function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+    //
+    // parameters and variables
+    //
+
+    const globalState = useGlobalStore()
+    // const { sidenavState } = globalState
+    const router = useRouter()
+
+    let keyDownTimeoutRef = useRef<NodeJS.Timeout | undefined>()
+    let isKeyInputRepeatingRef = useRef<boolean>(false)
+
+    //
+    // functions
+    //
+
+    function clearKeyDownTimeout(): void {
+        // if (isDebugEnabled) console.log('Sidenav: Clear key-down timeout.')
+        clearTimeout(keyDownTimeoutRef.current)
+        keyDownTimeoutRef.current = undefined
+    }
+
+    function handleKeyDownInput(event: KeyboardEvent): void {
+        if (keyDownTimeoutRef.current != null) return
+        function handleInput(event: KeyboardEvent, initialDelay?: number): void {
+            handleInput_Sidenav(event, globalState, isKeyInputRepeatingRef, router)
+            keyDownTimeoutRef.current = setTimeout(() => { handleInput(event) }, isKeyInputRepeatingRef.current ? (initialDelay ?? repeatDelay) : maximumDelay)
+        }
+        handleInput(event, initialDelay)
+    }
+
+    //
+    //
+    //
+
     return (<>
         <html lang="en">
             <head>
@@ -47,7 +91,11 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
                 index.css file; but this is a non-standard property and it is recommended not to
                 use it; see `https://developer.mozilla.org/en-US/docs/Web/CSS/font-smooth`;
             */}
-            <body className="w-full bg-background [color:--color-text] [font-size:100%] [font-family:Helvetica,Arial,sans-serif]">
+            <body
+                className="w-full bg-background [color:--color-text] [font-size:100%] [font-family:Helvetica,Arial,sans-serif]"
+                onKeyDown={handleKeyDownInput}
+                onKeyUp={clearKeyDownTimeout}
+            >
                 <noscript>You need to enable JavaScript to run this app.</noscript>
                 <React.StrictMode>
                     <ThemeProvider theme={darkTheme}>

@@ -19,7 +19,7 @@ function Page() {
     // parameters and variables
     //
 
-    const layoutStore = useLayoutStore()
+    const layoutState = useLayoutStore()
 
     //
     // functions
@@ -134,7 +134,7 @@ function Page() {
                             className="bg-primary border m-1 px-2 py-1 rounded-md"
                             name="button"
                             onClick={handleClick}
-                            tabIndex={layoutStore.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
+                            tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
                             type="button"
                             value="use cases? use normal button instead?"
                         />

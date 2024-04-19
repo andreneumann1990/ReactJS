@@ -43,18 +43,18 @@ function Main({ children }: React.PropsWithChildren) {
 
     const focusAnchor = useRef<HTMLDivElement | null>(null)
 
-    const layoutStore = useLayoutStore()
-    const mainStore = useMainStore()
-    const sidenavStore = useSidenavStore()
+    const layoutState = useLayoutStore()
+    const mainState = useMainStore()
+    const sidenavState = useSidenavStore()
     const searchStore = useSearchStore()
-    const topnavStore = useTopnavStore()
+    const topnavState = useTopnavStore()
 
     const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"]), input:not([tabindex="-1"]), summary:not([tabindex="-1"])'
 
     // close sidenav by swipe / panning gesture;
     const dragAttributes: ReactDOMAttributes = useDrag<PointerEvent>(({ movement: [dx, dy], last }) => {
         // `offset` does not reset when panning ends; `movement` does;
-        const sidenavElement = sidenavStore.element
+        const sidenavElement = sidenavState.element
         if (sidenavElement == null) return
         if (dx > -10) return
         if (Math.abs(dy) > Math.abs(dx)) return
@@ -73,7 +73,7 @@ function Main({ children }: React.PropsWithChildren) {
             // isOpen is not updated immediately;
             // this is enough since the isOpen state is changed; hence, applySidenavState()
             // is called automatically;
-            sidenavStore.setIsOpen(false)
+            sidenavState.setIsOpen(false)
             return
         }
 
@@ -82,21 +82,21 @@ function Main({ children }: React.PropsWithChildren) {
         // cannot call applySidenavState() for this since it depends on this function, i.e. enableTouchEvents();
         sidenavElement.style.transition = 'transform 0.5s ease-out 0s'
         sidenavElement.style.transform = `translateX(${sidenavElement.offsetWidth}px)`
-    }, { eventOptions: { capture: true }, enabled: sidenavStore.isOpen })()
+    }, { eventOptions: { capture: true }, enabled: sidenavState.isOpen })()
 
     //
     // functions
     //
 
     function initializeMainReference(element: HTMLElement | null): void {
-        if (mainStore.element != null) return
+        if (mainState.element != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Main: Initialize main reference.')
-        mainStore.setElement(element)
+        mainState.setElement(element)
     }
 
     function focusNextElement() {
-        const mainElement = mainStore.element
+        const mainElement = mainState.element
         if (mainElement == null) return
         const focusedElement = document.activeElement as HTMLAnchorElement | null
         if (focusedElement == null) return
@@ -107,7 +107,7 @@ function Main({ children }: React.PropsWithChildren) {
     }
 
     function focusPreviousElement() {
-        const mainElement = mainStore.element
+        const mainElement = mainState.element
         if (mainElement == null) return
         let focusedElement = document.activeElement as HTMLElement | null
         if (focusedElement == null) return
@@ -122,10 +122,10 @@ function Main({ children }: React.PropsWithChildren) {
     function handleKeyUpInput(event: KeyboardEvent): void {
         if (isDebugEnabled) console.log('Main: Handle key-up input.')
 
-        if (document.activeElement === mainStore.element) {
+        if (document.activeElement === mainState.element) {
             if (event.key === 'Enter') {
                 event.preventDefault()
-                layoutStore.setActiveTabIndexGroup(tabIndexGroupMain)
+                layoutState.setActiveTabIndexGroup(tabIndexGroupMain)
                 // focusAnchor.current?.focus()
                 focusPreviousElement()
                 return
@@ -133,7 +133,7 @@ function Main({ children }: React.PropsWithChildren) {
 
             if (event.key === 'ArrowUp') {
                 event.preventDefault()
-                topnavStore.element?.focus()
+                topnavState.element?.focus()
                 return
             }
             return
@@ -158,8 +158,8 @@ function Main({ children }: React.PropsWithChildren) {
 
         if (event.key === 'Escape') {
             event.preventDefault()
-            layoutStore.setActiveTabIndexGroup(0)
-            mainStore.element?.focus()
+            layoutState.setActiveTabIndexGroup(0)
+            mainState.element?.focus()
             return
         }
 
@@ -185,22 +185,22 @@ function Main({ children }: React.PropsWithChildren) {
 
     // update state;
     useEffect(() => {
-        if (mainStore.isActive === (!sidenavStore.isOpen && !searchStore.isOpen)) return
-        mainStore.setIsActive(!mainStore.isActive)
-    }, [mainStore, searchStore.isOpen, sidenavStore.isOpen])
+        if (mainState.isActive === (!sidenavState.isOpen && !searchStore.isOpen)) return
+        mainState.setIsActive(!mainState.isActive)
+    }, [mainState, searchStore.isOpen, sidenavState.isOpen])
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // [mainStore.setIsActive, searchStore.isOpen, sidenavStore.isOpen])
+    // [mainState.setIsActive, searchStore.isOpen, sidenavState.isOpen])
 
     // synchronize state and attributes;
     useEffect(() => {
-        if (mainStore.element == null) return
-        if (mainStore.isActive) {
-            delete mainStore.element.dataset.inactive
+        if (mainState.element == null) return
+        if (mainState.isActive) {
+            delete mainState.element.dataset.inactive
             return
         }
-        mainStore.element.dataset.inactive = ''
-    }, [mainStore.element, mainStore.isActive])
+        mainState.element.dataset.inactive = ''
+    }, [mainState.element, mainState.isActive])
 
     //
     //
@@ -212,11 +212,11 @@ function Main({ children }: React.PropsWithChildren) {
             className="h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-colors ease-out duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
             onKeyUp={handleKeyUpInput}
             ref={initializeMainReference}
-            tabIndex={(mainStore.isActive && layoutStore.activeTabIndexGroup === 0 ? 0 : -1)}
+            tabIndex={(mainState.isActive && layoutState.activeTabIndexGroup === 0 ? 0 : -1)}
         >
             <div
                 ref={focusAnchor}
-                tabIndex={layoutStore.activeTabIndexGroup === tabIndexGroupMain ? 0 : -1}
+                tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupMain ? 0 : -1}
             />
             {children}
         </main >
