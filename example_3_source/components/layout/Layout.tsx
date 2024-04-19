@@ -1,12 +1,14 @@
 'use client'
 
-import Topnav, { useTopnavStore } from './Topnav'
+import Topnav from './Topnav'
 import Sidenav from './Sidenav'
 import React, { useEffect } from 'react'
 import Main, { useMainStore } from './Main'
 import { isDebugEnabled, tabIndexGroupDefault } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
 import { create } from 'zustand'
+import { GlobalState } from '../../constants/types'
+import { useGlobalStore } from '../../hooks/stores'
 
 export default Layout
 export { useLayoutStore }
@@ -45,10 +47,7 @@ function Layout({ children }: React.PropsWithChildren) {
     //TODO
     // const isSearchOpen: boolean = useSearchStore(state => state.isOpen)
     // const isSidenavOpen = useSidenavStore(state => state.isOpen)
-    const layoutState = useLayoutStore()
-    const mainState = useMainStore()
-    const topnavState = useTopnavStore()
-
+    const { layoutState, mainState, topnavState } = useGlobalStore()
     //
     // functions
     //

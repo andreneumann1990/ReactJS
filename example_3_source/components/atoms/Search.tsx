@@ -8,9 +8,9 @@ import { useRouter } from 'next/navigation'
 import { debounceEventFunction } from '../../constants/event_constants'
 import { useLayoutStore } from '../layout/Layout'
 import { useSidenavStore } from '../layout/Sidenav'
+import { useGlobalStore } from '../../hooks/stores'
 
 export default Search
-export { useSearchStore }
 
 //
 //
@@ -29,21 +29,6 @@ interface SearchData {
 const searchClient = algoliasearch('2QYN25VL0K', 'ba0b8a970db7843753c13218f38ae4e2')
 const index = searchClient.initIndex('example_3')
 
-const useSearchStore = create<{
-    inputElement: HTMLInputElement | null
-    setInputElement: (element: HTMLInputElement | null) => void
-    isOpen: boolean
-    setIsOpen: (isOpen: boolean) => void
-    resultsElement: HTMLDivElement | null
-    setResultsElement: (element: HTMLDivElement | null) => void
-}>((set) => ({
-    inputElement: null,
-    setInputElement: (element) => set(() => ({ inputElement: element })),
-    isOpen: false,
-    setIsOpen: (isOpen) => set(() => ({ isOpen })),
-    resultsElement: null,
-    setResultsElement: (element) => set(() => ({ resultsElement: element })),
-}))
 
 //
 //
@@ -55,10 +40,7 @@ function Search() {
     //
 
     const router = useRouter()
-
-    const layoutState = useLayoutStore()
-    const searchStore = useSearchStore()
-    const sidenavState = useSidenavStore()
+    const { layoutState, searchState, sidenavState } = useGlobalStore()
 
     const [isFocused, setIsFocused] = useState<boolean>(false)
     const [isHovering, setIsHovering] = useState<boolean>(false)
@@ -75,22 +57,22 @@ function Search() {
     //
 
     function initializeSearchInputReference(element: HTMLInputElement) {
-        if (searchStore.inputElement != null) return
+        if (searchState.inputElement != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Search: Initialize search input reference.')
-        searchStore.setInputElement(element)
+        searchState.setInputElement(element)
     }
 
     function initializeSearchResultsReference(element: HTMLDivElement) {
-        if (searchStore.resultsElement != null) return
+        if (searchState.resultsElement != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Search: Initialize search results reference.')
-        searchStore.setResultsElement(element)
+        searchState.setResultsElement(element)
     }
 
     // navigate via arrow keys; escape to close;
     function handleKeyDown(event: React.KeyboardEvent) {
-        if (searchStore.inputElement == null) return
+        if (searchState.inputElement == null) return
         if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
             event.preventDefault()
             return
@@ -99,7 +81,7 @@ function Search() {
         if (event.key === 'Escape') {
             event.preventDefault()
             previouslyFocusedElement?.focus()
-            searchStore.inputElement.blur()
+            searchState.inputElement.blur()
             return
         }
 
@@ -158,8 +140,8 @@ function Search() {
         if (typeof href != 'string') return
 
         router.push(href)
-        if (searchStore.inputElement == null) return
-        searchStore.inputElement.blur()
+        if (searchState.inputElement == null) return
+        searchState.inputElement.blur()
     }
 
     function updateInputField(event: ChangeEvent): void {
@@ -195,36 +177,36 @@ function Search() {
 
     // update state;
     useEffect(() => {
-        if (searchStore.inputElement == null) return
+        if (searchState.inputElement == null) return
         if (isDebugEnabled) console.log('Search: Update state.')
 
-        if (document.activeElement === searchStore.inputElement) {
-            if (searchStore.isOpen) return
-            searchStore.setIsOpen(true)
+        if (document.activeElement === searchState.inputElement) {
+            if (searchState.isOpen) return
+            searchState.setIsOpen(true)
             return
         }
 
         if (sidenavState.isOpen) {
-            if (!searchStore.isOpen) return
-            searchStore.setIsOpen(false)
+            if (!searchState.isOpen) return
+            searchState.setIsOpen(false)
             return
         }
 
         if (isHovering) {
-            if (searchStore.isOpen) return
-            searchStore.setIsOpen(true)
+            if (searchState.isOpen) return
+            searchState.setIsOpen(true)
             return
         }
 
         if (isFocused) {
-            if (searchStore.isOpen) return
-            searchStore.setIsOpen(true)
+            if (searchState.isOpen) return
+            searchState.setIsOpen(true)
             return
         }
 
-        if (!searchStore.isOpen) return
-        searchStore.setIsOpen(false)
-    }, [isFocused, isHovering, searchStore, sidenavState.isOpen])
+        if (!searchState.isOpen) return
+        searchState.setIsOpen(false)
+    }, [isFocused, isHovering, searchState, sidenavState.isOpen])
 
     // select search input field by ctrl+k;
     useEffect(() => {
@@ -235,17 +217,17 @@ function Search() {
         }
 
         function handleKeyUpInput(event: KeyboardEvent): void {
-            if (searchStore.inputElement == null) return
+            if (searchState.inputElement == null) return
             if (event.ctrlKey && event.key === 'k') {
                 event.preventDefault()
-                if (document.activeElement === searchStore.inputElement) {
+                if (document.activeElement === searchState.inputElement) {
                     previouslyFocusedElement?.focus()
-                    searchStore.inputElement.blur()
+                    searchState.inputElement.blur()
                     return
                 }
 
                 setPreviouslyFocusedElement(document.activeElement as HTMLElement | null)
-                searchStore.inputElement.focus()
+                searchState.inputElement.focus()
             }
         }
 
@@ -257,7 +239,7 @@ function Search() {
             document.removeEventListener('keydown', handleKeyDownInput)
             document.removeEventListener('keyup', handleKeyUpInput)
         })
-    }, [previouslyFocusedElement, searchStore.inputElement])
+    }, [previouslyFocusedElement, searchState.inputElement])
 
     // search after query is updated, i.e. onChange();
     useEffect(() => {
@@ -359,7 +341,7 @@ function Search() {
 
                 {/* search results; */}
                 <div
-                    className={`absolute w-full mt-1 bg-secondary shadow-md text-center hidden peer-focus:block hover:${searchStore.isOpen}`}
+                    className={`absolute w-full mt-1 bg-secondary shadow-md text-center hidden peer-focus:block hover:${searchState.isOpen}`}
                     ref={initializeSearchResultsReference}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}

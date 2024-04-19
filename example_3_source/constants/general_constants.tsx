@@ -1,3 +1,7 @@
+import { createTheme } from '@mui/material'
+
+export { darkTheme }
+
 export { backEndHRef }
 export { indexEntryTypesString }
 export { isDebugEnabled }
@@ -14,6 +18,12 @@ export { maximumDelay }
 //
 //
 //
+
+const darkTheme = createTheme({
+    palette: {
+        mode: 'dark',
+    },
+})
 
 const indexEntryTypesString = 'h1, h2, h3, li, label'
 const isDebugEnabled = true

@@ -4,28 +4,18 @@ import '../styles/globals.scss'
 import React, { KeyboardEvent, useRef } from 'react'
 import Layout from '../components/layout/Layout'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
-import { initialDelay, maximumDelay, repeatDelay } from '../constants/general_constants'
-import { handleInput_Sidenav } from '../components/layout/Sidenav'
+import { darkTheme, initialDelay, maximumDelay, repeatDelay } from '../constants/general_constants'
+import { handleInput_Sidenav as handleKeyDownInput_Sidenav } from '../components/layout/Sidenav'
 import { useRouter } from 'next/navigation'
-import { useGlobalStore } from '../hooks/general'
-import { GlobalState } from '../constants/types'
+import { useGlobalStore, useKeyboardStore } from '../hooks/stores'
+import { NullableBooleanRef, GlobalState } from '../constants/types'
+import { handleKeyInput_Topnav as handleKeyDownInput_Topnav } from '../components/layout/Topnav'
 
 export default RootLayout
 
 //
-// function
+// main
 //
-
-
-//
-//
-//
-
-const darkTheme = createTheme({
-    palette: {
-        mode: 'dark',
-    },
-})
 
 function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     //
@@ -37,25 +27,46 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     const router = useRouter()
 
     let keyDownTimeoutRef = useRef<NodeJS.Timeout | undefined>()
-    let isKeyInputRepeatingRef = useRef<boolean>(false)
+    let isKeyInputRepeatingRef: NullableBooleanRef = useRef(null)
 
     //
     // functions
     //
 
     function clearKeyDownTimeout(): void {
-        // if (isDebugEnabled) console.log('Sidenav: Clear key-down timeout.')
+        // if (isDebugEnabled) console.log('Body: Clear key-down timeout.')
+        globalState.keyboardState.setEvent(null)
         clearTimeout(keyDownTimeoutRef.current)
         keyDownTimeoutRef.current = undefined
     }
 
     function handleKeyDownInput(event: KeyboardEvent): void {
-        if (keyDownTimeoutRef.current != null) return
-        function handleInput(event: KeyboardEvent, initialDelay?: number): void {
-            handleInput_Sidenav(event, globalState, isKeyInputRepeatingRef, router)
-            keyDownTimeoutRef.current = setTimeout(() => { handleInput(event) }, isKeyInputRepeatingRef.current ? (initialDelay ?? repeatDelay) : maximumDelay)
+        if (keyDownTimeoutRef.current != null) {
+            globalState.keyboardState.setEvent(event)
+            return
         }
-        handleInput(event, initialDelay)
+
+        function handleInput(initialDelay?: number): void {
+            const globalState = useGlobalStore.getState()
+            const event = globalState.keyboardState.event
+            if (event == null) return
+
+            let isKeyInputRepeating = handleKeyDownInput_Sidenav(event, globalState, router)
+            if (isKeyInputRepeating != null) {
+                keyDownTimeoutRef.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)
+                return
+            }
+
+            console.log('test')
+            isKeyInputRepeating = handleKeyDownInput_Topnav(event)
+            if (isKeyInputRepeating != null) {
+                keyDownTimeoutRef.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)
+                return
+            }
+        }
+
+        globalState.keyboardState.setEvent(event)
+        handleInput(initialDelay)
     }
 
     //

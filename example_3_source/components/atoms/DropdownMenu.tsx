@@ -2,13 +2,13 @@ import React, { KeyboardEvent, ReactNode, useEffect } from 'react'
 import { useSidenavStore } from '../layout/Sidenav'
 import { triggerFlashEffect } from '../../constants/event_constants'
 import { initialDelay, maximumDelay, isDebugEnabled } from '../../constants/general_constants'
-import { BooleanRef, DropdownMenu, DropdownMenuState, DropdownMenuStore, GlobalState, SidenavState, TimeoutRef } from '../../constants/types'
+import { NullableBoolean, NullableBooleanRef, BooleanRef, DropdownMenu, DropdownMenuState, DropdownMenuStore, GlobalState, SidenavState, TimeoutRef } from '../../constants/types'
 import { create } from 'zustand'
-import { useGlobalStore } from '../../hooks/general'
+import { useGlobalStore } from '../../hooks/stores'
 
 export default DropdownMenu
 export { useDropdownMenuStoreArray }
-export { handleInput as handleInput_DropdownMenu }
+export { handleKeyDownInput as handleKeyDownInput_DropdownMenu }
 
 //
 // parameters and variables
@@ -62,9 +62,10 @@ function toggleContent(dropdownMenuState: DropdownMenuState, sidenavState: Siden
     sidenavState.setLastActiveDropdownElement(dropdownMenuState.buttonElement)
 }
 
-function handleInput(dropdownMenuState: DropdownMenuState, event: KeyboardEvent, isKeyInputRepeatingRef: BooleanRef, sidenavState: SidenavState): void {
-    if (dropdownMenuState.element == null) return
-    if (!dropdownMenuState.element?.contains(document.activeElement)) return
+function handleKeyDownInput(dropdownMenuState: DropdownMenuState, event: KeyboardEvent): NullableBoolean {
+    if (dropdownMenuState.element == null) return null
+    if (!dropdownMenuState.element?.contains(document.activeElement)) return null
+    const sidenavState = useSidenavStore.getState()
 
     if (document.activeElement === dropdownMenuState.buttonElement) {
         //TODO
@@ -75,8 +76,7 @@ function handleInput(dropdownMenuState: DropdownMenuState, event: KeyboardEvent,
 
             toggleContent(dropdownMenuState, sidenavState)
             triggerFlashEffect(event)
-            isKeyInputRepeatingRef.current = false
-            return
+            return false
         }
 
         if (event.key === 'ArrowRight' && !dropdownMenuState.isOpen) {
@@ -85,8 +85,11 @@ function handleInput(dropdownMenuState: DropdownMenuState, event: KeyboardEvent,
 
             toggleContent(dropdownMenuState, sidenavState)
             triggerFlashEffect(event)
-            isKeyInputRepeatingRef.current = false
-            return
+            return false
+        }
+
+        if (event.key === 'ArrowLeft' && dropdownMenuState.isOpen) {
+            triggerFlashEffect(event)
         }
     }
 
@@ -97,9 +100,9 @@ function handleInput(dropdownMenuState: DropdownMenuState, event: KeyboardEvent,
 
         toggleContent(dropdownMenuState, sidenavState)
         dropdownMenuState.buttonElement?.focus()
-        isKeyInputRepeatingRef.current = false
-        return
+        return true
     }
+    return null
 }
 
 //

@@ -1,18 +1,18 @@
 import { KeyboardEvent, MutableRefObject, useCallback, useEffect, useRef } from 'react'
-import DropdownMenu, { handleInput_DropdownMenu, useDropdownMenuStoreArray } from '../atoms/DropdownMenu'
+import DropdownMenu, { handleKeyDownInput_DropdownMenu, useDropdownMenuStoreArray } from '../atoms/DropdownMenu'
 import { create } from 'zustand'
 import Link from 'next/link'
 import { useClick } from '../../hooks/gesture_hooks'
 import { maximumDelay, repeatDelay, isDebugEnabled, tabIndexGroupTopnav } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
-import { BooleanRef, GlobalState, SidenavState, SidenavStore, TimeoutRef } from '../../constants/types'
-import { useGlobalStore } from '../../hooks/general'
+import { NullableBoolean, NullableBooleanRef, BooleanRef, GlobalState, SidenavState, SidenavStore, TimeoutRef } from '../../constants/types'
+import { useGlobalStore } from '../../hooks/stores'
 import { immer } from 'zustand/middleware/immer'
 
 export default Sidenav
 export { useSidenavStore }
-export { handleInput as handleInput_Sidenav }
+export { handleKeyDownInput as handleInput_Sidenav }
 
 //TODO; holding arrow keys;
 
@@ -67,25 +67,26 @@ function focusPreviousElement({ sidenavState, topnavState }: GlobalState) {
     focusableElements[previousIndex]?.focus()
 }
 
-function handleInput(event: KeyboardEvent, globalState: GlobalState, isKeyInputRepeatingRef: BooleanRef, router: AppRouterInstance): void {
+function handleKeyDownInput(event: KeyboardEvent, globalState: GlobalState, router: AppRouterInstance): NullableBoolean {
     const { dropdownMenuStateArray, layoutState, sidenavState, topnavState } = globalState
-    if (sidenavState.element == null) return
+    if (sidenavState.element == null) return null
     if (!sidenavState.element.contains(document.activeElement)) {
         //TODO
         // clearKeyDownTimeout()
-        return
+        return null
     }
 
-    dropdownMenuStateArray.forEach((dropdownMenuState) => {
-        handleInput_DropdownMenu(dropdownMenuState, event, isKeyInputRepeatingRef, sidenavState)
-    })
+    for (let index = 0; index < dropdownMenuStateArray.length; ++index) {
+        const isKeyInputRepeating = handleKeyDownInput_DropdownMenu(dropdownMenuStateArray[index], event)
+        console.log('is key input repeating ' + isKeyInputRepeating)
+        if (isKeyInputRepeating != null) return isKeyInputRepeating
+    }
 
     if (event.key === 'Escape') {
         event.preventDefault()
         event.stopPropagation()
         closeSidenav(globalState)
-        isKeyInputRepeatingRef.current = false
-        return
+        return false
     }
 
     if (event.target instanceof HTMLAnchorElement) {
@@ -95,10 +96,9 @@ function handleInput(event: KeyboardEvent, globalState: GlobalState, isKeyInputR
             event.stopPropagation()
 
             router.push(event.target.href)
-            isKeyInputRepeatingRef.current = false
             triggerFlashEffect(event)
             closeSidenav(globalState)
-            return
+            return false
         }
     }
 
@@ -107,8 +107,7 @@ function handleInput(event: KeyboardEvent, globalState: GlobalState, isKeyInputR
         event.stopPropagation()
 
         focusNextElement(globalState)
-        isKeyInputRepeatingRef.current = true
-        return
+        return true
     }
 
     if (event.key === 'ArrowUp') {
@@ -117,8 +116,7 @@ function handleInput(event: KeyboardEvent, globalState: GlobalState, isKeyInputR
 
         console.log('focus previous element')
         focusPreviousElement(globalState)
-        isKeyInputRepeatingRef.current = true
-        return
+        return true
     }
 
     if (event.key === 'ArrowLeft') {
@@ -131,9 +129,9 @@ function handleInput(event: KeyboardEvent, globalState: GlobalState, isKeyInputR
         layoutState.setActiveTabIndexGroup(tabIndexGroupTopnav)
         sidenavState.setIsOpen(false)
         topnavState.menuButtonElement?.focus()
-        isKeyInputRepeatingRef.current = false
-        return
+        return false
     }
+    return null
 }
 
 //

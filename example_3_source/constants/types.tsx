@@ -1,84 +1,92 @@
-import { MutableRefObject } from 'react'
+import { KeyboardEvent, MutableRefObject } from 'react'
 import { StoreApi, UseBoundStore } from 'zustand'
 
 //
 //
 //
 
-export type { BooleanRef, DropdownMenu, TimeoutRef }
-export type { ButtonElement, SetButtonElement }
-export type { DivElement, SetDivElement }
-export type { Element, SetElement }
+export type NullableBoolean = boolean | null
+export type NullableBooleanRef = MutableRefObject<NullableBoolean>
 
-export type { DropdownMenuState, DropdownMenuStore }
-export type { GlobalState }
-export type { LayoutState, LayoutStore }
-export type { MainState, MainStore }
+export type BooleanRef = MutableRefObject<boolean>
+export type DropdownMenu = React.JSX.Element
+export type TimeoutRef = MutableRefObject<NodeJS.Timeout | undefined>
 
-export type { SidenavState, SidenavStore }
-export type { TopnavState, TopnavStore }
+export type NullableAnchorElement = HTMLAnchorElement | null
+export type SetNullableAnchorElement = (element: NullableAnchorElement) => void
 
-//
-//
-//
+export type ButtonElement = HTMLButtonElement | null
+export type SetButtonElement = (element: ButtonElement) => void
 
-type BooleanRef = MutableRefObject<boolean>
-type DropdownMenu = React.JSX.Element
-type TimeoutRef = MutableRefObject<NodeJS.Timeout | undefined>
+export type DivElement = HTMLDivElement | null
+export type SetDivElement = (element: DivElement) => void
 
-type ButtonElement = HTMLButtonElement | null
-type SetButtonElement = (element: ButtonElement) => void
-
-type DivElement = HTMLDivElement | null
-type SetDivElement = (element: DivElement) => void
-
-type Element = HTMLElement | null
-type SetElement = (element: Element) => void
+export type NullableElement = HTMLElement | null
+export type SetElement = (element: NullableElement) => void
 
 //
 //
 //
 
-interface DropdownMenuState {
+export interface DropdownMenuState {
     buttonElement: ButtonElement,
     setButtonElement: SetButtonElement,
     contentElement: DivElement,
     setContentElement: SetDivElement,
 
-    element: Element,
+    element: NullableElement,
     setElement: SetElement,
-    iconElement: Element,
+    iconElement: NullableElement,
     setIconElement: SetElement,
 
     isOpen: boolean,
     setIsOpen: (isOpen: boolean) => void,
 }
-type DropdownMenuStore = UseBoundStore<StoreApi<DropdownMenuState>>
+export type DropdownMenuStore = UseBoundStore<StoreApi<DropdownMenuState>>
 
-interface GlobalState {
+export interface GlobalState {
     dropdownMenuStateArray: DropdownMenuState[],
+    keyboardState: KeyboardState,
     layoutState: LayoutState,
     mainState: MainState,
+
+    searchState: SearchState,
     sidenavState: SidenavState,
     topnavState: TopnavState
 }
 
-interface LayoutState {
+export type NullableKeyboardEvent = KeyboardEvent | null
+export interface KeyboardState {
+    event: NullableKeyboardEvent,
+    setEvent: (event: NullableKeyboardEvent) => void,
+}
+
+export interface LayoutState {
     activeTabIndexGroup: number,
     setActiveTabIndexGroup: (tabIndex: number) => void,
     resetActiveTabIndexGroup: () => void,
 }
-type LayoutStore = UseBoundStore<StoreApi<LayoutState>>
+export type LayoutStore = UseBoundStore<StoreApi<LayoutState>>
 
-interface MainState {
+export interface MainState {
     element: HTMLElement | null,
     setElement: (element: HTMLElement | null) => void,
     isActive: boolean,
     setIsActive: (isActive: boolean) => void,
 }
-type MainStore = UseBoundStore<StoreApi<MainState>>
+export type MainStore = UseBoundStore<StoreApi<MainState>>
 
-interface SidenavState {
+export interface SearchState {
+    inputElement: HTMLInputElement | null
+    setInputElement: (element: HTMLInputElement | null) => void
+    isOpen: boolean
+    setIsOpen: (isOpen: boolean) => void
+    resultsElement: HTMLDivElement | null
+    setResultsElement: (element: HTMLDivElement | null) => void
+}
+export type SearchStore = UseBoundStore<StoreApi<SearchState>>
+
+export interface SidenavState {
     element: HTMLElement | null,
     setElement: (element: HTMLElement | null) => void,
 
@@ -88,13 +96,15 @@ interface SidenavState {
     lastActiveDropdownElement: HTMLButtonElement | null,
     setLastActiveDropdownElement: (element: HTMLButtonElement | null) => void,
 }
-type SidenavStore = UseBoundStore<StoreApi<SidenavState>>
+export type SidenavStore = UseBoundStore<StoreApi<SidenavState>>
 
-interface TopnavState {
+export interface TopnavState {
     element: HTMLElement | null,
     setElement: (element: HTMLElement | null) => void,
+    homeLinkElement: NullableAnchorElement,
+    setHomeLinkElement: SetNullableAnchorElement,
 
     menuButtonElement: HTMLButtonElement | null,
     setMenuButtonElement: (element: HTMLButtonElement | null) => void,
 }
-type TopnavStore = UseBoundStore<StoreApi<TopnavState>>
+export type TopnavStore = UseBoundStore<StoreApi<TopnavState>>

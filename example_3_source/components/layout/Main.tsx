@@ -3,10 +3,9 @@ import React, { KeyboardEvent, useEffect, useRef } from 'react'
 import { useDrag } from '@use-gesture/react'
 import { create } from 'zustand'
 import { isDebugEnabled, tabIndexGroupMain } from '../../constants/general_constants'
-import { useSearchStore } from '../atoms/Search'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 import { useLayoutStore } from './Layout'
-import { useTopnavStore } from './Topnav'
+import { useGlobalStore } from '../../hooks/stores'
 
 export default Main
 export { useMainStore }
@@ -42,12 +41,7 @@ function Main({ children }: React.PropsWithChildren) {
     //
 
     const focusAnchor = useRef<HTMLDivElement | null>(null)
-
-    const layoutState = useLayoutStore()
-    const mainState = useMainStore()
-    const sidenavState = useSidenavStore()
-    const searchStore = useSearchStore()
-    const topnavState = useTopnavStore()
+    const { layoutState, mainState, searchState, sidenavState, topnavState } = useGlobalStore()
 
     const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"]), input:not([tabindex="-1"]), summary:not([tabindex="-1"])'
 
@@ -185,12 +179,12 @@ function Main({ children }: React.PropsWithChildren) {
 
     // update state;
     useEffect(() => {
-        if (mainState.isActive === (!sidenavState.isOpen && !searchStore.isOpen)) return
+        if (mainState.isActive === (!sidenavState.isOpen && !searchState.isOpen)) return
         mainState.setIsActive(!mainState.isActive)
-    }, [mainState, searchStore.isOpen, sidenavState.isOpen])
+    }, [mainState, searchState.isOpen, sidenavState.isOpen])
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    // [mainState.setIsActive, searchStore.isOpen, sidenavState.isOpen])
+    // [mainState.setIsActive, searchState.isOpen, sidenavState.isOpen])
 
     // synchronize state and attributes;
     useEffect(() => {
