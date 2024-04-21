@@ -7,6 +7,8 @@ import { useRef, useState } from 'react'
 import { useClick } from '../../hooks/gestures'
 import { mainIndexGroup } from '../../constants/parameters'
 import { useGlobalStore } from '../../hooks/stores'
+import { focusNextElement, focusPreviousElement, scrollIntoView } from '../../constants/functions'
+import { GSP_NO_RETURNED_VALUE } from 'next/dist/lib/constants'
 
 function Page() {
     //
@@ -14,11 +16,17 @@ function Page() {
     //
 
     const { layoutState, sidenavState } = useGlobalStore()
+
     const [imageRowElement, setImageRowElement] = useState<HTMLDivElement | null>(null)
     const [overlayElement, setOverlayElement] = useState<HTMLDivElement | null>(null)
+
     const imageRowFirstImage = useRef<HTMLImageElement | null>(null)
     const overlayImageRef = useRef<HTMLImageElement | null>(null)
     const previouslyFocusedElementRef = useRef<HTMLElement | null>(null)
+
+    const imageRowIndexGroup = 'main-imageRow'
+    const overlayIndexGroup = 'main-overlay'
+    const queryString = 'img[tabIndex="0"]'
 
     //
     // functions
@@ -57,22 +65,44 @@ function Page() {
     }, { eventOptions: { capture: true }, enabled: !sidenavState.isOpen })
 
     function handleKeyDownInput_ImageRow(event: React.KeyboardEvent) {
-        if (layoutState.indexGroup !== mainIndexGroup) return
-
-        //TODO
-        console.log('hello')
-        if (event.key === 'Enter') {
-            event.preventDefault()
-            event.stopPropagation()
-            layoutState.setIndexGroup('main-imageRow')
-            imageRowFirstImage.current?.focus()
+        if (layoutState.indexGroup === mainIndexGroup) {
+            if (event.key === 'Enter') {
+                event.preventDefault()
+                event.stopPropagation()
+                layoutState.setIndexGroup(imageRowIndexGroup)
+                imageRowFirstImage.current?.focus()
+                return
+            }
             return
         }
 
-        if (event.key === 'ArrowRight') {
-            event.preventDefault()
-            event.stopPropagation()
-            //TODO
+        if (layoutState.indexGroup === imageRowIndexGroup) {
+            if (event.key === 'Escape') {
+                event.preventDefault()
+                event.stopPropagation()
+                layoutState.setIndexGroup(mainIndexGroup)
+                imageRowElement?.focus()
+                return
+            }
+
+            if (event.key === 'ArrowRight') {
+                event.preventDefault()
+                event.stopPropagation()
+                //TODO
+                //TODO; check if motion-safe;
+                scrollIntoView(focusNextElement(imageRowElement, queryString))
+                return
+            }
+
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault()
+                event.stopPropagation()
+                scrollIntoView(focusPreviousElement(imageRowElement, queryString))
+                // imageRowElement?.scrollBy({ left: -100 })
+                // imageRowElement?.scroll
+                return
+            }
+            return
         }
     }
 
@@ -109,7 +139,7 @@ function Page() {
         <div
             className="fixed hidden open:block h-[calc(100vh-var(--height-topnav))] w-full p-10 top-[--height-topnav] left-0 overflow-y-auto z-10 bg-secondary motion-safe:animate-fade-in"
             onBlur={() => layoutState.restorePreviousIndexGroup()}
-            onFocus={() => layoutState.setIndexGroup('main-overlay')}
+            onFocus={() => layoutState.setIndexGroup(overlayIndexGroup)}
             onKeyDown={handleKeyDownInput_Overlay}
             ref={setOverlayElement}
         >
@@ -171,7 +201,11 @@ function Page() {
         <div
             {...onDrag()}
             className="flex w-full border items-center overflow-x-hidden touch-none"
+            // capture is necessary to prevent the default scrolling behavior?;
             onKeyDown={handleKeyDownInput_ImageRow}
+            // reset the changes made by onDrag();
+            onKeyDownCapture={undefined}
+            onKeyUpCapture={undefined}
             ref={setImageRowElement}
             tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1}
         >
@@ -181,8 +215,9 @@ function Page() {
                 className="p-1 mx-auto text-center"
                 height={250}
                 ref={imageRowFirstImage}
+                onKeyDown={handleKeyDownInput_SingleImage}
                 src="/images/sunset-3008779_1280.jpg"
-                tabIndex={layoutState.indexGroup === 'main-imageRow' ? 0 : -1}
+                tabIndex={layoutState.indexGroup === imageRowIndexGroup ? 0 : -1}
                 width={250}
             ></Image>
             <Image
@@ -190,8 +225,9 @@ function Page() {
                 alt="placeholder"
                 className="p-1 mx-auto text-center"
                 height={250}
+                onKeyDown={handleKeyDownInput_SingleImage}
                 src="/images/forest-5855196_1280.jpg"
-                tabIndex={layoutState.indexGroup === 'main-imageRow' ? 0 : -1}
+                tabIndex={layoutState.indexGroup === imageRowIndexGroup ? 0 : -1}
                 width={250}
             ></Image>
             <Image
@@ -199,8 +235,9 @@ function Page() {
                 alt="placeholder"
                 className="p-1 mx-auto text-center"
                 height={250}
+                onKeyDown={handleKeyDownInput_SingleImage}
                 src="/images/cute-7270285.svg"
-                tabIndex={layoutState.indexGroup === 'main-imageRow' ? 0 : -1}
+                tabIndex={layoutState.indexGroup === imageRowIndexGroup ? 0 : -1}
                 width={250}
             ></Image>
             <Image
@@ -208,8 +245,9 @@ function Page() {
                 alt="placeholder"
                 className="p-1 mx-auto text-center touch-none"
                 height={250}
+                onKeyDown={handleKeyDownInput_SingleImage}
                 src="/images/floral-background-6622475_1280.png"
-                tabIndex={layoutState.indexGroup === 'main-imageRow' ? 0 : -1}
+                tabIndex={layoutState.indexGroup === imageRowIndexGroup ? 0 : -1}
                 width={250}
             ></Image>
         </div>

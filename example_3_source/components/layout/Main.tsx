@@ -1,10 +1,11 @@
 import React, { KeyboardEvent, useEffect } from 'react'
 import { useDrag } from '@use-gesture/react'
-import { indexEntryTypesString, isDebugEnabled, mainIndexGroup } from '../../constants/parameters'
+import { defaultIndexGroup, indexEntryTypesString, isDebugEnabled, mainIndexGroup } from '../../constants/parameters'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 import { useGlobalStore, useMainStore } from '../../hooks/stores'
 import { NullableBoolean } from '../../constants/types'
 import { useSearchParams } from 'next/navigation'
+import { focusNextElement, focusPreviousElement, scrollIntoView } from '../../constants/functions'
 
 export default Main
 export { handleKeyDownInput as handleKeyDownInput_Main }
@@ -23,48 +24,70 @@ const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"]), div[ta
 // functions
 //
 
-function focusNextElement() {
-    const mainElement = useMainStore.getState().element
-    if (mainElement == null) return
-    const focusedElement = document.activeElement as HTMLAnchorElement | null
-    if (focusedElement == null) return
-
-    const focusableElements = Array.from(mainElement.querySelectorAll<HTMLAnchorElement>(queryString))
-    //TODO
-    console.log(focusableElements)
-    const nextIndex = Math.min(focusableElements.indexOf(focusedElement) + 1, focusableElements.length - 1)
-    focusableElements[nextIndex]?.focus()
-}
-
-function focusPreviousElement() {
-    const mainElement = useMainStore.getState().element
-    if (mainElement == null) return
-    let focusedElement = document.activeElement as HTMLElement | null
-    if (focusedElement == null) return
-
-    // previousIndex is -1 if the element is not found or null;
-    const focusableElements = Array.from(mainElement.querySelectorAll<HTMLElement>(queryString))
-    const previousIndex = Math.max(focusableElements.indexOf(focusedElement) - 1, 0)
-    focusableElements[previousIndex]?.focus()
-}
+// function focusNextElement() {
+//     const mainElement = useMainStore.getState().element
+//     if (mainElement == null) return
+//     const focusedElement = document.activeElement as HTMLAnchorElement | null
+//     if (focusedElement == null) return
+// 
+//     const focusableElements = Array.from(mainElement.querySelectorAll<HTMLAnchorElement>(queryString))
+//     const nextIndex = Math.min(focusableElements.indexOf(focusedElement) + 1, focusableElements.length - 1)
+//     focusableElements[nextIndex]?.focus()
+// }
+// 
+// function focusPreviousElement() {
+//     const mainElement = useMainStore.getState().element
+//     if (mainElement == null) return
+//     let focusedElement = document.activeElement as HTMLElement | null
+//     if (focusedElement == null) return
+// 
+//     // previousIndex is -1 if the element is not found or null;
+//     const focusableElements = Array.from(mainElement.querySelectorAll<HTMLElement>(queryString))
+//     const previousIndex = Math.max(focusableElements.indexOf(focusedElement) - 1, 0)
+//     focusableElements[previousIndex]?.focus()
+// }
 
 function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
-    const { layoutState, mainState } = useGlobalStore.getState()
+    const { layoutState, mainState, topnavState } = useGlobalStore.getState()
     if (mainState.element == null) return null
     if (!mainState.element.contains(document.activeElement)) return null
 
-    if (document.activeElement === mainState.element) {
+    // does not scroll down when holding down starting from topnav; this is because the scrolling happens by default and main is not selected at the start; holding key down does not trigger onKeyDown on main; TODO;
+    console.log('main')
+    if (layoutState.indexGroup === defaultIndexGroup) {
+        if (event.key === 'ArrowUp' && mainState.element?.scrollTop === 0) {
+            event.preventDefault()
+            event.stopPropagation()
+            topnavState.element?.focus()
+            return false
+        }
+
         if (event.key === 'Enter') {
             event.preventDefault()
+            event.stopPropagation()
             layoutState.setIndexGroup(mainIndexGroup)
-            // focusPreviousElement()
-            setTimeout(() => focusNextElement(), 1)
+
+            // wait for the indexGroup change to be applied;
+            setTimeout(() => focusNextElement(mainState.element, queryString), 1)
             return false
         }
         return null
     }
 
-    //TODO
+    //     if (document.activeElement === mainState.element) {
+    //         if (event.key === 'Enter') {
+    //             event.preventDefault()
+    //             event.stopPropagation()
+    //             layoutState.setIndexGroup(mainIndexGroup)
+    // 
+    //             // wait for the indexGroup change to be applied;
+    //             setTimeout(() => focusNextElement(mainState.element, queryString), 1)
+    //             return false
+    //         }
+    //         return null
+    //     }
+
+    //TODO; maybe put this directly on the elements;
     if (document.activeElement?.tagName === 'SUMMARY') {
         if (event.key === 'ArrowRight') {
             event.preventDefault()
@@ -89,16 +112,17 @@ function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
     }
 
     if (event.key === 'ArrowDown') {
+        console.log('prevent')
         event.preventDefault()
         event.stopPropagation()
-        focusNextElement()
+        scrollIntoView(focusNextElement(mainState.element, queryString))
         return true
     }
 
     if (event.key === 'ArrowUp') {
         event.preventDefault()
         event.stopPropagation()
-        focusPreviousElement()
+        scrollIntoView(focusPreviousElement(mainState.element, queryString))
         return true
     }
     return null
@@ -255,6 +279,7 @@ function Main({ children }: React.PropsWithChildren) {
 
     return (<>
         <main
+            // sets onKeyDownCapture and onKeyUpCapture;
             {...dragAttributes}
             className="h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-colors ease-out duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
             ref={initializeMainReference}

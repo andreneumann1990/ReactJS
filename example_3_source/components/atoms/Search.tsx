@@ -25,6 +25,7 @@ const algoliaIndex = algoliasearch('2QYN25VL0K', 'ba0b8a970db7843753c13218f38ae4
 function handleKeyDownInput(event: React.KeyboardEvent): NullableBoolean {
     const { searchState, topnavState } = useGlobalStore.getState()
     if (searchState.inputElement == null) return null
+    if (!searchState.inputElement.contains(document.activeElement)) return null
 
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
         //TODO
@@ -32,12 +33,13 @@ function handleKeyDownInput(event: React.KeyboardEvent): NullableBoolean {
         return null
     }
 
-    if (event.key === 'Escape') {
-        event.preventDefault()
-        searchState.inputElement.blur()
-        topnavState.element?.focus()
-        return false
-    }
+    //TODO remove?
+    // if (event.key === 'Escape') {
+    //     event.preventDefault()
+    //     searchState.inputElement.blur()
+    //     topnavState.element?.focus()
+    //     return false
+    // }
 
     if (Object.keys(searchState.resultsDataArray).length < 1) return null
     const [keyIndex, entryIndex] = searchState.resultsSelectedIndex
@@ -196,6 +198,7 @@ function Search() {
 
     // select search input field by ctrl+k;
     useEffect(() => {
+        //TODO; move to layout.tsx;
         function handleKeyDownInput(event: KeyboardEvent): void {
             if (event.ctrlKey && event.key === 'k') {
                 event.preventDefault()

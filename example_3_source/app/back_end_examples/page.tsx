@@ -9,6 +9,9 @@ import { useLayoutStore } from '../../hooks/stores'
 
 export default Page
 
+// TODO; add the onFocus event for all input element that have text in them;
+// or find a better way to sychronize indexGroup and the element currently being focused;
+
 //
 //
 //

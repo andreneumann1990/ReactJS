@@ -4,7 +4,7 @@ import { isDebugEnabled, defaultIndexGroup, mainIndexGroup, sidenavIndexGroup, t
 import { triggerFlashEffect } from '../../constants/functions'
 import { NullableBoolean } from '../../constants/types'
 import { useGlobalStore, useSearchStore, useTopnavStore } from '../../hooks/stores'
-import Search from '../atoms/Search'
+import Search, { handleKeyDownInput_Search } from '../atoms/Search'
 
 export default Topnav
 export { handleKeyDownInput as handleKeyInput_Topnav }
@@ -53,29 +53,52 @@ function focusPreviousElement(): void {
 }
 
 function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
-    const { layoutState, sidenavState, topnavState } = useGlobalStore.getState()
+    const { layoutState, mainState, sidenavState, topnavState } = useGlobalStore.getState()
     if (topnavState.element == null) return null
     if (!topnavState.element.contains(document.activeElement)) return null
 
-    //TODO; this ignores things like opening the sidenav, where you still focus on the menu button;
-    // it works for now because the tab index is set there differenctly; think about it again;
-    if (layoutState.indexGroup !== topnavIndexGroup) {
-        layoutState.setIndexGroup(topnavIndexGroup)
-    }
+    if (layoutState.indexGroup === defaultIndexGroup) {
+        if (event.key === 'ArrowDown') {
+            event.preventDefault()
+            event.stopPropagation()
+            mainState.element?.focus()
+            return true
+        }
 
-    if (document.activeElement === topnavState.element) {
         if (event.key === 'Enter') {
             event.preventDefault()
             event.stopPropagation()
+            layoutState.setIndexGroup(topnavIndexGroup)
             topnavState.menuButtonElement?.focus()
             return false
         }
         return null
     }
 
+    const isKeyInputRepeating = handleKeyDownInput_Search(event)
+    if (isKeyInputRepeating != null) return isKeyInputRepeating
+
+    //TODO; this ignores things like opening the sidenav, where you still focus on the menu button;
+    // it works for now because the tab index is set there differenctly; think about it again;
+    // if (layoutState.indexGroup !== topnavIndexGroup) {
+    //     layoutState.setIndexGroup(topnavIndexGroup)
+    // }
+
+    // if (document.activeElement === topnavState.element) {
+    //     if (event.key === 'Enter') {
+    //         event.preventDefault()
+    //         event.stopPropagation()
+    //         topnavState.menuButtonElement?.focus()
+    //         return false
+    //     }
+    //     return null
+    // }
+
     if (event.key === 'Escape') {
         event.preventDefault()
+        event.stopPropagation()
         layoutState.resetIndexGroup()
+        sidenavState.setIsOpen(false)
         topnavState.element?.focus()
         return false
     }
@@ -248,7 +271,7 @@ function Topnav() {
                         // onFocusCapture={setActiveTabIndexGroupToTopnav}
                         onPointerUp={toggleSidenav}
                         ref={initializeMenuButtonReference}
-                        tabIndex={layoutState.indexGroup === topnavIndexGroup ? topnavIndexGroup : -1}
+                        tabIndex={layoutState.indexGroup === topnavIndexGroup ? undefined : -1}
                     >
                         <i
                             className="p-1 icon-medium material-icons"
@@ -263,7 +286,7 @@ function Topnav() {
                         className="block h-[--height-topnav]"
                         href="/home"
                         ref={homeLinkRef}
-                        tabIndex={layoutState.indexGroup === topnavIndexGroup ? topnavIndexGroup : -1}
+                        tabIndex={layoutState.indexGroup === topnavIndexGroup ? undefined : -1}
                     >
                         <i className="p-1 icon-medium material-icons">home</i>
                     </Link>
