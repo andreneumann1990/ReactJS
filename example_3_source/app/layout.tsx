@@ -24,7 +24,7 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     //
 
     const globalState = useGlobalStore()
-    // const { sidenavState } = globalState
+    const { layoutState, mainState, sidenavState, topnavState } = globalState
     const router = useRouter()
     let keyDownTimeoutRef = useRef<NodeJS.Timeout | undefined>()
 
@@ -37,6 +37,11 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
         globalState.keyboardState.setEvent(null)
         clearTimeout(keyDownTimeoutRef.current)
         keyDownTimeoutRef.current = undefined
+    }
+
+    function handleFocus(event: React.FocusEvent) {
+        //TODO; it is probably better to do it for each element that can be focused;
+        // if (sidenavState.element?.contains(event.target)) lay
     }
 
     function handleKeyDownInput(event: KeyboardEvent): void {
@@ -155,6 +160,7 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
             */}
             <body
                 className="w-full bg-background [color:--color-text] [font-size:100%] [font-family:Helvetica,Arial,sans-serif]"
+                onFocusCapture={handleFocus}
                 onKeyDown={handleKeyDownInput}
                 onKeyUp={clearKeyDownTimeout}
             >
