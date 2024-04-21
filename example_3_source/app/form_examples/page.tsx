@@ -6,15 +6,12 @@ import * as Yup from 'yup'
 import { InputCountry1, InputCountry2 } from '../../components/atoms/InputCountry'
 import Link from 'next/link'
 import { Button } from '@mui/material'
-import { useNavigateAndHighlightElement } from '../../hooks/navigation_hooks'
-import { useLayoutStore } from '../../components/layout/Layout'
-import { tabIndexGroupMain } from '../../constants/general_constants'
+import { mainIndexGroup } from '../../constants/general_constants'
+import { useLayoutStore } from '../../hooks/stores'
 
 //TODO; handle tabIndex;
 
 function Page() {
-    useNavigateAndHighlightElement('FormExamples')
-
     //
     // parameters and variables
     //
@@ -134,7 +131,7 @@ function Page() {
                             className="bg-primary border m-1 px-2 py-1 rounded-md"
                             name="button"
                             onClick={handleClick}
-                            tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
+                            tabIndex={layoutState.indexGroup === mainIndexGroup ? undefined : -1}
                             type="button"
                             value="use cases? use normal button instead?"
                         />

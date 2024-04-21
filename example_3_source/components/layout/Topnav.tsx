@@ -1,13 +1,15 @@
-import { KeyboardEvent, useCallback, useEffect, useRef } from 'react'
+import { KeyboardEvent, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import SearchBox from '../atoms/Search'
-import { initialDelay, maximumDelay, repeatDelay, isDebugEnabled, tabIndexGroupDefault, tabIndexGroupSidenav, tabIndexGroupTopnav } from '../../constants/general_constants'
+import { isDebugEnabled, defaultIndexGroup, mainIndexGroup, sidenavIndexGroup, topnavIndexGroup } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
-import { GlobalState, NullableBoolean, TopnavState } from '../../constants/types'
+import { NullableBoolean } from '../../constants/types'
 import { useGlobalStore, useSearchStore, useTopnavStore } from '../../hooks/stores'
+import Search from '../atoms/Search'
 
 export default Topnav
 export { handleKeyDownInput as handleKeyInput_Topnav }
+
+//TODO; check onFocusCapture again; set it inside the handleKeyDownInput function in layout??;
 
 //
 // parameters and variables
@@ -51,13 +53,14 @@ function focusPreviousElement(): void {
 }
 
 function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
-    const { layoutState, mainState, sidenavState, topnavState } = useGlobalStore.getState()
+    const { layoutState, sidenavState, topnavState } = useGlobalStore.getState()
     if (topnavState.element == null) return null
+    if (!topnavState.element.contains(document.activeElement)) return null
 
-    if (!topnavState.element.contains(document.activeElement)) {
-        // if (isDebugEnabled) console.log('Topnav: Stop key-down input.')
-        // clearKeyDownTimeout()
-        return null
+    //TODO; this ignores things like opening the sidenav, where you still focus on the menu button;
+    // it works for now because the tab index is set there differenctly; think about it again;
+    if (layoutState.indexGroup !== topnavIndexGroup) {
+        layoutState.setIndexGroup(topnavIndexGroup)
     }
 
     if (document.activeElement === topnavState.element) {
@@ -67,18 +70,12 @@ function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
             topnavState.menuButtonElement?.focus()
             return false
         }
-
-        if (event.key === 'ArrowDown') {
-            event.preventDefault()
-            mainState.element?.focus()
-            return false
-        }
         return null
     }
 
     if (event.key === 'Escape') {
         event.preventDefault()
-        layoutState.resetActiveTabIndexGroup()
+        layoutState.resetIndexGroup()
         topnavState.element?.focus()
         return false
     }
@@ -157,9 +154,9 @@ function toggleSidenav(): void {
     if (isDebugEnabled) console.log('Topnav: Toggle sidenav.')
 
     if (!sidenavState.isOpen) {
-        layoutState.setActiveTabIndexGroup(tabIndexGroupSidenav)
+        layoutState.setIndexGroup(sidenavIndexGroup)
     } else if (document.activeElement === topnavState.menuButtonElement) {
-        layoutState.setActiveTabIndexGroup(tabIndexGroupTopnav)
+        layoutState.setIndexGroup(topnavIndexGroup)
     }
     sidenavState.setIsOpen(!sidenavState.isOpen)
 }
@@ -173,23 +170,15 @@ function Topnav() {
     // parameters and variables
     //
 
-    const { layoutState, searchState, sidenavState, topnavState } = useGlobalStore()
+    const { layoutState, sidenavState, topnavState } = useGlobalStore()
 
     const homeLinkRef = useRef<HTMLAnchorElement | null>(null)
     const menuIconRef = useRef<HTMLElement | null>(null)
     const closeIconRef = useRef<HTMLElement | null>(null)
 
-    let keyDownTimeoutRef = useRef<NodeJS.Timeout | undefined>()
-
     //
     // functions
     //
-
-    function clearKeyDownTimeout(): void {
-        if (isDebugEnabled) console.log('Topnav: Clear key-down timeout.')
-        clearTimeout(keyDownTimeoutRef.current)
-        keyDownTimeoutRef.current = undefined
-    }
 
     const initializeMenuButtonReference = (element: HTMLButtonElement | null) => {
         if (topnavState.menuButtonElement != null) return
@@ -207,7 +196,7 @@ function Topnav() {
 
     function setActiveTabIndexGroupToTopnav() {
         console.log('focus') //TODO
-        layoutState.setActiveTabIndexGroup(tabIndexGroupTopnav)
+        layoutState.setIndexGroup(topnavIndexGroup)
     }
 
     //
@@ -244,20 +233,22 @@ function Topnav() {
         >test</div> */}
 
         <nav
+            // lg:h-[calc(var(--height-topnav)/2)]
             className="bg-background h-[--height-topnav] shadow-md"
             ref={initializeTopnavReference}
-            tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupDefault ? 0 : -1}
+            tabIndex={layoutState.indexGroup === defaultIndexGroup ? 0 : -1}
         >
             <div
-                className="grid grid-flow-col [grid-template-columns:20%_60%_20%] justify-items-center justify-between"
+                className="h-[--height-topnav] lg:h-auto grid [grid-template-columns:20%_60%_20%] lg:[grid-template-columns:20%_1fr_410px] justify-items-center justify-between"
             >
                 <div className="grid grid-flow-col justify-self-start">
+                    {/* sidenav menu and home link; left; */}
                     <button
                         className="h-[--height-topnav]"
-                        onFocusCapture={setActiveTabIndexGroupToTopnav}
+                        // onFocusCapture={setActiveTabIndexGroupToTopnav}
                         onPointerUp={toggleSidenav}
                         ref={initializeMenuButtonReference}
-                        tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
+                        tabIndex={layoutState.indexGroup === topnavIndexGroup ? topnavIndexGroup : -1}
                     >
                         <i
                             className="p-1 icon-medium material-icons"
@@ -272,12 +263,31 @@ function Topnav() {
                         className="block h-[--height-topnav]"
                         href="/home"
                         ref={homeLinkRef}
-                        tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
+                        tabIndex={layoutState.indexGroup === topnavIndexGroup ? topnavIndexGroup : -1}
                     >
                         <i className="p-1 icon-medium material-icons">home</i>
                     </Link>
                 </div>
-                <SearchBox />
+                {/* search input; middle; */}
+                <Search />
+                {/* key input hints; right; */}
+                <div className="hidden lg:flex w-full px-5 justify-between items-center text-right">
+                    <div className="grid grid-flow-col justify-center">
+                        <i className="material-icons rotate-90">arrow_downward</i>
+                        <i className="material-icons rotate-90">arrow_upward</i>
+                        <i className="material-icons">arrow_upward</i>
+                        <i className="material-icons">arrow_downward</i>
+                        <span className="inline-block p-1 text-xs">to navigate</span>
+                    </div>
+                    <div className="text-center">
+                        <img className="inline bg-white rounded-md p-1" src="./icons/enter-arrow-svgrepo-com.svg" alt="enter" height="24px" width="24px"></img>
+                        <span className="inline-block p-1 text-xs">to select</span>
+                    </div>
+                    <div>
+                        <img className="inline bg-white rounded-md p-1" src="./icons/esc-a-svgrepo-com.svg" alt="escape" height="24px" width="24px"></img>
+                        <span className="inline-block p-1 text-xs">to go back</span>
+                    </div>
+                </div>
             </div>
         </nav >
     </>)

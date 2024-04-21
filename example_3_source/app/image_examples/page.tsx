@@ -3,21 +3,22 @@
 import { useDrag } from '@use-gesture/react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
-import { useSidenavStore } from '../../components/layout/Sidenav'
+import { useRef, useState } from 'react'
 import { useClick } from '../../hooks/gesture_hooks'
-import { useNavigateAndHighlightElement } from '../../hooks/navigation_hooks'
+import { mainIndexGroup } from '../../constants/general_constants'
+import { useGlobalStore } from '../../hooks/stores'
 
 function Page() {
-    useNavigateAndHighlightElement('ImageExamples')
-
     //
     // parameters and variables
     //
 
-    const isSidenavOpen = useSidenavStore(state => state.isOpen)
+    const { layoutState, sidenavState } = useGlobalStore()
     const [imageRowElement, setImageRowElement] = useState<HTMLDivElement | null>(null)
     const [overlayElement, setOverlayElement] = useState<HTMLDivElement | null>(null)
+    const imageRowFirstImage = useRef<HTMLImageElement | null>(null)
+    const overlayImageRef = useRef<HTMLImageElement | null>(null)
+    const previouslyFocusedElementRef = useRef<HTMLElement | null>(null)
 
     //
     // functions
@@ -35,9 +36,9 @@ function Page() {
         overlayElement.removeAttribute('open')
     }
 
-    function openOverlay(event: PointerEvent): void {
+    function openOverlay({ target }: { target: EventTarget | null }): void {
         if (overlayElement == null) return
-        const imageElement = event.target as HTMLImageElement | null
+        const imageElement = target as HTMLImageElement | null
         if (imageElement == null) return
         const overlayImageElement = overlayElement.querySelector('img')
         if (overlayImageElement == null) return
@@ -53,7 +54,51 @@ function Page() {
         if (imageRowElement == null) return
         event.preventDefault()
         imageRowElement.scrollBy({ left: -dx })
-    }, { eventOptions: { capture: true }, enabled: !isSidenavOpen })
+    }, { eventOptions: { capture: true }, enabled: !sidenavState.isOpen })
+
+    function handleKeyDownInput_ImageRow(event: React.KeyboardEvent) {
+        if (layoutState.indexGroup !== mainIndexGroup) return
+
+        //TODO
+        console.log('hello')
+        if (event.key === 'Enter') {
+            event.preventDefault()
+            event.stopPropagation()
+            layoutState.setIndexGroup('main-imageRow')
+            imageRowFirstImage.current?.focus()
+            return
+        }
+
+        if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            event.stopPropagation()
+            //TODO
+        }
+    }
+
+    function handleKeyDownInput_Overlay(event: React.KeyboardEvent) {
+        if (event.key === 'Escape') {
+            event.preventDefault()
+            event.stopPropagation()
+            closeOverlay()
+            const currentTarget = event.currentTarget as HTMLElement | null
+            currentTarget?.blur()
+            previouslyFocusedElementRef.current?.focus()
+            return
+        }
+    }
+
+    function handleKeyDownInput_SingleImage(event: React.KeyboardEvent): void {
+        if (event.key === 'Enter') {
+            event.preventDefault()
+            event.stopPropagation()
+            openOverlay(event)
+            //TODO; check if it works;
+            previouslyFocusedElementRef.current = event.currentTarget as HTMLElement
+            overlayImageRef.current?.focus()
+            return
+        }
+    }
 
     //
     //
@@ -61,38 +106,112 @@ function Page() {
 
     return (<>
         {/* overlay; fullscreen picture view; */}
-        <div className="fixed hidden open:block h-[calc(100vh-var(--height-topnav))] w-full p-10 top-[--height-topnav] left-0 overflow-y-auto z-10 bg-secondary motion-safe:animate-fade-in" ref={setOverlayElement}>
-            <button className="absolute right-12 top-12 bg-primary" onClick={closeOverlay}>
+        <div
+            className="fixed hidden open:block h-[calc(100vh-var(--height-topnav))] w-full p-10 top-[--height-topnav] left-0 overflow-y-auto z-10 bg-secondary motion-safe:animate-fade-in"
+            onBlur={() => layoutState.restorePreviousIndexGroup()}
+            onFocus={() => layoutState.setIndexGroup('main-overlay')}
+            onKeyDown={handleKeyDownInput_Overlay}
+            ref={setOverlayElement}
+        >
+            <button
+                className="absolute right-12 top-12 bg-primary"
+                onClick={closeOverlay}
+                //TODO
+                tabIndex={-1}
+            // tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
+            >
                 <i className="p-1 icon-medium material-icons">close</i>
             </button>
-            <Image className="p-1 mx-auto" src="/icons/logo192.png" alt="" width={0} height={0}></Image>
+            <Image
+                alt=""
+                className="p-1 mx-auto"
+                height={0}
+                ref={overlayImageRef}
+                src="/icons/logo192.png"
+                tabIndex={-1}
+                width={0}
+            ></Image>
         </div>
 
         {/* header; */}
         <h1 className="my-3 text-3xl font-bold">Image Examples</h1>
         <ul className="pl-5">
-            <li>images are taken from
-                <Link className="text-blue-300" href="https://pixabay.com/collections/example_2-21740818/"> https://pixabay.com/collections/example_2-21740818/</Link>
+            <li>images are taken from&nbsp;
+                <Link
+                    className="text-blue-300"
+                    href="https://pixabay.com/collections/example_2-21740818/"
+                    onFocusCapture={() => layoutState.setIndexGroup(mainIndexGroup)}
+                    tabIndex={layoutState.indexGroup === mainIndexGroup ? undefined : -1}
+                >https://pixabay.com/collections/example_2-21740818/</Link>
             </li>
-        </ul>
+        </ul >
 
         {/* single image; */}
-        <h2 className="my-1 text-xl font-bold">single image:</h2>
+        <h2 className="my-1 text-xl font-bold" > single image:</h2>
         <ul className="pl-5">
             <li>click on image for full-scale image</li>
         </ul>
-        <Image className="p-1 mx-auto text-center" src="/images/woman-3077180_1280.jpg" alt="placeholder" width={250} height={250} {...useClick(openOverlay)} priority={true}></Image >
+        <Image
+            {...useClick(openOverlay)}
+            alt="placeholder"
+            className="p-1 mx-auto text-center"
+            priority={true}
+            height={250}
+            onKeyDown={handleKeyDownInput_SingleImage}
+            src="/images/woman-3077180_1280.jpg"
+            tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1}
+            width={250}
+        ></Image >
 
         {/* image row; */}
         < h2 className="my-1 text-xl font-bold" > image row:</h2 >
         <ul className="pl-5">
             <li>click or drag</li>
         </ul>
-        <div ref={setImageRowElement} className="flex w-full border items-center overflow-x-hidden touch-none" {...onDrag()}>
-            <Image className="p-1 mx-auto text-center" src="/images/sunset-3008779_1280.jpg" alt="placeholder" width={250} height={250} {...useClick(openOverlay)}></Image>
-            <Image className="p-1 mx-auto text-center" src="/images/forest-5855196_1280.jpg" alt="placeholder" width={250} height={250} {...useClick(openOverlay)}></Image>
-            <Image className="p-1 mx-auto text-center" src="/images/cute-7270285.svg" alt="placeholder" width={250} height={250} {...useClick(openOverlay)}></Image>
-            <Image className="p-1 mx-auto text-center touch-none" src="/images/floral-background-6622475_1280.png" alt="placeholder" width={250} height={250} {...useClick(openOverlay)} ></Image>
+        <div
+            {...onDrag()}
+            className="flex w-full border items-center overflow-x-hidden touch-none"
+            onKeyDown={handleKeyDownInput_ImageRow}
+            ref={setImageRowElement}
+            tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1}
+        >
+            <Image
+                {...useClick(openOverlay)}
+                alt="placeholder"
+                className="p-1 mx-auto text-center"
+                height={250}
+                ref={imageRowFirstImage}
+                src="/images/sunset-3008779_1280.jpg"
+                tabIndex={layoutState.indexGroup === 'main-imageRow' ? 0 : -1}
+                width={250}
+            ></Image>
+            <Image
+                {...useClick(openOverlay)}
+                alt="placeholder"
+                className="p-1 mx-auto text-center"
+                height={250}
+                src="/images/forest-5855196_1280.jpg"
+                tabIndex={layoutState.indexGroup === 'main-imageRow' ? 0 : -1}
+                width={250}
+            ></Image>
+            <Image
+                {...useClick(openOverlay)}
+                alt="placeholder"
+                className="p-1 mx-auto text-center"
+                height={250}
+                src="/images/cute-7270285.svg"
+                tabIndex={layoutState.indexGroup === 'main-imageRow' ? 0 : -1}
+                width={250}
+            ></Image>
+            <Image
+                {...useClick(openOverlay)}
+                alt="placeholder"
+                className="p-1 mx-auto text-center touch-none"
+                height={250}
+                src="/images/floral-background-6622475_1280.png"
+                tabIndex={layoutState.indexGroup === 'main-imageRow' ? 0 : -1}
+                width={250}
+            ></Image>
         </div>
     </>)
 }

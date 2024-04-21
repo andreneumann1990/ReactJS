@@ -4,8 +4,7 @@ import { Box, Button, Link, TextField } from '@mui/material'
 import { useFormik } from 'formik'
 import { useEffect, useState } from 'react'
 import * as Yup from 'yup'
-import { useNavigateAndHighlightElement } from '../../hooks/navigation_hooks'
-import { backEndHRef, tabIndexGroupMain } from '../../constants/general_constants'
+import { backEndHRef, mainIndexGroup } from '../../constants/general_constants'
 import { useLayoutStore } from '../../hooks/stores'
 
 export default Page
@@ -15,8 +14,6 @@ export default Page
 //
 
 function Page() {
-    useNavigateAndHighlightElement('back_end_examples')
-
     //
     // parameters and variables
     //
@@ -29,7 +26,7 @@ function Page() {
     // functions
     //
 
-    function setTabIndex() { layoutState.setActiveTabIndexGroup(tabIndexGroupMain) }
+    function setTabIndex() { layoutState.setIndexGroup(mainIndexGroup) }
 
     const formik = useFormik({
         initialValues: {
@@ -83,7 +80,7 @@ function Page() {
                     className="text-blue-300"
                     href={backEndHRef}
                     onFocusCapture={setTabIndex}
-                    tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
+                    tabIndex={layoutState.indexGroup === mainIndexGroup ? undefined : -1}
                 >{backEndHRef}</Link>
             </li>
         </ul>
@@ -117,7 +114,7 @@ function Page() {
                     error={formik.touched.username && formik.errors.username != null} helperText={formik.errors.username}
                     inputProps={{
                         onFocusCapture: setTabIndex,
-                        tabIndex: layoutState.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1,
+                        tabIndex: layoutState.indexGroup === mainIndexGroup ? undefined : -1,
                     }}
                     label="Username"
                     required
@@ -129,7 +126,7 @@ function Page() {
                     autoComplete="current-password"
                     inputProps={{
                         onFocusCapture: setTabIndex,
-                        tabIndex: layoutState.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1,
+                        tabIndex: layoutState.indexGroup === mainIndexGroup ? undefined : -1,
                     }}
                     label="Password"
                     required
@@ -144,7 +141,7 @@ function Page() {
                 <Button
                     className="m-2"
                     onFocusCapture={setTabIndex}
-                    tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
+                    tabIndex={layoutState.indexGroup === mainIndexGroup ? undefined : -1}
                     type="submit"
                     variant="contained"
                 >Submit</Button>

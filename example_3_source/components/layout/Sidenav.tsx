@@ -1,14 +1,12 @@
-import { KeyboardEvent, MutableRefObject, useCallback, useEffect, useRef } from 'react'
+import { KeyboardEvent, useEffect } from 'react'
 import DropdownMenu, { handleKeyDownInput_DropdownMenu } from '../atoms/DropdownMenu'
-import { create } from 'zustand'
 import Link from 'next/link'
 import { useClick } from '../../hooks/gesture_hooks'
-import { maximumDelay, repeatDelay, isDebugEnabled, tabIndexGroupTopnav } from '../../constants/general_constants'
+import { isDebugEnabled, topnavIndexGroup } from '../../constants/general_constants'
 import { triggerFlashEffect } from '../../constants/event_constants'
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
-import { NullableBoolean, NullableBooleanRef, BooleanRef, GlobalState, SidenavState, SidenavStore, TimeoutRef } from '../../constants/types'
+import { NullableBoolean, GlobalState } from '../../constants/types'
 import { useGlobalStore } from '../../hooks/stores'
-import { immer } from 'zustand/middleware/immer'
 
 export default Sidenav
 export { handleKeyDownInput as handleInput_Sidenav }
@@ -25,8 +23,9 @@ const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"])'
 // functions
 //
 
-function closeSidenav({ layoutState, sidenavState, topnavState }: GlobalState): void {
-    layoutState.resetActiveTabIndexGroup()
+function closeSidenav(): void {
+    const { layoutState, sidenavState, topnavState } = useGlobalStore.getState()
+    layoutState.resetIndexGroup()
     sidenavState.setIsOpen(false)
     topnavState.element?.focus()
 }
@@ -75,7 +74,7 @@ function handleKeyDownInput(event: KeyboardEvent, globalState: GlobalState, rout
     if (event.key === 'Escape') {
         event.preventDefault()
         event.stopPropagation()
-        closeSidenav(globalState)
+        closeSidenav()
         return false
     }
 
@@ -87,7 +86,7 @@ function handleKeyDownInput(event: KeyboardEvent, globalState: GlobalState, rout
 
             router.push(event.target.href)
             triggerFlashEffect(event)
-            closeSidenav(globalState)
+            closeSidenav()
             return false
         }
     }
@@ -116,7 +115,7 @@ function handleKeyDownInput(event: KeyboardEvent, globalState: GlobalState, rout
         event.stopPropagation()
 
         // this way is more consistent with how ArrowUp is handle for topnav's menuButton;
-        layoutState.setActiveTabIndexGroup(tabIndexGroupTopnav)
+        layoutState.setIndexGroup(topnavIndexGroup)
         sidenavState.setIsOpen(false)
         topnavState.menuButtonElement?.focus()
         return false
@@ -134,17 +133,11 @@ function Sidenav() {
     //
 
     const globalState = useGlobalStore()
-    const { layoutState, sidenavState, topnavState } = globalState
-    let keyDownTimeoutRef: TimeoutRef = useRef()
+    const { sidenavState, topnavState } = globalState
 
     //
     // functions
     //
-
-    function clearKeyDownTimeout(): void {
-        clearTimeout(keyDownTimeoutRef.current)
-        keyDownTimeoutRef.current = undefined
-    }
 
     // this is called when the component mounts or unmounts; and called when it re-renders;
     const initializeSidenavReference = (element: HTMLElement | null) => {
@@ -196,7 +189,7 @@ function Sidenav() {
             if (topnavState.menuButtonElement == null) return
             if (topnavState.menuButtonElement.contains(event.target as Node)) return
             if (isDebugEnabled) console.log('Sidenav: Clicked outside. Close sidenav.')
-            closeSidenav(globalState)
+            closeSidenav()
         }
 
         document.addEventListener('pointerdown', handlePointerDown)
@@ -206,7 +199,7 @@ function Sidenav() {
             document.removeEventListener('pointerdown', handlePointerDown)
             document.removeEventListener('pointerup', handlePointerUp)
         }
-    }, [globalState, layoutState, sidenavState, topnavState.menuButtonElement])
+    }, [sidenavState.element, sidenavState.isOpen, topnavState.menuButtonElement])
 
     //
     //
@@ -222,19 +215,19 @@ function Sidenav() {
                 className="block pl-4 py-[2px]"
                 href="/image_examples"
                 tabIndex={sidenavState.isOpen ? undefined : -1}
-                {...useClick(() => closeSidenav(globalState))}
+                {...useClick(() => closeSidenav())}
             >Image Examples</Link><hr />
             <Link
                 className="block pl-4 py-[2px]"
                 href="/form_examples"
                 tabIndex={sidenavState.isOpen ? undefined : -1}
-                {...useClick(() => closeSidenav(globalState))}
+                {...useClick(() => closeSidenav())}
             >Form Examples</Link><hr />
             <Link
                 className="block pl-4 py-[2px]"
                 href="/back_end_examples"
                 tabIndex={sidenavState.isOpen ? undefined : -1}
-                {...useClick(() => closeSidenav(globalState))}
+                {...useClick(() => closeSidenav())}
             >Back-End Examples</Link><hr />
             <DropdownMenu id={0} text="Dropdown 1">
                 <Link href="#" className="block pl-8 py-[2px]">Link 3</Link>

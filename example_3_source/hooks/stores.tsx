@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { DropdownMenuState, DropdownMenuStore, GlobalState, KeyboardState, LayoutState, LayoutStore, MainState, MainStore, SearchState, SearchStore, SidenavState, SidenavStore, TopnavState, TopnavStore } from '../constants/types'
-import { isDebugEnabled, tabIndexGroupDefault } from '../constants/general_constants'
+import { isDebugEnabled, defaultIndexGroup } from '../constants/general_constants'
+import { useEffect } from 'react'
 
 //
 //
@@ -51,15 +52,21 @@ export const useKeyboardStore = create<KeyboardState>((set) => ({
     setEvent: (event) => set(() => ({ event }))
 }))
 
-export const useLayoutStore: LayoutStore = create<LayoutState>(set => ({
-    activeTabIndexGroup: 0,
-    setActiveTabIndexGroup: (tabIndex) => set(() => {
-        if (isDebugEnabled) console.log(`Layout: tabIndex ${tabIndex}`)
-        return { activeTabIndexGroup: tabIndex }
+export const useLayoutStore: LayoutStore = create<LayoutState>((set, get) => ({
+    _previousIndexGroup: defaultIndexGroup,
+    indexGroup: defaultIndexGroup,
+    setIndexGroup: (indexGroup) => set((state) => {
+        if (isDebugEnabled) console.log(`Layout: indexGroup ${indexGroup}`)
+        state._previousIndexGroup = state.indexGroup
+        return { indexGroup }
     }),
-    resetActiveTabIndexGroup: () => set(() => {
-        if (isDebugEnabled) console.log(`Layout: tabIndex ${tabIndexGroupDefault}`)
-        return { activeTabIndexGroup: tabIndexGroupDefault }
+    resetIndexGroup: () => set(() => {
+        if (isDebugEnabled) console.log(`Layout: indexGroup ${defaultIndexGroup}`)
+        return { indexGroup: defaultIndexGroup }
+    }),
+    restorePreviousIndexGroup: () => set((state) => {
+        if (isDebugEnabled) console.log(`Layout: indexGroup ${state._previousIndexGroup}`)
+        return { indexGroup: state._previousIndexGroup }
     })
 }))
 
@@ -75,8 +82,14 @@ export const useSearchStore: SearchStore = create<SearchState>((set) => ({
     setInputElement: (element) => set(() => ({ inputElement: element })),
     isOpen: false,
     setIsOpen: (isOpen) => set(() => ({ isOpen })),
+
+    resultsDataArray: {},
+    setResultsDataArray: (resultsDataArray) => set(() => ({ resultsDataArray })),
     resultsElement: null,
     setResultsElement: (element) => set(() => ({ resultsElement: element })),
+
+    resultsSelectedIndex: [0, 0],
+    setResultsSelectedIndex: (resultsSelectedIndex) => set(() => ({ resultsSelectedIndex })),
 }))
 
 export const useSidenavStore: SidenavStore = create<SidenavState>((set) => ({

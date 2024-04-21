@@ -1,8 +1,7 @@
 import React, { KeyboardEvent, ReactNode, useEffect } from 'react'
 import { triggerFlashEffect } from '../../constants/event_constants'
-import { initialDelay, maximumDelay, isDebugEnabled } from '../../constants/general_constants'
-import { NullableBoolean, NullableBooleanRef, BooleanRef, DropdownMenu, DropdownMenuState, DropdownMenuStore, GlobalState, SidenavState, TimeoutRef } from '../../constants/types'
-import { create } from 'zustand'
+import { isDebugEnabled } from '../../constants/general_constants'
+import { NullableBoolean, DropdownMenuState, SidenavState } from '../../constants/types'
 import { useDropdownMenuStoreArray, useGlobalStore, useSidenavStore } from '../../hooks/stores'
 
 export default DropdownMenu
@@ -93,7 +92,7 @@ function DropdownMenu(props: {
     children?: ReactNode,
     className?: string,
     text?: ReactNode,
-}): DropdownMenu {
+}): React.JSX.Element {
     //
     // parameters and variables
     //
@@ -128,7 +127,7 @@ function DropdownMenu(props: {
 
         //TODO; toggleContent() does not need everything in sidenavState; check if it is re-rendered too often;
         toggleContent(dropdownMenuState, sidenavState)
-    }, [dropdownMenuState, sidenavState, sidenavState.lastActiveDropdownElement])
+    }, [dropdownMenuState, sidenavState])
 
     // update tabindex;
     useEffect(() => {
@@ -175,7 +174,7 @@ function DropdownMenu(props: {
             >
                 <div className="grid grid-cols-2 items-center">
                     {props.text}
-                    <i ref={dropdownMenuState.setIconElement} className="icon-medium material-icons justify-self-end transition-all ease-out duration-300">computer</i>
+                    <i ref={dropdownMenuState.setIconElement} className="icon-medium material-icons justify-self-end motion-safe:transition-all ease-out duration-300">computer</i>
                 </div>
             </button>
             <div

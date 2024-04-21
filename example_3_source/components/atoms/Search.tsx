@@ -1,35 +1,93 @@
 import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
-import { create } from 'zustand'
 import algoliasearch from 'algoliasearch/lite'
 import DOMPurify from 'dompurify'
 import Link from 'next/link'
-import { isDebugEnabled, tabIndexGroupTopnav } from '../../constants/general_constants'
+import { isDebugEnabled, topnavIndexGroup } from '../../constants/general_constants'
 import { useRouter } from 'next/navigation'
 import { debounceEventFunction } from '../../constants/event_constants'
 import { useGlobalStore } from '../../hooks/stores'
+import { EntryData, NullableBoolean, SearchData } from '../../constants/types'
 
 export default Search
+export { handleKeyDownInput as handleKeyDownInput_Search }
 
 //
-//
+// parameters and variables
 //
 
-interface EntryData {
-    href: string,
-    open: boolean,
-    purifiedInnerHTML: string,
+const algoliaIndex = algoliasearch('2QYN25VL0K', 'ba0b8a970db7843753c13218f38ae4e2').initIndex('example_3')
+
+//
+// functions
+//
+
+// navigate via arrow keys; escape to close;
+function handleKeyDownInput(event: React.KeyboardEvent): NullableBoolean {
+    const { searchState, topnavState } = useGlobalStore.getState()
+    if (searchState.inputElement == null) return null
+
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+        //TODO
+        event.preventDefault()
+        return null
+    }
+
+    if (event.key === 'Escape') {
+        event.preventDefault()
+        searchState.inputElement.blur()
+        topnavState.element?.focus()
+        return false
+    }
+
+    if (Object.keys(searchState.resultsDataArray).length < 1) return null
+    const [keyIndex, entryIndex] = searchState.resultsSelectedIndex
+
+    if (event.key === 'ArrowDown') {
+        const entryArray: EntryData[] | undefined = Object.values(searchState.resultsDataArray)[keyIndex]
+        if (entryArray == null) {
+            if (isDebugEnabled) {
+                console.log('Search-Warning: Entry array could not be found.')
+                console.log(`Search-Warning: dataArray ${Object.values(searchState.resultsDataArray)}`)
+                console.log(`Search-Warning: keyIndex ${keyIndex}`)
+            }
+            return false
+        }
+
+        if (entryIndex < entryArray.length - 1) {
+            event.preventDefault()
+            searchState.setResultsSelectedIndex([keyIndex, entryIndex + 1])
+        } else if (keyIndex < Object.keys(searchState.resultsDataArray).length - 1) {
+            event.preventDefault()
+            searchState.setResultsSelectedIndex([keyIndex + 1, 0])
+        }
+        return true
+    }
+
+    if (event.key === 'ArrowUp') {
+        if (entryIndex > 0) {
+            event.preventDefault()
+            searchState.setResultsSelectedIndex([keyIndex, entryIndex - 1])
+        } else if (keyIndex > 0) {
+            const entryArray: EntryData[] | undefined = Object.values(searchState.resultsDataArray)[keyIndex - 1]
+            if (entryArray == null) {
+                if (isDebugEnabled) {
+                    console.log('Search-Warning: Entry array could not be found.')
+                    console.log(`Search-Warning: dataArray ${Object.values(searchState.resultsDataArray)}`)
+                    console.log(`Search-Warning: (keyIndex - 1) ${keyIndex - 1}`)
+                }
+                return false
+            }
+
+            event.preventDefault()
+            searchState.setResultsSelectedIndex([keyIndex - 1, entryArray.length - 1])
+        }
+        return true
+    }
+    return null
 }
 
-interface SearchData {
-    [url_relative: string]: EntryData[]
-}
-
-const searchClient = algoliasearch('2QYN25VL0K', 'ba0b8a970db7843753c13218f38ae4e2')
-const index = searchClient.initIndex('example_3')
-
-
 //
-//
+// main
 //
 
 function Search() {
@@ -39,16 +97,17 @@ function Search() {
 
     const router = useRouter()
     const { layoutState, searchState, sidenavState } = useGlobalStore()
+    const { setIsOpen } = searchState
+    const { setResultsDataArray, setResultsSelectedIndex } = searchState
 
     const [isFocused, setIsFocused] = useState<boolean>(false)
     const [isHovering, setIsHovering] = useState<boolean>(false)
     const [lastSearchQuery, setLastSearchQuery] = useState<string>('')
     const [previouslyFocusedElement, setPreviouslyFocusedElement] = useState<HTMLElement | null>(null)
 
-    const [searchResultDataArray, setSearchResultDataArray] = useState<SearchData>({})
-    const [searchResultSelectedIndex, setSearchResultSelectedIndex] = useState<[number, number]>([0, 0])
+    // const [searchState.resultsDataArray, searchState.setResultsDataArray] = useState<SearchData>({})
+    // const [searchState.resultsSelectedIndex, searchState.setResultsSelectedIndex] = useState<[number, number]>([0, 0])
     const [searchQuery, setSearchQuery] = useState('')
-
 
     //
     // functions
@@ -68,73 +127,12 @@ function Search() {
         searchState.setResultsElement(element)
     }
 
-    // navigate via arrow keys; escape to close;
-    function handleKeyDown(event: React.KeyboardEvent) {
-        if (searchState.inputElement == null) return
-        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-            event.preventDefault()
-            return
-        }
-
-        if (event.key === 'Escape') {
-            event.preventDefault()
-            previouslyFocusedElement?.focus()
-            searchState.inputElement.blur()
-            return
-        }
-
-        if (Object.keys(searchResultDataArray).length < 1) return
-        const [keyIndex, entryIndex] = searchResultSelectedIndex
-
-        if (event.key === 'ArrowDown') {
-            const entryArray: EntryData[] | undefined = Object.values(searchResultDataArray)[keyIndex]
-            if (entryArray == null) {
-                if (isDebugEnabled) {
-                    console.log('Search-Warning: Entry array could not be found.')
-                    console.log(`Search-Warning: dataArray ${Object.values(searchResultDataArray)}`)
-                    console.log(`Search-Warning: keyIndex ${keyIndex}`)
-                }
-                return
-            }
-
-            if (entryIndex < entryArray.length - 1) {
-                event.preventDefault()
-                setSearchResultSelectedIndex([keyIndex, entryIndex + 1])
-            } else if (keyIndex < Object.keys(searchResultDataArray).length - 1) {
-                event.preventDefault()
-                setSearchResultSelectedIndex([keyIndex + 1, 0])
-            }
-            return
-        }
-
-        if (event.key === 'ArrowUp') {
-            if (entryIndex > 0) {
-                event.preventDefault()
-                setSearchResultSelectedIndex([keyIndex, entryIndex - 1])
-            } else if (keyIndex > 0) {
-                const entryArray: EntryData[] | undefined = Object.values(searchResultDataArray)[keyIndex - 1]
-                if (entryArray == null) {
-                    if (isDebugEnabled) {
-                        console.log('Search-Warning: Entry array could not be found.')
-                        console.log(`Search-Warning: dataArray ${Object.values(searchResultDataArray)}`)
-                        console.log(`Search-Warning: (keyIndex - 1) ${keyIndex - 1}`)
-                    }
-                    return
-                }
-
-                event.preventDefault()
-                setSearchResultSelectedIndex([keyIndex - 1, entryArray.length - 1])
-            }
-            return
-        }
-    }
-
     // navigate to the selected result by pressing 'enter';
     function handleSearch(event: FormEvent) {
         event.preventDefault()
-        if (Object.keys(searchResultDataArray).length < 1) return
-        const [keyIndex, entryIndex] = searchResultSelectedIndex
-        const href = Object.values(searchResultDataArray)[keyIndex][entryIndex].href
+        if (Object.keys(searchState.resultsDataArray).length < 1) return
+        const [keyIndex, entryIndex] = searchState.resultsSelectedIndex
+        const href = Object.values(searchState.resultsDataArray)[keyIndex][entryIndex].href
         if (typeof href != 'string') return
 
         router.push(href)
@@ -161,7 +159,7 @@ function Search() {
 
     // set focus; don't close when focused => update state;
     function handleFocus(): void {
-        layoutState.setActiveTabIndexGroup(tabIndexGroupTopnav)
+        layoutState.setIndexGroup(topnavIndexGroup)
         setIsFocused(true)
     }
 
@@ -175,36 +173,26 @@ function Search() {
 
     // update state;
     useEffect(() => {
-        if (searchState.inputElement == null) return
-        if (isDebugEnabled) console.log('Search: Update state.')
-
-        if (document.activeElement === searchState.inputElement) {
-            if (searchState.isOpen) return
-            searchState.setIsOpen(true)
-            return
-        }
-
         if (sidenavState.isOpen) {
             if (!searchState.isOpen) return
-            searchState.setIsOpen(false)
+            if (isDebugEnabled) console.log('Search: isOpen false')
+            setIsOpen(false)
             return
         }
 
-        if (isHovering) {
+        if (searchState.inputElement == null) return
+        // if (document.activeElement === searchState.inputElement || isFocused) {
+        if (document.activeElement === searchState.inputElement || isFocused || isHovering) {
             if (searchState.isOpen) return
-            searchState.setIsOpen(true)
-            return
-        }
-
-        if (isFocused) {
-            if (searchState.isOpen) return
-            searchState.setIsOpen(true)
+            if (isDebugEnabled) console.log('Search: isOpen true')
+            setIsOpen(true)
             return
         }
 
         if (!searchState.isOpen) return
-        searchState.setIsOpen(false)
-    }, [isFocused, isHovering, searchState, sidenavState.isOpen])
+        if (isDebugEnabled) console.log('Search: isOpen false')
+        setIsOpen(false)
+    }, [isFocused, isHovering, searchState.inputElement, searchState.isOpen, setIsOpen, sidenavState.isOpen])
 
     // select search input field by ctrl+k;
     useEffect(() => {
@@ -242,8 +230,8 @@ function Search() {
     // search after query is updated, i.e. onChange();
     useEffect(() => {
         if (searchQuery === '') {
-            if (Object.keys(searchResultDataArray).length < 1) return
-            setSearchResultDataArray({})
+            if (Object.keys(searchState.resultsDataArray).length < 1) return
+            setResultsDataArray({})
             return
         }
 
@@ -251,7 +239,7 @@ function Search() {
         setLastSearchQuery(searchQuery)
         if (isDebugEnabled) console.log(`Search: Search for ${searchQuery}`)
 
-        index.search(searchQuery).then((response) => {
+        algoliaIndex.search(searchQuery).then((response) => {
             let dataArray: SearchData = {}
             response.hits.forEach((hit: any, index) => {
                 //
@@ -299,15 +287,15 @@ function Search() {
                     purifiedInnerHTML: DOMPurify.sanitize(innerHTML),
                 })
             })
-            setSearchResultDataArray(dataArray)
+            setResultsDataArray(dataArray)
         })
-    }, [lastSearchQuery, searchQuery, searchResultDataArray])
+    }, [lastSearchQuery, searchQuery, searchState.resultsDataArray, setResultsDataArray])
 
     // reset selectedHitIndex;
     useEffect(() => {
-        if (Object.keys(searchResultDataArray).length > 0) return
-        setSearchResultSelectedIndex([0, 0])
-    }, [searchResultDataArray])
+        if (Object.keys(searchState.resultsDataArray).length > 0) return
+        setResultsSelectedIndex([0, 0])
+    }, [searchState.resultsDataArray, setResultsSelectedIndex])
 
     //
     //
@@ -320,7 +308,7 @@ function Search() {
         >
             <button
                 type="submit"
-                tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
+                tabIndex={layoutState.indexGroup === topnavIndexGroup ? topnavIndexGroup : -1}
             >
                 <i className="p-1 icon-medium material-icons">search</i>
             </button>
@@ -333,25 +321,27 @@ function Search() {
                     onBlurCapture={handleBlur}
                     onChange={debounceEventFunction(updateInputField, 300)}
                     onFocusCapture={handleFocus}
-                    onKeyDown={handleKeyDown}
-                    tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupTopnav ? tabIndexGroupTopnav : -1}
+                    tabIndex={layoutState.indexGroup === topnavIndexGroup ? topnavIndexGroup : -1}
                 />
 
                 {/* search results; */}
                 <div
-                    className={`absolute w-full mt-1 bg-secondary shadow-md text-center hidden peer-focus:block hover:${searchState.isOpen}`}
+                    //TODO
+                    // className={`absolute w-full lg:min-w-[600px] mt-1 bg-secondary shadow-md text-center peer-focus:block hover:${searchState.isOpen ? 'block' : undefined}`}
+                    className={`absolute w-full lg:min-w-[600px] mt-1 bg-secondary shadow-md text-center hidden peer-focus:block hover:${searchState.isOpen ? 'block' : undefined}`}
+                    // className={`absolute w-full lg:min-w-[600px] mt-1 bg-secondary shadow-md text-center hidden peer-focus:block hover:${sidenavState.isOpen ? undefined : 'block'}`}
                     ref={initializeSearchResultsReference}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                 >
-                    {Object.entries(searchResultDataArray).map(([url_relative, entryArray], keyIndex) => {
+                    {Object.entries(searchState.resultsDataArray).map(([url_relative, entryArray], keyIndex) => {
                         return (<div key={`d-${keyIndex}`}
                             className="text-left p-2 pl-5 text-xl"
                         >
                             <header>{url_relative}</header>
                             {entryArray.map((entry, entryIndex) => {
                                 return (<Link key={`l-${entryIndex}`}
-                                    className={'grid items-center my-3 text-left min-h-10 p-2 px-4 mt-2 border rounded-2xl' + (keyIndex === searchResultSelectedIndex[0] && entryIndex === searchResultSelectedIndex[1] ? ' bg-primary-active' : ' bg-primary')}
+                                    className={'grid items-center my-3 text-left min-h-10 p-2 px-4 mt-2 border rounded-2xl' + (keyIndex === searchState.resultsSelectedIndex[0] && entryIndex === searchState.resultsSelectedIndex[1] ? ' bg-primary-active' : ' bg-primary')}
                                     href={entry.href}
                                 >
                                     <div
@@ -362,21 +352,24 @@ function Search() {
                             })}
                         </div>)
                     })}
-                    <div className="text-right flex justify-between items-center my-2 mx-5">
-                        <div className="grid grid-flow-col justify-center">
-                            <i className="material-icons">arrow_upward</i>
-                            <i className="material-icons">arrow_downward</i>
-                            <span className="inline-block p-1 text-xs">to navigate</span>
+                    {/* key input hints and Algolia logo; */}
+                    <div className="flex flex-row flex-wrap justify-center lg:justify-end items-center mx-5 my-2">
+                        <div className="flex lg:hidden flex-col sm:flex-row items-center">
+                            <div className="inline-grid grid-flow-col justify-center px-2">
+                                <i className="material-icons">arrow_upward</i>
+                                <i className="material-icons">arrow_downward</i>
+                                <span className="inline-block p-1 text-xs">to navigate</span>
+                            </div>
+                            <div className="inline-block px-2 text-center">
+                                <img className="inline bg-white rounded-md p-1" src="./icons/enter-arrow-svgrepo-com.svg" alt="enter" height="24px" width="24px"></img>
+                                <span className="inline-block p-1 text-xs">to select</span>
+                            </div>
+                            <div className="inline-block px-2">
+                                <img className="inline bg-white rounded-md p-1" src="./icons/esc-a-svgrepo-com.svg" alt="escape" height="24px" width="24px"></img>
+                                <span className="inline-block p-1 text-xs">to close</span>
+                            </div>
                         </div>
-                        <div className="text-center">
-                            <img className="inline bg-white rounded-md p-1" src="./icons/enter-arrow-svgrepo-com.svg" alt="enter" height="24px" width="24px"></img>
-                            <span className="inline-block p-1 text-xs">to select</span>
-                        </div>
-                        <div>
-                            <img className="inline bg-white rounded-md p-1" src="./icons/esc-a-svgrepo-com.svg" alt="escape" height="24px" width="24px"></img>
-                            <span className="inline-block p-1 text-xs">to close</span>
-                        </div>
-                        <div>
+                        <div className="">
                             <p className="inline-block p-1 text-xs">
                                 Search by
                             </p>

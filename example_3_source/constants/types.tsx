@@ -9,7 +9,6 @@ export type NullableBoolean = boolean | null
 export type NullableBooleanRef = MutableRefObject<NullableBoolean>
 
 export type BooleanRef = MutableRefObject<boolean>
-export type DropdownMenu = React.JSX.Element
 export type TimeoutRef = MutableRefObject<NodeJS.Timeout | undefined>
 
 export type NullableAnchorElement = HTMLAnchorElement | null
@@ -44,6 +43,12 @@ export interface DropdownMenuState {
 }
 export type DropdownMenuStore = UseBoundStore<StoreApi<DropdownMenuState>>
 
+export interface EntryData {
+    href: string,
+    open: boolean,
+    purifiedInnerHTML: string,
+}
+
 export interface GlobalState {
     dropdownMenuStateArray: DropdownMenuState[],
     keyboardState: KeyboardState,
@@ -62,9 +67,11 @@ export interface KeyboardState {
 }
 
 export interface LayoutState {
-    activeTabIndexGroup: number,
-    setActiveTabIndexGroup: (tabIndex: number) => void,
-    resetActiveTabIndexGroup: () => void,
+    _previousIndexGroup: string,
+    indexGroup: string,
+    setIndexGroup: (indexGroup: string) => void,
+    resetIndexGroup: () => void,
+    restorePreviousIndexGroup: () => void,
 }
 export type LayoutStore = UseBoundStore<StoreApi<LayoutState>>
 
@@ -76,13 +83,24 @@ export interface MainState {
 }
 export type MainStore = UseBoundStore<StoreApi<MainState>>
 
+export interface SearchData {
+    [url_relative: string]: EntryData[]
+}
+
+export type Pair = [number, number]
 export interface SearchState {
-    inputElement: HTMLInputElement | null
-    setInputElement: (element: HTMLInputElement | null) => void
-    isOpen: boolean
-    setIsOpen: (isOpen: boolean) => void
-    resultsElement: HTMLDivElement | null
-    setResultsElement: (element: HTMLDivElement | null) => void
+    inputElement: HTMLInputElement | null,
+    setInputElement: (element: HTMLInputElement | null) => void,
+    isOpen: boolean,
+    setIsOpen: (isOpen: boolean) => void,
+
+    resultsDataArray: SearchData,
+    setResultsDataArray: (data: SearchData) => void,
+    resultsElement: HTMLDivElement | null,
+    setResultsElement: (element: HTMLDivElement | null) => void,
+
+    resultsSelectedIndex: Pair,
+    setResultsSelectedIndex: (index: Pair) => void,
 }
 export type SearchStore = UseBoundStore<StoreApi<SearchState>>
 

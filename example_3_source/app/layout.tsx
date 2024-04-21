@@ -3,14 +3,14 @@
 import '../styles/globals.scss'
 import React, { KeyboardEvent, useRef } from 'react'
 import Layout from '../components/layout/Layout'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
-import { darkTheme, initialDelay, maximumDelay, repeatDelay } from '../constants/general_constants'
+import { ThemeProvider } from '@mui/material/styles'
+import { darkTheme, initialDelay, maximumDelay, repeatDelay, defaultIndexGroup } from '../constants/general_constants'
 import { handleInput_Sidenav as handleKeyDownInput_Sidenav } from '../components/layout/Sidenav'
 import { useRouter } from 'next/navigation'
-import { useGlobalStore, useKeyboardStore } from '../hooks/stores'
-import { NullableBooleanRef, GlobalState } from '../constants/types'
+import { useGlobalStore } from '../hooks/stores'
 import { handleKeyInput_Topnav as handleKeyDownInput_Topnav } from '../components/layout/Topnav'
 import { handleKeyDownInput_Main } from '../components/layout/Main'
+import { handleKeyDownInput_Search } from '../components/atoms/Search'
 
 export default RootLayout
 
@@ -26,9 +26,7 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     const globalState = useGlobalStore()
     // const { sidenavState } = globalState
     const router = useRouter()
-
     let keyDownTimeoutRef = useRef<NodeJS.Timeout | undefined>()
-    let isKeyInputRepeatingRef: NullableBooleanRef = useRef(null)
 
     //
     // functions
@@ -49,9 +47,44 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
 
         function handleInput(initialDelay?: number): void {
             const globalState = useGlobalStore.getState()
+            const { layoutState, mainState, topnavState } = globalState
             const event = globalState.keyboardState.event
             if (event == null) return
+
             let isKeyInputRepeating = null
+            if (document.activeElement instanceof HTMLBodyElement) {
+                console.log('hello')
+                event.preventDefault()
+                event.stopPropagation()
+                mainState.element?.focus()
+                isKeyInputRepeating = false
+            }
+
+            if (isKeyInputRepeating != null) {
+                keyDownTimeoutRef.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)
+                return
+            }
+
+            if (layoutState.indexGroup === defaultIndexGroup) {
+                if (event.key === 'ArrowLeft') {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    topnavState.element?.focus()
+                    isKeyInputRepeating = false
+                }
+
+                if (event.key === 'ArrowRight') {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    mainState.element?.focus()
+                    isKeyInputRepeating = false
+                }
+            }
+
+            if (isKeyInputRepeating != null) {
+                keyDownTimeoutRef.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)
+                return
+            }
 
             isKeyInputRepeating = handleKeyDownInput_Main(event)
             if (isKeyInputRepeating != null) {
@@ -59,7 +92,14 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
                 return
             }
 
+            //TODO; no global state;
             isKeyInputRepeating = handleKeyDownInput_Sidenav(event, globalState, router)
+            if (isKeyInputRepeating != null) {
+                keyDownTimeoutRef.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)
+                return
+            }
+
+            isKeyInputRepeating = handleKeyDownInput_Search(event)
             if (isKeyInputRepeating != null) {
                 keyDownTimeoutRef.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)
                 return

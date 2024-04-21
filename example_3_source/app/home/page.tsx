@@ -1,7 +1,6 @@
 'use client'
 
-import { tabIndexGroupMain } from '../../constants/general_constants'
-import { useNavigateAndHighlightElement } from '../../hooks/navigation_hooks'
+import { mainIndexGroup } from '../../constants/general_constants'
 import { useLayoutStore } from '../../hooks/stores'
 
 export default Page
@@ -21,13 +20,13 @@ function Page() {
     // functions
     //
 
-    function setTabIndex() { layoutState.setActiveTabIndexGroup(tabIndexGroupMain) }
+    function setTabIndex() { layoutState.setIndexGroup(mainIndexGroup) }
 
     //
     // effects
     //
 
-    useNavigateAndHighlightElement('Home')
+    // useNavigateAndHighlightElement('Home')
 
     //
     //
@@ -47,7 +46,7 @@ function Page() {
         <details
             className="group border rounded-md ml-1 mb-2"
             onFocusCapture={setTabIndex}
-            tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
+            tabIndex={layoutState.indexGroup === mainIndexGroup ? undefined : -1}
         >
             <summary className="group-open:border-b p-2">Example 1</summary>
             <ul className="*:my-2 pl-10">
@@ -67,7 +66,7 @@ function Page() {
         <details
             className="group border rounded-md ml-1 mb-2"
             onFocusCapture={setTabIndex}
-            tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
+            tabIndex={layoutState.indexGroup === mainIndexGroup ? undefined : -1}
         >
             <summary className="group-open:border-b p-2">Example 2</summary>
             <ul className="*:my-2 pl-10">
@@ -82,6 +81,7 @@ function Page() {
         <ul className="*:my-2 pl-5">
             <li>first back-end steps;</li>
             <li>added <b>Algolia</b> search; navigation hints and behavior similar to <b>react.dev</b>;</li>
+            <li>overhaul of handling key input events; you can now hold inputs as well;</li>
         </ul>
 
         <h2 className="my-2 text-2xl font-bold">TODO:</h2>
