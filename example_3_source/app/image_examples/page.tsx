@@ -4,8 +4,8 @@ import { useDrag } from '@use-gesture/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRef, useState } from 'react'
-import { useClick } from '../../hooks/gesture_hooks'
-import { mainIndexGroup } from '../../constants/general_constants'
+import { useClick } from '../../hooks/gestures'
+import { mainIndexGroup } from '../../constants/parameters'
 import { useGlobalStore } from '../../hooks/stores'
 
 function Page() {

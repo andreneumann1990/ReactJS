@@ -4,7 +4,7 @@ import Topnav from './Topnav'
 import Sidenav from './Sidenav'
 import React, { Suspense, useEffect } from 'react'
 import Main from './Main'
-import { triggerFlashEffect } from '../../constants/event_constants'
+import { triggerFlashEffect } from '../../constants/events'
 
 export default Layout
 

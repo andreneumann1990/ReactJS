@@ -1,5 +1,5 @@
 import tinycolor from 'tinycolor2'
-import { isDebugEnabled } from './general_constants'
+import { isDebugEnabled } from './parameters'
 
 export { debounceEventFunction }
 export { triggerFlashEffect }

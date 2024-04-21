@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { DropdownMenuState, DropdownMenuStore, GlobalState, KeyboardState, LayoutState, LayoutStore, MainState, MainStore, SearchState, SearchStore, SidenavState, SidenavStore, TopnavState, TopnavStore } from '../constants/types'
-import { isDebugEnabled, defaultIndexGroup } from '../constants/general_constants'
+import { isDebugEnabled, defaultIndexGroup } from '../constants/parameters'
 import { useEffect } from 'react'
 
 //

@@ -1,6 +1,6 @@
 import React, { KeyboardEvent, useEffect } from 'react'
 import { useDrag } from '@use-gesture/react'
-import { indexEntryTypesString, isDebugEnabled, mainIndexGroup } from '../../constants/general_constants'
+import { indexEntryTypesString, isDebugEnabled, mainIndexGroup } from '../../constants/parameters'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 import { useGlobalStore, useMainStore } from '../../hooks/stores'
 import { NullableBoolean } from '../../constants/types'

@@ -4,7 +4,7 @@ import { Box, Button, Link, TextField } from '@mui/material'
 import { useFormik } from 'formik'
 import { useEffect, useState } from 'react'
 import * as Yup from 'yup'
-import { backEndHRef, mainIndexGroup } from '../../constants/general_constants'
+import { backEndHRef, mainIndexGroup } from '../../constants/parameters'
 import { useLayoutStore } from '../../hooks/stores'
 
 export default Page

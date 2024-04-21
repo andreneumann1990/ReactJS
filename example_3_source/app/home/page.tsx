@@ -1,6 +1,6 @@
 'use client'
 
-import { mainIndexGroup } from '../../constants/general_constants'
+import { mainIndexGroup } from '../../constants/parameters'
 import { useLayoutStore } from '../../hooks/stores'
 
 export default Page

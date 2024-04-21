@@ -1,14 +1,14 @@
 import TextField from '@mui/material/TextField'
 import { Autocomplete, Box } from '@mui/material'
 
-export { InputCountry1 }
-export { InputCountry2 }
+export { Country1 }
+export { Country2 }
 
 //
 //
 //
 
-const InputCountry1 = (props: { [field: string]: any }) => {
+const Country1 = (props: { [field: string]: any }) => {
     const options = ['England', 'France', 'Germany', 'Musterland']
 
     return (
@@ -29,7 +29,7 @@ const InputCountry1 = (props: { [field: string]: any }) => {
 }
 
 // From: https://mui.com/material-ui/react-autocomplete/
-function InputCountry2(props: { [field: string]: any }) {
+function Country2(props: { [field: string]: any }) {
     return (
         <Autocomplete
             {...props}

@@ -3,10 +3,10 @@
 import { useFormik } from 'formik'
 import { MouseEvent, SyntheticEvent, } from 'react'
 import * as Yup from 'yup'
-import { InputCountry1, InputCountry2 } from '../../components/atoms/InputCountry'
+import { Country1, Country2 } from '../../components/atoms/Country'
 import Link from 'next/link'
 import { Button } from '@mui/material'
-import { mainIndexGroup } from '../../constants/general_constants'
+import { mainIndexGroup } from '../../constants/parameters'
 import { useLayoutStore } from '../../hooks/stores'
 
 //TODO; handle tabIndex;
@@ -430,7 +430,7 @@ function Page() {
                             rounded-md does not work since it is applied to the container without border; 
                             customization might be difficult when using these; 
                         */}
-                        <InputCountry1
+                        <Country1
                             className="m-1 px-2 py-1 rounded-md"
                             // onKeyDown={() => { }} //TODO; wrap them so that you can use up / down for selecting entries;
                             onChange={(_: SyntheticEvent, value: string) => handleChangeForCountry1(value)}
@@ -440,7 +440,7 @@ function Page() {
                 <div className="grid px-5 items-center">
                     <div>
                         Copied from: <Link className="text-blue-300" href={'https://mui.com/material-ui/react-autocomplete/'}>https://mui.com/material-ui/react-autocomplete/</Link>
-                        <InputCountry2
+                        <Country2
                             className="m-1 px-2 py-1 rounded-md"
                             onChange={(_: SyntheticEvent, { label }: { label: string }) => handleChangeForCountry2(label)}
                         />
