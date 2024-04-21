@@ -1,5 +1,5 @@
 import React, { KeyboardEvent, ReactNode, useEffect } from 'react'
-import { triggerFlashEffect } from '../../constants/events'
+import { triggerFlashEffect } from '../../constants/functions'
 import { isDebugEnabled } from '../../constants/parameters'
 import { NullableBoolean, DropdownMenuState, SidenavState } from '../../constants/types'
 import { useDropdownMenuStoreArray, useGlobalStore, useSidenavStore } from '../../hooks/stores'

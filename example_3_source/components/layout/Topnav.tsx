@@ -1,7 +1,7 @@
 import { KeyboardEvent, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { isDebugEnabled, defaultIndexGroup, mainIndexGroup, sidenavIndexGroup, topnavIndexGroup } from '../../constants/parameters'
-import { triggerFlashEffect } from '../../constants/events'
+import { triggerFlashEffect } from '../../constants/functions'
 import { NullableBoolean } from '../../constants/types'
 import { useGlobalStore, useSearchStore, useTopnavStore } from '../../hooks/stores'
 import Search from '../atoms/Search'

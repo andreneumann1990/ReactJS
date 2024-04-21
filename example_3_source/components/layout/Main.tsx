@@ -83,7 +83,7 @@ function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
 
     if (event.key === 'Escape') {
         event.preventDefault()
-        layoutState.setIndexGroup(0)
+        layoutState.resetIndexGroup()
         mainState.element?.focus()
         return false
     }
@@ -258,7 +258,9 @@ function Main({ children }: React.PropsWithChildren) {
             {...dragAttributes}
             className="h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-colors ease-out duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
             ref={initializeMainReference}
-            tabIndex={(mainState.isActive && layoutState.indexGroup === 0 ? 0 : -1)}
+            //TODO; check again;
+            tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1}
+        // tabIndex={(mainState.isActive && layoutState.indexGroup === mainIndexGroup ? 0 : -1)}
         >
             {children}
         </main >

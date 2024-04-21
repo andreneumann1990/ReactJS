@@ -4,7 +4,7 @@ import DOMPurify from 'dompurify'
 import Link from 'next/link'
 import { isDebugEnabled, topnavIndexGroup } from '../../constants/parameters'
 import { useRouter } from 'next/navigation'
-import { debounceEventFunction } from '../../constants/events'
+import { debounceEventFunction } from '../../constants/functions'
 import { useGlobalStore } from '../../hooks/stores'
 import { EntryData, NullableBoolean, SearchData } from '../../constants/types'
 
@@ -308,7 +308,7 @@ function Search() {
         >
             <button
                 type="submit"
-                tabIndex={layoutState.indexGroup === topnavIndexGroup ? topnavIndexGroup : -1}
+                tabIndex={layoutState.indexGroup === topnavIndexGroup ? undefined : -1}
             >
                 <i className="p-1 icon-medium material-icons">search</i>
             </button>
@@ -321,7 +321,7 @@ function Search() {
                     onBlurCapture={handleBlur}
                     onChange={debounceEventFunction(updateInputField, 300)}
                     onFocusCapture={handleFocus}
-                    tabIndex={layoutState.indexGroup === topnavIndexGroup ? topnavIndexGroup : -1}
+                    tabIndex={layoutState.indexGroup === topnavIndexGroup ? undefined : -1}
                 />
 
                 {/* search results; */}

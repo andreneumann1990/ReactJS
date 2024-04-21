@@ -3,7 +3,7 @@ import DropdownMenu, { handleKeyDownInput_DropdownMenu } from '../atoms/Dropdown
 import Link from 'next/link'
 import { useClick } from '../../hooks/gestures'
 import { isDebugEnabled, topnavIndexGroup } from '../../constants/parameters'
-import { triggerFlashEffect } from '../../constants/events'
+import { triggerFlashEffect } from '../../constants/functions'
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import { NullableBoolean, GlobalState } from '../../constants/types'
 import { useGlobalStore } from '../../hooks/stores'
