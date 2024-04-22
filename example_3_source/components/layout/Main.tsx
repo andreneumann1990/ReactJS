@@ -1,6 +1,6 @@
-import React, { KeyboardEvent, useEffect } from 'react'
+import React, { KeyboardEvent, useEffect, useRef } from 'react'
 import { useDrag } from '@use-gesture/react'
-import { defaultIndexGroup, indexEntryTypesString, isDebugEnabled, mainIndexGroup } from '../../constants/parameters'
+import { defaultIndexGroup, indexEntryTypesString, isDebugEnabled, mainIndexGroup, sidenavTransitionDuration } from '../../constants/parameters'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 import { useGlobalStore, useMainStore } from '../../hooks/stores'
 import { NullableBoolean } from '../../constants/types'
@@ -8,54 +8,48 @@ import { useSearchParams } from 'next/navigation'
 import { focusNextElement, focusPreviousElement, scrollIntoView } from '../../constants/functions'
 
 export default Main
-export { handleKeyDownInput as handleKeyDownInput_Main }
+export { handleKeyDown as handleKeyDown_Main }
 
 //TODO; focus child elements;
-//TODO; uparrow for focus topnav;
 //TODO; change keys; up down is for scrolling;
 
 //
-// paramters and variables
+// parameters and variables
 //
 
 const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"]), div[tabindex="0"], input:not([tabindex="-1"]), img[tabindex="0"], summary:not([tabindex="-1"])'
+
+// what is the difference between useRef and a normal variable??; useRef can be 
+// only used like other hooks and does not trigger a re-render; a normal variable 
+// does not trigger a re-render either; they are local if inside a function component;
+//
+// in this case it is fine; but there are problems here; this is a global variable;
+// this means that effectively the Main component should never be re-used; a more
+// general pattern would be probably better; TODO;
+let previousScrollTop: number = -1
 
 //
 // functions
 //
 
-// function focusNextElement() {
-//     const mainElement = useMainStore.getState().element
-//     if (mainElement == null) return
-//     const focusedElement = document.activeElement as HTMLAnchorElement | null
-//     if (focusedElement == null) return
-// 
-//     const focusableElements = Array.from(mainElement.querySelectorAll<HTMLAnchorElement>(queryString))
-//     const nextIndex = Math.min(focusableElements.indexOf(focusedElement) + 1, focusableElements.length - 1)
-//     focusableElements[nextIndex]?.focus()
-// }
-// 
-// function focusPreviousElement() {
-//     const mainElement = useMainStore.getState().element
-//     if (mainElement == null) return
-//     let focusedElement = document.activeElement as HTMLElement | null
-//     if (focusedElement == null) return
-// 
-//     // previousIndex is -1 if the element is not found or null;
-//     const focusableElements = Array.from(mainElement.querySelectorAll<HTMLElement>(queryString))
-//     const previousIndex = Math.max(focusableElements.indexOf(focusedElement) - 1, 0)
-//     focusableElements[previousIndex]?.focus()
-// }
-
-function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
+function handleKeyDown(event: KeyboardEvent): NullableBoolean {
     const { layoutState, mainState, topnavState } = useGlobalStore.getState()
     if (mainState.element == null) return null
     if (!mainState.element.contains(document.activeElement)) return null
 
-    // does not scroll down when holding down starting from topnav; this is because the scrolling happens by default and main is not selected at the start; holding key down does not trigger onKeyDown on main; TODO;
-    console.log('main')
     if (layoutState.indexGroup === defaultIndexGroup) {
-        if (event.key === 'ArrowUp' && mainState.element?.scrollTop === 0) {
+        if (event.key === 'ArrowUp') {
+            const scrollTop = mainState.element.scrollTop
+            if (scrollTop > 0) {
+                previousScrollTop = scrollTop
+                return null
+            }
+
+            if (previousScrollTop > 0) {
+                previousScrollTop = 0
+                return false
+            }
+
             event.preventDefault()
             event.stopPropagation()
             topnavState.element?.focus()
@@ -71,59 +65,54 @@ function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
             setTimeout(() => focusNextElement(mainState.element, queryString), 1)
             return false
         }
+
+        // what is this?; is this unique?;
+        if (event.key === ' ') {
+            event.preventDefault()
+            return null
+        }
         return null
     }
 
-    //     if (document.activeElement === mainState.element) {
-    //         if (event.key === 'Enter') {
-    //             event.preventDefault()
-    //             event.stopPropagation()
-    //             layoutState.setIndexGroup(mainIndexGroup)
-    // 
-    //             // wait for the indexGroup change to be applied;
-    //             setTimeout(() => focusNextElement(mainState.element, queryString), 1)
-    //             return false
-    //         }
-    //         return null
-    //     }
+    if (layoutState.indexGroup === mainIndexGroup) {
+        //TODO; maybe put this directly on the elements;
+        //         if (document.activeElement?.tagName === 'SUMMARY') {
+        //             if (event.key === 'ArrowRight') {
+        //                 event.preventDefault()
+        //                 event.stopPropagation()
+        //                 document.activeElement.parentElement?.setAttribute('open', '')
+        //                 return false
+        //             }
+        // 
+        //             if (event.key === 'ArrowLeft') {
+        //                 event.preventDefault()
+        //                 event.stopPropagation()
+        //                 document.activeElement.parentElement?.removeAttribute('open')
+        //                 return false
+        //             }
+        //         }
 
-    //TODO; maybe put this directly on the elements;
-    if (document.activeElement?.tagName === 'SUMMARY') {
-        if (event.key === 'ArrowRight') {
+        if (event.key === 'Escape') {
             event.preventDefault()
-            event.stopPropagation()
-            document.activeElement.parentElement?.setAttribute('open', '')
+            layoutState.resetIndexGroup()
+            mainState.element?.focus()
             return false
         }
 
-        if (event.key === 'ArrowLeft') {
+        if (event.key === 'ArrowDown') {
+            console.log('prevent')
             event.preventDefault()
             event.stopPropagation()
-            document.activeElement.parentElement?.removeAttribute('open')
-            return false
+            scrollIntoView(focusNextElement(mainState.element, queryString))
+            return true
         }
-    }
 
-    if (event.key === 'Escape') {
-        event.preventDefault()
-        layoutState.resetIndexGroup()
-        mainState.element?.focus()
-        return false
-    }
-
-    if (event.key === 'ArrowDown') {
-        console.log('prevent')
-        event.preventDefault()
-        event.stopPropagation()
-        scrollIntoView(focusNextElement(mainState.element, queryString))
-        return true
-    }
-
-    if (event.key === 'ArrowUp') {
-        event.preventDefault()
-        event.stopPropagation()
-        scrollIntoView(focusPreviousElement(mainState.element, queryString))
-        return true
+        if (event.key === 'ArrowUp') {
+            event.preventDefault()
+            event.stopPropagation()
+            scrollIntoView(focusPreviousElement(mainState.element, queryString))
+            return true
+        }
     }
     return null
 }
@@ -144,8 +133,6 @@ function Main({ children }: React.PropsWithChildren) {
 
     // close sidenav by swipe / panning gesture;
     const dragAttributes: ReactDOMAttributes = useDrag<PointerEvent>(({ movement: [dx, dy], last }) => {
-        // check if motion safe is checked; TODO;
-
         // `offset` does not reset when panning ends; `movement` does;
         const sidenavElement = sidenavState.element
         if (sidenavElement == null) return
@@ -154,7 +141,7 @@ function Main({ children }: React.PropsWithChildren) {
 
         // pan move;
         if (!last) {
-            sidenavElement.style.transition = 'transform 0s ease'
+            sidenavElement.style.transitionDuration = '0s'
             const currentOffset = sidenavElement.offsetWidth + dx
             sidenavElement.style.transform = `translateX(${currentOffset}px)`
             return
@@ -164,16 +151,11 @@ function Main({ children }: React.PropsWithChildren) {
         if (isDebugEnabled) console.log('Sidenav: Pan gesture has ended.')
         if (dx < -0.5 * sidenavElement.offsetWidth) {
             // isOpen is not updated immediately;
-            // this is enough since the isOpen state is changed; hence, applySidenavState()
-            // is called automatically;
             sidenavState.setIsOpen(false)
             return
         }
 
-        // not needed; the isOpen state is not changed;
-        // sidenavContext.openState.setIsOpen(true)
-        // cannot call applySidenavState() for this since it depends on this function, i.e. enableTouchEvents();
-        sidenavElement.style.transition = 'transform 0.5s ease-out 0s'
+        sidenavElement.style.transitionDuration = sidenavTransitionDuration
         sidenavElement.style.transform = `translateX(${sidenavElement.offsetWidth}px)`
     }, { eventOptions: { capture: true }, enabled: sidenavState.isOpen })()
 
@@ -181,10 +163,10 @@ function Main({ children }: React.PropsWithChildren) {
     // functions
     //
 
-    function initializeMainReference(element: HTMLElement | null): void {
+    function initializeMainElement(element: HTMLElement | null): void {
         if (mainState.element != null) return
         if (element == null) return
-        if (isDebugEnabled) console.log('Main: Initialize main reference.')
+        if (isDebugEnabled) console.log('Main: Initialize main element.')
         mainState.setElement(element)
     }
 
@@ -194,23 +176,16 @@ function Main({ children }: React.PropsWithChildren) {
 
     // update state;
     useEffect(() => {
-        // if (mainState.isActive === (!sidenavState.isOpen && !searchState.isOpen)) return
-        // mainState.setIsActive(!mainState.isActive)
-        setIsActive(!sidenavState.isOpen && !searchState.isOpen)
-    }, [searchState.isOpen, setIsActive, sidenavState.isOpen])
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    // [mainState.setIsActive, searchState.isOpen, sidenavState.isOpen])
-
-    // synchronize state and attributes;
-    useEffect(() => {
         if (mainState.element == null) return
-        if (mainState.isActive) {
+        const isActive = !sidenavState.isOpen && !searchState.isOpen
+        setIsActive(isActive)
+
+        if (isActive) {
             delete mainState.element.dataset.inactive
             return
         }
         mainState.element.dataset.inactive = ''
-    }, [mainState.element, mainState.isActive])
+    }, [mainState.element, searchState.isOpen, setIsActive, sidenavState.isOpen])
 
     // navigate to searched element;
     useEffect(() => {
@@ -281,10 +256,10 @@ function Main({ children }: React.PropsWithChildren) {
         <main
             // sets onKeyDownCapture and onKeyUpCapture;
             {...dragAttributes}
-            className="h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-colors ease-out duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
-            ref={initializeMainReference}
+            className="h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:transition-colors motion-safe:ease-out motion-safe:duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
+            ref={initializeMainElement}
             //TODO; check again;
-            tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1}
+            tabIndex={layoutState.indexGroup === defaultIndexGroup ? 0 : -1}
         // tabIndex={(mainState.isActive && layoutState.indexGroup === mainIndexGroup ? 0 : -1)}
         >
             {children}

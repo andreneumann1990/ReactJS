@@ -1,13 +1,14 @@
 'use client'
 
-import { useFormik } from 'formik'
-import { MouseEvent, SyntheticEvent, } from 'react'
+import { FormikConfig, useFormik } from 'formik'
+import { MouseEvent, SyntheticEvent, useEffect, useRef, } from 'react'
 import * as Yup from 'yup'
 import { Country1, Country2 } from '../../components/atoms/Country'
 import Link from 'next/link'
 import { Button } from '@mui/material'
 import { mainIndexGroup } from '../../constants/parameters'
 import { useLayoutStore } from '../../hooks/stores'
+import { handleFocusCapture, scrollIntoView } from '../../constants/functions'
 
 //TODO; handle tabIndex;
 
@@ -17,10 +18,32 @@ function Page() {
     //
 
     const layoutState = useLayoutStore()
+    const { setIndexGroup } = layoutState
+    const country1Ref = useRef<HTMLElement>()
+    const form1Ref = useRef<HTMLFormElement | null>(null)
+    const pageRef = useRef<HTMLDivElement | null>(null)
 
     //
     // functions
     //
+
+    function handleKeyDown_Country1(event: React.KeyboardEvent): void {
+        if (event.key === 'Enter') {
+            event.preventDefault()
+            event.stopPropagation()
+            layoutState.setIndexGroup('main-country1')
+            country1Ref.current?.focus()
+            return
+        }
+
+        if (event.key === 'Escape') {
+            event.preventDefault()
+            event.stopPropagation()
+            layoutState.setIndexGroup('main');
+            (event.currentTarget as HTMLElement)?.focus()
+            return
+        }
+    }
 
     const form1 = useFormik({
         initialValues: {
@@ -113,15 +136,46 @@ function Page() {
     }
 
     //
+    // effects
+    //
+
+    useEffect(() => {
+        if (form1Ref.current == null) return
+        if (pageRef.current == null) return
+
+        pageRef.current.querySelectorAll('a').forEach((element: HTMLElement) => {
+            element.tabIndex = layoutState.indexGroup === mainIndexGroup ? 0 : -1
+        })
+
+        pageRef.current.querySelectorAll('button').forEach((element: HTMLElement) => {
+            element.tabIndex = layoutState.indexGroup === mainIndexGroup ? 0 : -1
+        })
+
+        const form1InputElementArray = form1Ref.current.querySelectorAll('input')
+        form1InputElementArray.forEach((element: HTMLInputElement) => {
+            if (element.type === 'hidden') return
+            element.tabIndex = layoutState.indexGroup === mainIndexGroup ? 0 : -1
+            element.addEventListener('focus', handleFocusCapture(mainIndexGroup), true)
+        })
+
+        return () => {
+            form1InputElementArray.forEach((element: HTMLInputElement) => { element.removeEventListener('focus', handleFocusCapture(mainIndexGroup), true) })
+        }
+    }, [layoutState.indexGroup, setIndexGroup])
+
+    //
     //
     //
 
-    return (<>
+    return (<div ref={pageRef}>
         {/* header; */}
         <h1 className="my-3 text-3xl font-bold">Form Examples</h1>
 
         <h2 className="my-1 text-xl font-bold">All Input Types:</h2>
-        <form onSubmit={form1.handleSubmit}>
+        <form
+            ref={form1Ref}
+            onSubmit={form1.handleSubmit}
+        >
             <div ref={normalizeHeights} className="grid grid-flow-row md:grid-cols-2 xl:grid-cols-3 border-x-[1px] items-center">
                 <div className="grid px-5 border-x-[1px] items-center">
                     <label>
@@ -131,7 +185,6 @@ function Page() {
                             className="bg-primary border m-1 px-2 py-1 rounded-md"
                             name="button"
                             onClick={handleClick}
-                            tabIndex={layoutState.indexGroup === mainIndexGroup ? undefined : -1}
                             type="button"
                             value="use cases? use normal button instead?"
                         />
@@ -430,19 +483,18 @@ function Page() {
                             rounded-md does not work since it is applied to the container without border; 
                             customization might be difficult when using these; 
                         */}
-                        <Country1
-                            className="m-1 px-2 py-1 rounded-md"
-                            // onKeyDown={() => { }} //TODO; wrap them so that you can use up / down for selecting entries;
-                            onChange={(_: SyntheticEvent, value: string) => handleChangeForCountry1(value)}
-                        />
+                        <div
+                            onKeyDown={handleKeyDown_Country1}
+                            tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1}
+                        >
+                            <Country1 setFieldValue={(value) => form2.setFieldValue('country1', value)} />
+                        </div>
                     </div>
                 </div>
                 <div className="grid px-5 items-center">
                     <div>
                         Copied from: <Link className="text-blue-300" href={'https://mui.com/material-ui/react-autocomplete/'}>https://mui.com/material-ui/react-autocomplete/</Link>
-                        <Country2
-                            className="m-1 px-2 py-1 rounded-md"
-                            onChange={(_: SyntheticEvent, { label }: { label: string }) => handleChangeForCountry2(label)}
+                        <Country2 setFieldValue={(value) => form2.setFieldValue('country2', value)}
                         />
                     </div>
                 </div>
@@ -450,7 +502,7 @@ function Page() {
             <br />
             <Button variant="outlined" type="submit">Submit</Button>
         </form >
-    </>)
+    </div>)
 }
 
 export default Page

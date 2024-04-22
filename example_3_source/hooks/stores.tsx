@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { DropdownMenuState, DropdownMenuStore, GlobalState, KeyboardState, LayoutState, LayoutStore, MainState, MainStore, SearchState, SearchStore, SidenavState, SidenavStore, TopnavState, TopnavStore } from '../constants/types'
+import { DropdownMenuState, DropdownMenuStore, GlobalState, LayoutState, LayoutStore, MainState, MainStore, SearchState, SearchStore, SidenavState, SidenavStore, TopnavState, TopnavStore } from '../constants/types'
 import { isDebugEnabled, defaultIndexGroup } from '../constants/parameters'
 import { useEffect } from 'react'
 
@@ -26,7 +26,6 @@ export { useGlobalStore }
 function useGlobalStore(): GlobalState {
     return {
         dropdownMenuStateArray: useDropdownMenuStoreArray.map((store) => store()),
-        keyboardState: useKeyboardStore(),
         layoutState: useLayoutStore(),
         mainState: useMainStore(),
         searchState: useSearchStore(),
@@ -38,7 +37,6 @@ function useGlobalStore(): GlobalState {
 useGlobalStore.getState = function (): GlobalState {
     return {
         dropdownMenuStateArray: useDropdownMenuStoreArray.map((store) => store.getState()),
-        keyboardState: useKeyboardStore.getState(),
         layoutState: useLayoutStore.getState(),
         mainState: useMainStore.getState(),
         searchState: useSearchStore.getState(),
@@ -46,11 +44,6 @@ useGlobalStore.getState = function (): GlobalState {
         topnavState: useTopnavStore.getState(),
     }
 }
-
-export const useKeyboardStore = create<KeyboardState>((set) => ({
-    event: null,
-    setEvent: (event) => set(() => ({ event }))
-}))
 
 export const useLayoutStore: LayoutStore = create<LayoutState>((set, get) => ({
     _previousIndexGroup: defaultIndexGroup,

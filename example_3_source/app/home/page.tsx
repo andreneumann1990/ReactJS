@@ -1,7 +1,9 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { mainIndexGroup } from '../../constants/parameters'
 import { useLayoutStore } from '../../hooks/stores'
+import { handleFocusCapture } from '../../constants/functions'
 
 export default Page
 
@@ -15,24 +17,54 @@ function Page() {
     //
 
     const layoutState = useLayoutStore()
+    const pageRef = useRef<HTMLDivElement | null>(null)
 
     //
     // functions
     //
 
-    function setTabIndex() { layoutState.setIndexGroup(mainIndexGroup) }
+    function handleKeyDown(event: React.KeyboardEvent): void {
+        if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            event.stopPropagation()
+            event.currentTarget.parentElement?.setAttribute('open', '')
+            return
+        }
+
+        if (event.key === 'ArrowLeft') {
+            event.preventDefault()
+            event.stopPropagation()
+            event.currentTarget.parentElement?.removeAttribute('open')
+            return
+        }
+    }
+
+    // onFocusCapture() should work; deeper nested elements can override this by 
+    // using onFocusCapture() themselfes;
 
     //
     // effects
     //
 
-    // useNavigateAndHighlightElement('Home')
+    useEffect(() => {
+        if (pageRef.current == null) return
+        const summaryElementArray = pageRef.current.querySelectorAll('summary')
+
+        summaryElementArray.forEach((element: HTMLElement) => {
+            element.tabIndex = layoutState.indexGroup === mainIndexGroup ? 0 : -1
+            element.addEventListener('focus', handleFocusCapture(mainIndexGroup), true)
+        })
+
+        return () => summaryElementArray.forEach((element: HTMLElement) => {
+            element.removeEventListener('focus', handleFocusCapture(mainIndexGroup), true)
+        })
+    }, [layoutState.indexGroup])
 
     //
     //
     //
 
-    return (<>
+    return (<div ref={pageRef}>
         <h1 className="my-3 text-3xl font-bold">ReactJS Example 3</h1>
 
         <h2 className="my-2 text-2xl font-bold">Summary:</h2>
@@ -43,12 +75,11 @@ function Page() {
         </ul>
 
         <h2 className="my-2 text-2xl font-bold">Changelog / Features:</h2>
-        <details
-            className="group border rounded-md ml-1 mb-2"
-            onFocusCapture={setTabIndex}
-            tabIndex={layoutState.indexGroup === mainIndexGroup ? undefined : -1}
-        >
-            <summary className="group-open:border-b p-2">Example 1</summary>
+        <details className="group border rounded-md ml-1 mb-2" >
+            <summary
+                className="group-open:border-b p-2"
+                onKeyDown={handleKeyDown}
+            >Example 1</summary>
             <ul className="*:my-2 pl-10">
                 <li>clicking highlights links</li>
                 <li>sidenav animation</li>
@@ -63,12 +94,11 @@ function Page() {
                 <li>deployed on github.io</li>
             </ul>
         </details>
-        <details
-            className="group border rounded-md ml-1 mb-2"
-            onFocusCapture={setTabIndex}
-            tabIndex={layoutState.indexGroup === mainIndexGroup ? undefined : -1}
-        >
-            <summary className="group-open:border-b p-2">Example 2</summary>
+        <details className="group border rounded-md ml-1 mb-2">
+            <summary
+                className="group-open:border-b p-2"
+                onKeyDown={handleKeyDown}
+            >Example 2</summary>
             <ul className="*:my-2 pl-10">
                 <li>switched to nextjs; no server-side-rendering (SSR); needs to be static at this point; no back-end yet;</li>
                 <li>switched to tailwindcss in most cases;</li>
@@ -93,5 +123,5 @@ function Page() {
             <li>database with pictures; pre-loading with <b>Node.js</b>?, placeholder?;</li>
             <li>tables;</li>
         </ul>
-    </>)
+    </div>)
 }

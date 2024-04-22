@@ -1,15 +1,17 @@
 import { KeyboardEvent, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { isDebugEnabled, defaultIndexGroup, mainIndexGroup, sidenavIndexGroup, topnavIndexGroup } from '../../constants/parameters'
-import { triggerFlashEffect } from '../../constants/functions'
+import { stopKeyDownInput, triggerFlashEffect } from '../../constants/functions'
 import { NullableBoolean } from '../../constants/types'
 import { useGlobalStore, useSearchStore, useTopnavStore } from '../../hooks/stores'
-import Search, { handleKeyDownInput_Search } from '../atoms/Search'
+import Search, { handleKeyDown_Search } from '../atoms/Search'
+import { keyDownTimeout } from '../../app/layout'
+import { useRouter } from 'next/navigation'
 
 export default Topnav
-export { handleKeyDownInput as handleKeyInput_Topnav }
+export { handleKeyDown as handleKeyInput_Topnav }
 
-//TODO; check onFocusCapture again; set it inside the handleKeyDownInput function in layout??;
+//TODO; check onFocusCapture again; set it inside the handleKeyDown function in layout??;
 
 //
 // parameters and variables
@@ -52,7 +54,7 @@ function focusPreviousElement(): void {
     previousElement?.focus()
 }
 
-function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
+function handleKeyDown(event: KeyboardEvent): NullableBoolean {
     const { layoutState, mainState, sidenavState, topnavState } = useGlobalStore.getState()
     if (topnavState.element == null) return null
     if (!topnavState.element.contains(document.activeElement)) return null
@@ -75,7 +77,7 @@ function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
         return null
     }
 
-    const isKeyInputRepeating = handleKeyDownInput_Search(event)
+    const isKeyInputRepeating = handleKeyDown_Search(event)
     if (isKeyInputRepeating != null) return isKeyInputRepeating
 
     //TODO; this ignores things like opening the sidenav, where you still focus on the menu button;
@@ -149,12 +151,15 @@ function handleKeyDownInput(event: KeyboardEvent): NullableBoolean {
         }
     }
 
-    if (document.activeElement === topnavState.homeLinkElement) {
-        if (event.key === 'Enter') {
-            triggerFlashEffect(event)
-            return true
-        }
-    }
+    // if (document.activeElement === topnavState.homeLinkElement) {
+    //     if (event.key === 'Enter') {
+    //         console.log('homeLink')
+    //         triggerFlashEffect(event)
+    //         layoutState.resetIndexGroup()
+    //         topnavState.element.focus()
+    //         return true
+    //     }
+    // }
 
     if (event.key === 'ArrowLeft') {
         event.preventDefault()
@@ -193,6 +198,7 @@ function Topnav() {
     // parameters and variables
     //
 
+    const router = useRouter()
     const { layoutState, sidenavState, topnavState } = useGlobalStore()
 
     const homeLinkRef = useRef<HTMLAnchorElement | null>(null)
@@ -203,17 +209,30 @@ function Topnav() {
     // functions
     //
 
-    const initializeMenuButtonReference = (element: HTMLButtonElement | null) => {
+    function handleKeyDown_HomeLink(event: React.KeyboardEvent): void {
+        if (keyDownTimeout.current != null) return
+        if (event.key === 'Enter') {
+            router.push('/home')
+            triggerFlashEffect(event)
+
+            layoutState.resetIndexGroup()
+            topnavState.element?.focus()
+            keyDownTimeout.current = stopKeyDownInput()
+            return
+        }
+    }
+
+    const initializeMenuButtonElement = (element: HTMLButtonElement | null) => {
         if (topnavState.menuButtonElement != null) return
         if (element == null) return
-        if (isDebugEnabled) console.log('Topnav: Initialize menu reference.')
+        if (isDebugEnabled) console.log('Topnav: Initialize menu element.')
         topnavState.setMenuButtonElement(element)
     }
 
-    const initializeTopnavReference = (element: HTMLElement | null) => {
+    const initializeTopnavElement = (element: HTMLElement | null) => {
         if (topnavState.element != null) return
         if (element == null) return
-        if (isDebugEnabled) console.log('Topnav: Initialize topbar reference.')
+        if (isDebugEnabled) console.log('Topnav: Initialize topnav element.')
         topnavState.setElement(element)
     }
 
@@ -258,7 +277,7 @@ function Topnav() {
         <nav
             // lg:h-[calc(var(--height-topnav)/2)]
             className="bg-background h-[--height-topnav] shadow-md"
-            ref={initializeTopnavReference}
+            ref={initializeTopnavElement}
             tabIndex={layoutState.indexGroup === defaultIndexGroup ? 0 : -1}
         >
             <div
@@ -270,8 +289,8 @@ function Topnav() {
                         className="h-[--height-topnav]"
                         // onFocusCapture={setActiveTabIndexGroupToTopnav}
                         onPointerUp={toggleSidenav}
-                        ref={initializeMenuButtonReference}
-                        tabIndex={layoutState.indexGroup === topnavIndexGroup ? undefined : -1}
+                        ref={initializeMenuButtonElement}
+                        tabIndex={layoutState.indexGroup === topnavIndexGroup || layoutState.indexGroup === sidenavIndexGroup ? undefined : -1}
                     >
                         <i
                             className="p-1 icon-medium material-icons"
@@ -285,6 +304,7 @@ function Topnav() {
                     <Link
                         className="block h-[--height-topnav]"
                         href="/home"
+                        onKeyDown={handleKeyDown_HomeLink}
                         ref={homeLinkRef}
                         tabIndex={layoutState.indexGroup === topnavIndexGroup ? undefined : -1}
                     >
@@ -304,6 +324,8 @@ function Topnav() {
                     </div>
                     <div className="text-center">
                         <img className="inline bg-white rounded-md p-1" src="./icons/enter-arrow-svgrepo-com.svg" alt="enter" height="24px" width="24px"></img>
+                        <span> </span>
+                        <img className="inline bg-white rounded-md p-1" src="./icons/spacebar-svgrepo-com.svg" alt="spacebar" height="24px" width="24px"></img>
                         <span className="inline-block p-1 text-xs">to select</span>
                     </div>
                     <div>

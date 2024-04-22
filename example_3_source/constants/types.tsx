@@ -7,9 +7,13 @@ import { StoreApi, UseBoundStore } from 'zustand'
 
 export type NullableBoolean = boolean | null
 export type NullableBooleanRef = MutableRefObject<NullableBoolean>
+export type NullableNumber = number | null
+export type NullableNumberRef = MutableRefObject<NullableNumber>
+
+export type StringStringObject = { [field: string]: string }
 
 export type BooleanRef = MutableRefObject<boolean>
-export type TimeoutRef = MutableRefObject<NodeJS.Timeout | undefined>
+export type TimeoutRef = { current?: NodeJS.Timeout }
 
 export type NullableAnchorElement = HTMLAnchorElement | null
 export type SetNullableAnchorElement = (element: NullableAnchorElement) => void
@@ -51,7 +55,6 @@ export interface EntryData {
 
 export interface GlobalState {
     dropdownMenuStateArray: DropdownMenuState[],
-    keyboardState: KeyboardState,
     layoutState: LayoutState,
     mainState: MainState,
 
@@ -60,10 +63,16 @@ export interface GlobalState {
     topnavState: TopnavState
 }
 
-export type NullableKeyboardEvent = KeyboardEvent | null
-export interface KeyboardState {
-    event: NullableKeyboardEvent,
-    setEvent: (event: NullableKeyboardEvent) => void,
+//TODO
+// export type NullableKeyboardEvent = KeyboardEvent | null
+// export interface KeyboardState {
+//     event: NullableKeyboardEvent,
+//     setEvent: (event: NullableKeyboardEvent) => void,
+// }
+
+export interface KeyboardEventState {
+    event?: React.KeyboardEvent,
+    setEvent: (event?: React.KeyboardEvent) => void,
 }
 
 export interface LayoutState {

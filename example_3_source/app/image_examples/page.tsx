@@ -3,12 +3,27 @@
 import { useDrag } from '@use-gesture/react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useClick } from '../../hooks/gestures'
-import { mainIndexGroup } from '../../constants/parameters'
+import { initialDelay, mainIndexGroup, maximumDelay, repeatDelay } from '../../constants/parameters'
 import { useGlobalStore } from '../../hooks/stores'
-import { focusNextElement, focusPreviousElement, scrollIntoView } from '../../constants/functions'
+import { clearKeyDownTimeout, focusNextElement, focusPreviousElement, repeatKeyDownInput, scrollIntoView, stopKeyDownInput } from '../../constants/functions'
 import { GSP_NO_RETURNED_VALUE } from 'next/dist/lib/constants'
+import { KeyboardEventState, NullableBoolean, NullableElement } from '../../constants/types'
+import { create } from 'zustand'
+
+//
+//
+//
+
+const useKeyboardEventStore = create<KeyboardEventState>((set) => ({
+    event: undefined,
+    setEvent: (event) => set(() => ({ event })),
+}))
+
+//
+// main
+//
 
 function Page() {
     //
@@ -16,6 +31,7 @@ function Page() {
     //
 
     const { layoutState, sidenavState } = useGlobalStore()
+    const keyboardEventState = useKeyboardEventStore()
 
     const [imageRowElement, setImageRowElement] = useState<HTMLDivElement | null>(null)
     const [overlayElement, setOverlayElement] = useState<HTMLDivElement | null>(null)
@@ -28,9 +44,20 @@ function Page() {
     const overlayIndexGroup = 'main-overlay'
     const queryString = 'img[tabIndex="0"]'
 
+    // it seems like moving information from inside to outside is possible but from 
+    // outside to inside is not via useRef; in that case I need a store (to update 
+    // the event for example);
+    const keyDownTimeoutRef = useRef<NodeJS.Timeout>()
+
     //
     // functions
     //
+
+    // function clearKeyDownTimeout() {
+    //     keyboardEventState.setEvent(undefined)
+    //     clearTimeout(keyDownTimeoutRef.current)
+    //     keyDownTimeoutRef.current = undefined
+    // }
 
     function closeOverlay(): void {
         if (overlayElement == null) return
@@ -64,71 +91,108 @@ function Page() {
         imageRowElement.scrollBy({ left: -dx })
     }, { eventOptions: { capture: true }, enabled: !sidenavState.isOpen })
 
-    function handleKeyDownInput_ImageRow(event: React.KeyboardEvent) {
-        if (layoutState.indexGroup === mainIndexGroup) {
-            if (event.key === 'Enter') {
-                event.preventDefault()
-                event.stopPropagation()
-                layoutState.setIndexGroup(imageRowIndexGroup)
-                imageRowFirstImage.current?.focus()
-                return
-            }
+    function handleKeyDown_ImageRow(event: React.KeyboardEvent): void {
+        if (keyDownTimeoutRef.current != null) {
+            keyboardEventState.setEvent(event)
+            event.preventDefault()
+            event.stopPropagation()
             return
         }
 
-        if (layoutState.indexGroup === imageRowIndexGroup) {
-            if (event.key === 'Escape') {
-                event.preventDefault()
-                event.stopPropagation()
-                layoutState.setIndexGroup(mainIndexGroup)
-                imageRowElement?.focus()
+        function handleInput(isFirstKeyDown?: boolean): void {
+            const event = useKeyboardEventStore.getState().event
+            if (event == null) return
+
+            if (layoutState.indexGroup === mainIndexGroup) {
+                if (event.key === 'Enter') {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    layoutState.setIndexGroup(imageRowIndexGroup)
+                    imageRowFirstImage.current?.focus()
+                    keyDownTimeoutRef.current = stopKeyDownInput()
+                    return
+                }
                 return
             }
 
-            if (event.key === 'ArrowRight') {
-                event.preventDefault()
-                event.stopPropagation()
-                //TODO
-                //TODO; check if motion-safe;
-                scrollIntoView(focusNextElement(imageRowElement, queryString))
-                return
-            }
+            if (layoutState.indexGroup === imageRowIndexGroup) {
+                if (event.key === 'Escape') {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    layoutState.setIndexGroup(mainIndexGroup)
+                    imageRowElement?.focus()
+                    keyDownTimeoutRef.current = stopKeyDownInput()
+                    return
+                }
 
-            if (event.key === 'ArrowLeft') {
-                event.preventDefault()
-                event.stopPropagation()
-                scrollIntoView(focusPreviousElement(imageRowElement, queryString))
-                // imageRowElement?.scrollBy({ left: -100 })
-                // imageRowElement?.scroll
+                if (event.key === 'ArrowRight') {
+                    console.log('right')
+                    event.preventDefault()
+                    event.stopPropagation()
+                    scrollIntoView(focusNextElement(imageRowElement, queryString))
+                    keyDownTimeoutRef.current = repeatKeyDownInput(handleInput, isFirstKeyDown ? initialDelay : repeatDelay)
+                    return
+                }
+
+                if (event.key === 'ArrowLeft') {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    scrollIntoView(focusPreviousElement(imageRowElement, queryString))
+                    keyDownTimeoutRef.current = repeatKeyDownInput(handleInput, isFirstKeyDown ? initialDelay : repeatDelay)
+                    return
+                }
+
+                if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                    event.preventDefault()
+                    event.stopPropagation()
+                    return
+                }
                 return
             }
-            return
         }
+
+        keyboardEventState.setEvent(event)
+        handleInput(true)
     }
 
-    function handleKeyDownInput_Overlay(event: React.KeyboardEvent) {
+    function handleKeyDown_Overlay(event: React.KeyboardEvent) {
+        // TODO; what is the difference between document.activeElement and element.focus()
+        // you can be active without focus such as event don't trigger;
+        console.log('handle')
+
         if (event.key === 'Escape') {
             event.preventDefault()
             event.stopPropagation()
+
             closeOverlay()
             const currentTarget = event.currentTarget as HTMLElement | null
             currentTarget?.blur()
-            previouslyFocusedElementRef.current?.focus()
+
+            if (!(previouslyFocusedElementRef.current instanceof HTMLBodyElement)) {
+                previouslyFocusedElementRef.current?.focus()
+            }
             return
         }
     }
 
-    function handleKeyDownInput_SingleImage(event: React.KeyboardEvent): void {
+    function handleKeyDown_SingleImage(event: React.KeyboardEvent): void {
         if (event.key === 'Enter') {
             event.preventDefault()
             event.stopPropagation()
+
             openOverlay(event)
-            //TODO; check if it works;
             previouslyFocusedElementRef.current = event.currentTarget as HTMLElement
             overlayImageRef.current?.focus()
             return
         }
     }
+
+    //TODO; check useClick to handle like key inputs regarding focus or previous element;
+    // maybe;
+    useEffect(() => {
+        const interval = setInterval(() => { console.log(document.activeElement) }, 2000)
+        return () => clearInterval(interval)
+    }, [])
 
     //
     //
@@ -138,17 +202,12 @@ function Page() {
         {/* overlay; fullscreen picture view; */}
         <div
             className="fixed hidden open:block h-[calc(100vh-var(--height-topnav))] w-full p-10 top-[--height-topnav] left-0 overflow-y-auto z-10 bg-secondary motion-safe:animate-fade-in"
-            onBlur={() => layoutState.restorePreviousIndexGroup()}
-            onFocus={() => layoutState.setIndexGroup(overlayIndexGroup)}
-            onKeyDown={handleKeyDownInput_Overlay}
             ref={setOverlayElement}
         >
             <button
                 className="absolute right-12 top-12 bg-primary"
                 onClick={closeOverlay}
-                //TODO
                 tabIndex={-1}
-            // tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupMain ? undefined : -1}
             >
                 <i className="p-1 icon-medium material-icons">close</i>
             </button>
@@ -156,9 +215,12 @@ function Page() {
                 alt=""
                 className="p-1 mx-auto"
                 height={0}
+                onBlurCapture={() => layoutState.setIndexGroup(mainIndexGroup)}
+                onFocusCapture={() => layoutState.setIndexGroup(overlayIndexGroup)}
+                onKeyDown={handleKeyDown_Overlay}
                 ref={overlayImageRef}
                 src="/icons/logo192.png"
-                tabIndex={-1}
+                tabIndex={layoutState.indexGroup === overlayIndexGroup ? 0 : -1}
                 width={0}
             ></Image>
         </div>
@@ -187,8 +249,8 @@ function Page() {
             className="p-1 mx-auto text-center"
             priority={true}
             height={250}
-            onKeyDown={handleKeyDownInput_SingleImage}
-            src="/images/woman-3077180_1280.jpg"
+            onKeyDown={handleKeyDown_SingleImage}
+            src="./images/woman-3077180_1280.jpg"
             tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1}
             width={250}
         ></Image >
@@ -202,7 +264,9 @@ function Page() {
             {...onDrag()}
             className="flex w-full border items-center overflow-x-hidden touch-none"
             // capture is necessary to prevent the default scrolling behavior?;
-            onKeyDown={handleKeyDownInput_ImageRow}
+            onBlur={() => clearKeyDownTimeout(keyboardEventState, keyDownTimeoutRef)}
+            onKeyDown={handleKeyDown_ImageRow}
+            onKeyUp={() => clearKeyDownTimeout(keyboardEventState, keyDownTimeoutRef)}
             // reset the changes made by onDrag();
             onKeyDownCapture={undefined}
             onKeyUpCapture={undefined}
@@ -215,8 +279,8 @@ function Page() {
                 className="p-1 mx-auto text-center"
                 height={250}
                 ref={imageRowFirstImage}
-                onKeyDown={handleKeyDownInput_SingleImage}
-                src="/images/sunset-3008779_1280.jpg"
+                onKeyDown={handleKeyDown_SingleImage}
+                src="./images/sunset-3008779_1280.jpg"
                 tabIndex={layoutState.indexGroup === imageRowIndexGroup ? 0 : -1}
                 width={250}
             ></Image>
@@ -225,8 +289,8 @@ function Page() {
                 alt="placeholder"
                 className="p-1 mx-auto text-center"
                 height={250}
-                onKeyDown={handleKeyDownInput_SingleImage}
-                src="/images/forest-5855196_1280.jpg"
+                onKeyDown={handleKeyDown_SingleImage}
+                src="./images/forest-5855196_1280.jpg"
                 tabIndex={layoutState.indexGroup === imageRowIndexGroup ? 0 : -1}
                 width={250}
             ></Image>
@@ -235,8 +299,8 @@ function Page() {
                 alt="placeholder"
                 className="p-1 mx-auto text-center"
                 height={250}
-                onKeyDown={handleKeyDownInput_SingleImage}
-                src="/images/cute-7270285.svg"
+                onKeyDown={handleKeyDown_SingleImage}
+                src="./images/cute-7270285.svg"
                 tabIndex={layoutState.indexGroup === imageRowIndexGroup ? 0 : -1}
                 width={250}
             ></Image>
@@ -245,8 +309,8 @@ function Page() {
                 alt="placeholder"
                 className="p-1 mx-auto text-center touch-none"
                 height={250}
-                onKeyDown={handleKeyDownInput_SingleImage}
-                src="/images/floral-background-6622475_1280.png"
+                onKeyDown={handleKeyDown_SingleImage}
+                src="./images/floral-background-6622475_1280.png"
                 tabIndex={layoutState.indexGroup === imageRowIndexGroup ? 0 : -1}
                 width={250}
             ></Image>

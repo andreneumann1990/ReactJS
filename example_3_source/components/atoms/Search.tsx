@@ -1,15 +1,14 @@
-import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react'
+import React, { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
 import algoliasearch from 'algoliasearch/lite'
 import DOMPurify from 'dompurify'
 import Link from 'next/link'
 import { isDebugEnabled, topnavIndexGroup } from '../../constants/parameters'
 import { useRouter } from 'next/navigation'
-import { debounceEventFunction } from '../../constants/functions'
 import { useGlobalStore } from '../../hooks/stores'
 import { EntryData, NullableBoolean, SearchData } from '../../constants/types'
 
 export default Search
-export { handleKeyDownInput as handleKeyDownInput_Search }
+export { handleKeyDown_Global as handleKeyDown_Search }
 
 //
 // parameters and variables
@@ -22,7 +21,7 @@ const algoliaIndex = algoliasearch('2QYN25VL0K', 'ba0b8a970db7843753c13218f38ae4
 //
 
 // navigate via arrow keys; escape to close;
-function handleKeyDownInput(event: React.KeyboardEvent): NullableBoolean {
+function handleKeyDown_Global(event: React.KeyboardEvent): NullableBoolean {
     const { searchState, topnavState } = useGlobalStore.getState()
     if (searchState.inputElement == null) return null
     if (!searchState.inputElement.contains(document.activeElement)) return null
@@ -111,21 +110,29 @@ function Search() {
     // const [searchState.resultsSelectedIndex, searchState.setResultsSelectedIndex] = useState<[number, number]>([0, 0])
     const [searchQuery, setSearchQuery] = useState('')
 
+    const updateInputFieldTimeoutRef = useRef<NodeJS.Timeout>()
+
     //
     // functions
     //
 
-    function initializeSearchInputReference(element: HTMLInputElement) {
+    function handleChange(event: ChangeEvent): void {
+        // debounce updateInputField();
+        clearTimeout(updateInputFieldTimeoutRef.current)
+        updateInputFieldTimeoutRef.current = setTimeout(() => updateInputField(event), 300)
+    }
+
+    function initializeInputElement(element: HTMLInputElement) {
         if (searchState.inputElement != null) return
         if (element == null) return
-        if (isDebugEnabled) console.log('Search: Initialize search input reference.')
+        if (isDebugEnabled) console.log('Search: Initialize search input element.')
         searchState.setInputElement(element)
     }
 
-    function initializeSearchResultsReference(element: HTMLDivElement) {
+    function initializeResultsElement(element: HTMLDivElement) {
         if (searchState.resultsElement != null) return
         if (element == null) return
-        if (isDebugEnabled) console.log('Search: Initialize search results reference.')
+        if (isDebugEnabled) console.log('Search: Initialize search results element.')
         searchState.setResultsElement(element)
     }
 
@@ -199,7 +206,7 @@ function Search() {
     // select search input field by ctrl+k;
     useEffect(() => {
         //TODO; move to layout.tsx;
-        function handleKeyDownInput(event: KeyboardEvent): void {
+        function handleKeyDown(event: KeyboardEvent): void {
             if (event.ctrlKey && event.key === 'k') {
                 event.preventDefault()
             }
@@ -221,11 +228,11 @@ function Search() {
         }
 
         // for some reason `keypress` does not trigger??;
-        document.addEventListener('keydown', handleKeyDownInput)
+        document.addEventListener('keydown', handleKeyDown)
         document.addEventListener('keyup', handleKeyUpInput)
 
         return (() => {
-            document.removeEventListener('keydown', handleKeyDownInput)
+            document.removeEventListener('keydown', handleKeyDown)
             document.removeEventListener('keyup', handleKeyUpInput)
         })
     }, [previouslyFocusedElement, searchState.inputElement])
@@ -309,31 +316,25 @@ function Search() {
             className="w-full relative grid grid-flow-col [grid-template-columns:var(--height-topnav)_auto] items-center"
             onSubmit={handleSearch}
         >
-            <button
-                type="submit"
-                tabIndex={layoutState.indexGroup === topnavIndexGroup ? undefined : -1}
-            >
-                <i className="p-1 icon-medium material-icons">search</i>
-            </button>
+            <i className="p-1 icon-medium material-icons">search</i>
             <div className="relative pr-1">
                 {/* search input; */}
                 <input name="searchInput" className="w-full px-4 py-1 rounded-2xl peer"
                     type="text"
                     placeholder="Search here..."
-                    ref={initializeSearchInputReference}
+                    ref={initializeInputElement}
                     onBlurCapture={handleBlur}
-                    onChange={debounceEventFunction(updateInputField, 300)}
+                    onChange={handleChange}
                     onFocusCapture={handleFocus}
                     tabIndex={layoutState.indexGroup === topnavIndexGroup ? undefined : -1}
                 />
 
                 {/* search results; */}
                 <div
-                    //TODO
-                    // className={`absolute w-full lg:min-w-[600px] mt-1 bg-secondary shadow-md text-center peer-focus:block hover:${searchState.isOpen ? 'block' : undefined}`}
-                    className={`absolute w-full lg:min-w-[600px] mt-1 bg-secondary shadow-md text-center hidden peer-focus:block hover:${searchState.isOpen ? 'block' : undefined}`}
-                    // className={`absolute w-full lg:min-w-[600px] mt-1 bg-secondary shadow-md text-center hidden peer-focus:block hover:${sidenavState.isOpen ? undefined : 'block'}`}
-                    ref={initializeSearchResultsReference}
+                    // making hover:block conditional to searchState.isOpen does not work in all cases;
+                    // maybe a race condition?;
+                    className={'absolute w-full lg:min-w-[600px] mt-1 bg-secondary shadow-md text-center hidden peer-focus:block hover:block'}
+                    ref={initializeResultsElement}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                 >

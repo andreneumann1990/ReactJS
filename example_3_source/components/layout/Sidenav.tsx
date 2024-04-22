@@ -1,15 +1,15 @@
 import { KeyboardEvent, useEffect } from 'react'
-import DropdownMenu, { handleKeyDownInput_DropdownMenu } from '../atoms/DropdownMenu'
+import DropdownMenu, { handleKeyDown_DropdownMenu } from '../atoms/DropdownMenu'
 import Link from 'next/link'
 import { useClick } from '../../hooks/gestures'
-import { isDebugEnabled, topnavIndexGroup } from '../../constants/parameters'
+import { isDebugEnabled, sidenavTransitionDuration, topnavIndexGroup } from '../../constants/parameters'
 import { triggerFlashEffect } from '../../constants/functions'
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import { NullableBoolean, GlobalState } from '../../constants/types'
 import { useGlobalStore } from '../../hooks/stores'
 
 export default Sidenav
-export { handleKeyDownInput as handleInput_Sidenav }
+export { handleKeyDown as handleInput_Sidenav }
 
 //TODO; holding arrow keys;
 
@@ -56,7 +56,7 @@ function focusPreviousElement({ sidenavState, topnavState }: GlobalState) {
     focusableElements[previousIndex]?.focus()
 }
 
-function handleKeyDownInput(event: KeyboardEvent, globalState: GlobalState, router: AppRouterInstance): NullableBoolean {
+function handleKeyDown(event: KeyboardEvent, globalState: GlobalState, router: AppRouterInstance): NullableBoolean {
     const { dropdownMenuStateArray, layoutState, sidenavState, topnavState } = globalState
     if (sidenavState.element == null) return null
     if (!sidenavState.element.contains(document.activeElement)) {
@@ -66,7 +66,7 @@ function handleKeyDownInput(event: KeyboardEvent, globalState: GlobalState, rout
     }
 
     for (let index = 0; index < dropdownMenuStateArray.length; ++index) {
-        const isKeyInputRepeating = handleKeyDownInput_DropdownMenu(dropdownMenuStateArray[index], event)
+        const isKeyInputRepeating = handleKeyDown_DropdownMenu(dropdownMenuStateArray[index], event)
         console.log('is key input repeating ' + isKeyInputRepeating)
         if (isKeyInputRepeating != null) return isKeyInputRepeating
     }
@@ -140,10 +140,10 @@ function Sidenav() {
     //
 
     // this is called when the component mounts or unmounts; and called when it re-renders;
-    const initializeSidenavReference = (element: HTMLElement | null) => {
+    const initializeSidenavElement = (element: HTMLElement | null) => {
         if (sidenavState.element != null) return
         if (element == null) return // should never happen!! since it gets never unmounted;
-        if (isDebugEnabled) console.log('Sidenav: Initialize sidenav reference.')
+        if (isDebugEnabled) console.log('Sidenav: Initialize sidenav element.')
         sidenavState.setElement(element)
     }
 
@@ -155,9 +155,8 @@ function Sidenav() {
     useEffect(() => {
         const sidenavElement = sidenavState.element
         if (sidenavElement == null) return
+        sidenavElement.style.transitionDuration = sidenavTransitionDuration
 
-        //make changes by adding and removing classes only??; not possible if the value is dynamic;
-        sidenavElement.style.transition = 'transform 0.5s ease-out 0s'
         if (sidenavState.isOpen) {
             sidenavElement.style.transform = `translateX(${sidenavElement.offsetWidth}px)`
             return
@@ -207,8 +206,9 @@ function Sidenav() {
 
     return (<>
         <nav
-            className="fixed w-[min(500px,70vw)] h-[calc(100vh-var(--height-topnav))] left-[max(-500px,-70vw)] bg-background shadow-lg shadow-neutral-950 leading-10 overflow-y-auto overflow-x-hidden scrollbar-stable z-[100]"
-            ref={initializeSidenavReference}
+            className="fixed w-[min(500px,70vw)] h-[calc(100vh-var(--height-topnav))] left-[max(-500px,-70vw)] bg-background shadow-lg shadow-neutral-950 leading-10 overflow-y-auto overflow-x-hidden scrollbar-stable z-[100] transition-none motion-safe:transition-transform motion-safe:ease-out"
+            ref={initializeSidenavElement}
+            style={{ transitionDuration: sidenavTransitionDuration }}
         >
             <hr />
             <Link

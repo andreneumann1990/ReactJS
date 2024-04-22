@@ -5,7 +5,7 @@ import { NullableBoolean, DropdownMenuState, SidenavState } from '../../constant
 import { useDropdownMenuStoreArray, useGlobalStore, useSidenavStore } from '../../hooks/stores'
 
 export default DropdownMenu
-export { handleKeyDownInput as handleKeyDownInput_DropdownMenu }
+export { handleKeyDown as handleKeyDown_DropdownMenu }
 
 //
 // functions
@@ -40,7 +40,7 @@ function toggleContent(dropdownMenuState: DropdownMenuState, sidenavState: Siden
     sidenavState.setLastActiveDropdownElement(dropdownMenuState.buttonElement)
 }
 
-function handleKeyDownInput(dropdownMenuState: DropdownMenuState, event: KeyboardEvent): NullableBoolean {
+function handleKeyDown(dropdownMenuState: DropdownMenuState, event: KeyboardEvent): NullableBoolean {
     if (dropdownMenuState.element == null) return null
     if (!dropdownMenuState.element?.contains(document.activeElement)) return null
     const sidenavState = useSidenavStore.getState()
@@ -162,7 +162,6 @@ function DropdownMenu(props: {
     //
 
     return (<>
-        {/* the div block is for changing the background color; the anchor changed its bg-color based on hover; */}
         <div
             className={props.className}
             ref={dropdownMenuState.setElement}
@@ -174,13 +173,13 @@ function DropdownMenu(props: {
             >
                 <div className="grid grid-cols-2 items-center">
                     {props.text}
-                    <i ref={dropdownMenuState.setIconElement} className="icon-medium material-icons justify-self-end motion-safe:transition-all ease-out duration-300">computer</i>
+                    <i ref={dropdownMenuState.setIconElement} className="icon-medium material-icons justify-self-end motion-safe:transition-transform motion-safe:ease-out motion-safe:duration-300">computer</i>
                 </div>
             </button>
             <div
                 // the height needs to be directly changed; otherwise, the transition will not 
                 // work;
-                className="bg-background transition-all duration-300 ease-out overflow-y-hidden"
+                className="bg-background transition-none motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out overflow-y-hidden"
                 ref={dropdownMenuState.setContentElement}
                 style={{ height: 0 }}
             >
