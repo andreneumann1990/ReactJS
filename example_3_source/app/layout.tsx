@@ -46,12 +46,6 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     // functions
     //
 
-    // function clearKeyDownTimeout(): void {
-    //     keyboardEventState.setEvent(undefined)
-    //     clearTimeout(keyDownTimeoutRef.current)
-    //     keyDownTimeoutRef.current = undefined
-    // }
-
     function handleKeyDown(event: KeyboardEvent): void {
         if (keyDownTimeout.current != null) {
             event.preventDefault()
@@ -66,11 +60,15 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
             const event = useKeyboardEventStore.getState().event
             if (event == null) return
 
+            //TODO
+            console.log(document.activeElement)
+
             let isKeyInputRepeating = null
             if (document.activeElement instanceof HTMLBodyElement) {
                 if (event.key === 'Enter' || event.key === 'ArrowRight' || event.key === 'ArrowDown') {
                     event.preventDefault()
                     event.stopPropagation()
+                    layoutState.resetIndexGroup()
                     mainState.element?.focus()
                     isKeyInputRepeating = false
                 }
@@ -78,6 +76,7 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
                 if (event.key === 'Escape' || event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
                     event.preventDefault()
                     event.stopPropagation()
+                    layoutState.resetIndexGroup()
                     topnavState.element?.focus()
                     isKeyInputRepeating = false
                 }
@@ -94,8 +93,7 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
                 return
             }
 
-            //TODO; no global state;
-            isKeyInputRepeating = handleKeyDown_Sidenav(event, globalState, router)
+            isKeyInputRepeating = handleKeyDown_Sidenav(event, router)
             if (isKeyInputRepeating != null) {
                 keyDownTimeout.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)
                 return

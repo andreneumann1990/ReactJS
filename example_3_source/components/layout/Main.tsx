@@ -6,6 +6,7 @@ import { useGlobalStore, useMainStore } from '../../hooks/stores'
 import { NullableBoolean } from '../../constants/types'
 import { useSearchParams } from 'next/navigation'
 import { focusNextElement, focusPreviousElement, scrollIntoView } from '../../constants/functions'
+import { useClick } from '../../hooks/gestures'
 
 export default Main
 export { handleKeyDown as handleKeyDown_Main }
@@ -256,6 +257,7 @@ function Main({ children }: React.PropsWithChildren) {
         <main
             // sets onKeyDownCapture and onKeyUpCapture;
             {...dragAttributes}
+            // {...useClick(() => layoutState.setIndexGroup(mainIndexGroup))}
             className="h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:transition-colors motion-safe:ease-out motion-safe:duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
             ref={initializeMainElement}
             //TODO; check again;

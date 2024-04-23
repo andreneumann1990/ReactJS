@@ -1,3 +1,5 @@
+'use client'
+
 import { createTheme } from '@mui/material'
 
 //
@@ -25,6 +27,7 @@ export const initialDelay = 400
 export const maximumDelay = 2147483647
 export const repeatDelay = 100
 
+// window needs 'use client';
 export const isMotionSafe = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 export const sidenavTransitionDuration = '0.5s'
 

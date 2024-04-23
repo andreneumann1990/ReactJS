@@ -9,6 +9,7 @@ import { Button } from '@mui/material'
 import { mainIndexGroup } from '../../constants/parameters'
 import { useLayoutStore } from '../../hooks/stores'
 import { handleFocusCapture, scrollIntoView } from '../../constants/functions'
+import { useIndexGroup, useIndexGroupEffect } from '../../hooks/indexGroup'
 
 //TODO; handle tabIndex;
 
@@ -139,35 +140,41 @@ function Page() {
     // effects
     //
 
-    useEffect(() => {
-        if (form1Ref.current == null) return
-        if (pageRef.current == null) return
-
-        pageRef.current.querySelectorAll('a').forEach((element: HTMLElement) => {
-            element.tabIndex = layoutState.indexGroup === mainIndexGroup ? 0 : -1
-        })
-
-        pageRef.current.querySelectorAll('button').forEach((element: HTMLElement) => {
-            element.tabIndex = layoutState.indexGroup === mainIndexGroup ? 0 : -1
-        })
-
-        const form1InputElementArray = form1Ref.current.querySelectorAll('input')
-        form1InputElementArray.forEach((element: HTMLInputElement) => {
-            if (element.type === 'hidden') return
-            element.tabIndex = layoutState.indexGroup === mainIndexGroup ? 0 : -1
-            element.addEventListener('focus', handleFocusCapture(mainIndexGroup), true)
-        })
-
-        return () => {
-            form1InputElementArray.forEach((element: HTMLInputElement) => { element.removeEventListener('focus', handleFocusCapture(mainIndexGroup), true) })
-        }
-    }, [layoutState.indexGroup, setIndexGroup])
+    //     useEffect(() => {
+    //         if (form1Ref.current == null) return
+    //         if (pageRef.current == null) return
+    // 
+    //         pageRef.current.querySelectorAll('a').forEach((element: HTMLElement) => {
+    //             element.tabIndex = layoutState.indexGroup === mainIndexGroup ? 0 : -1
+    //         })
+    // 
+    //         pageRef.current.querySelectorAll('button').forEach((element: HTMLElement) => {
+    //             element.tabIndex = layoutState.indexGroup === mainIndexGroup ? 0 : -1
+    //         })
+    // 
+    //         const form1InputElementArray = form1Ref.current.querySelectorAll('input')
+    //         form1InputElementArray.forEach((element: HTMLInputElement) => {
+    //             if (element.type === 'hidden') return
+    //             element.tabIndex = layoutState.indexGroup === mainIndexGroup ? 0 : -1
+    //             element.addEventListener('focus', handleFocusCapture(mainIndexGroup), true)
+    //         })
+    // 
+    //         return () => {
+    //             form1InputElementArray.forEach((element: HTMLInputElement) => { element.removeEventListener('focus', handleFocusCapture(mainIndexGroup), true) })
+    //         }
+    //     }, [layoutState.indexGroup, setIndexGroup])
+    useIndexGroupEffect(form1Ref.current, mainIndexGroup, 'a, button, input')
 
     //
     //
     //
 
-    return (<div ref={pageRef}>
+    //TODO; maybe use div elements with data-attributes to layout the indexGroups;
+
+    return (<div
+        data-index-group={mainIndexGroup}
+        ref={pageRef}
+    >
         {/* header; */}
         <h1 className="my-3 text-3xl font-bold">Form Examples</h1>
 
@@ -257,12 +264,17 @@ function Page() {
                         />
                     </label>
                 </div>
-                <div className="grid px-5 border-x-[1px] items-center">
+                <div
+                    className="grid px-5 border-x-[1px] items-center"
+                    data-index-group="hidden"
+                >
                     <p>Hidden:
                         <input
+                            // TODO; maybe there is a better way; problem: useIndexGroupEffect() overrides the values of child elements and pre-set attributes like these ones;
+                            // maybe use data-attributes to communicate the indexGroup of elements?;
                             {...form1.getFieldProps('hidden')}
+                            {...useIndexGroup('hidden')}
                             className="ml-2 m-1 px-2 py-1 rounded-md"
-                            tabIndex={-1}
                             type="hidden"
                         />
                     </p>
@@ -484,23 +496,38 @@ function Page() {
                             customization might be difficult when using these; 
                         */}
                         <div
+                            data-index-group={mainIndexGroup}
+                            // {...useIndexGroup(mainIndexGroup)}
                             onKeyDown={handleKeyDown_Country1}
-                            tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1}
+                        // tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1} //TODO
                         >
-                            <Country1 setFieldValue={(value) => form2.setFieldValue('country1', value)} />
+                            <div data-index-group="main-country1">
+                                <Country1 setFieldValue={(value) => form2.setFieldValue('country1', value)} />
+                            </div>
                         </div>
                     </div>
                 </div>
                 <div className="grid px-5 items-center">
                     <div>
-                        Copied from: <Link className="text-blue-300" href={'https://mui.com/material-ui/react-autocomplete/'}>https://mui.com/material-ui/react-autocomplete/</Link>
-                        <Country2 setFieldValue={(value) => form2.setFieldValue('country2', value)}
-                        />
+                        Copied from:&nbps;
+                        <Link
+                            {...useIndexGroup(mainIndexGroup)}
+                            className="text-blue-300"
+                            href="https://mui.com/material-ui/react-autocomplete/"
+                        >https://mui.com/material-ui/react-autocomplete/</Link>
+                        <div data-index-group="main-country2">
+                            <Country2 setFieldValue={(value) => form2.setFieldValue('country2', value)}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
             <br />
-            <Button variant="outlined" type="submit">Submit</Button>
+            <Button
+                {...useIndexGroup(mainIndexGroup)}
+                type="submit"
+                variant="outlined"
+            >Submit</Button>
         </form >
     </div>)
 }

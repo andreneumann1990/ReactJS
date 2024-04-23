@@ -9,7 +9,7 @@ import { initialDelay, mainIndexGroup, maximumDelay, repeatDelay } from '../../c
 import { useGlobalStore } from '../../hooks/stores'
 import { clearKeyDownTimeout, focusNextElement, focusPreviousElement, repeatKeyDownInput, scrollIntoView, stopKeyDownInput } from '../../constants/functions'
 import { GSP_NO_RETURNED_VALUE } from 'next/dist/lib/constants'
-import { KeyboardEventState, NullableBoolean, NullableElement } from '../../constants/types'
+import { KeyboardEventState, NullableBoolean, NullableHTMLElement } from '../../constants/types'
 import { create } from 'zustand'
 
 //

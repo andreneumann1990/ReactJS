@@ -2,10 +2,12 @@
 
 import { Box, Button, Link, TextField } from '@mui/material'
 import { useFormik } from 'formik'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import * as Yup from 'yup'
 import { backEndHRef, mainIndexGroup } from '../../constants/parameters'
 import { useLayoutStore } from '../../hooks/stores'
+import { useIndexGroupEffect } from '../../hooks/indexGroup'
+import { NullableDivElement } from '../../constants/types'
 
 export default Page
 
@@ -25,11 +27,11 @@ function Page() {
     const [greetingResponse, setGreetingResponse] = useState('')
     const [postFormResponse, setPostFormResponse] = useState<{ username?: string, password?: string, }>({})
 
+    const pageRef = useRef<NullableDivElement>(null)
+
     //
     // functions
     //
-
-    function setTabIndex() { layoutState.setIndexGroup(mainIndexGroup) }
 
     const formik = useFormik({
         initialValues: {
@@ -67,11 +69,13 @@ function Page() {
             .catch(() => { })
     }, [])
 
+    useIndexGroupEffect(pageRef.current, mainIndexGroup, 'a, button, input')
+
     //
     //
     //
 
-    return (<>
+    return (<div ref={pageRef}>
         {/* header; */}
         <h1 className="my-3 text-3xl font-bold">Back-End Examples</h1>
 
@@ -82,8 +86,6 @@ function Page() {
                 <Link
                     className="text-blue-300"
                     href={backEndHRef}
-                    onFocusCapture={setTabIndex}
-                    tabIndex={layoutState.indexGroup === mainIndexGroup ? undefined : -1}
                 >{backEndHRef}</Link>
             </li>
         </ul>
@@ -115,10 +117,6 @@ function Page() {
                     {...formik.getFieldProps('username')}
                     autoComplete="username"
                     error={formik.touched.username && formik.errors.username != null} helperText={formik.errors.username}
-                    inputProps={{
-                        onFocusCapture: setTabIndex,
-                        tabIndex: layoutState.indexGroup === mainIndexGroup ? undefined : -1,
-                    }}
                     label="Username"
                     required
                     type="text"
@@ -127,10 +125,6 @@ function Page() {
                 <TextField
                     {...formik.getFieldProps('password')}
                     autoComplete="current-password"
-                    inputProps={{
-                        onFocusCapture: setTabIndex,
-                        tabIndex: layoutState.indexGroup === mainIndexGroup ? undefined : -1,
-                    }}
                     label="Password"
                     required
                     type="password"
@@ -143,8 +137,6 @@ function Page() {
                 {/* <Box component="div" className="grid items-center m-2"> */}
                 <Button
                     className="m-2"
-                    onFocusCapture={setTabIndex}
-                    tabIndex={layoutState.indexGroup === mainIndexGroup ? undefined : -1}
                     type="submit"
                     variant="contained"
                 >Submit</Button>
@@ -152,5 +144,5 @@ function Page() {
             </div>
         </Box>
         {/* </form> */}
-    </>)
+    </div>)
 }

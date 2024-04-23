@@ -1,6 +1,6 @@
 import tinycolor from 'tinycolor2'
 import { isDebugEnabled, isMotionSafe, maximumDelay, repeatDelay } from './parameters'
-import { KeyboardEventState, NullableBoolean, NullableElement, NullableNumber, TimeoutRef } from './types'
+import { KeyboardEventState, NullableBoolean, NullableHTMLElement, NullableNumber, TimeoutRef } from './types'
 import { useLayoutStore } from '../hooks/stores'
 
 //
@@ -29,7 +29,7 @@ export function focusFirstChildElement(element: HTMLElement | null, query: strin
     getFirstChildElement(element, query)?.focus()
 }
 
-export function focusNextElement(element: NullableElement, query: string): HTMLElement | null {
+export function focusNextElement(element: NullableHTMLElement, query: string): HTMLElement | null {
     if (element == null) return null
     const focusedElement = document.activeElement as HTMLElement | null
     if (focusedElement == null) return null
@@ -41,7 +41,7 @@ export function focusNextElement(element: NullableElement, query: string): HTMLE
     return nextElement
 }
 
-export function focusPreviousElement(element: NullableElement, query: string): HTMLElement | null {
+export function focusPreviousElement(element: NullableHTMLElement, query: string): HTMLElement | null {
     if (element == null) return null
     const focusedElement = document.activeElement as HTMLElement | null
     if (focusedElement == null) return null
@@ -54,7 +54,7 @@ export function focusPreviousElement(element: NullableElement, query: string): H
     return previousElement
 }
 
-export function getFirstChildElement(element: NullableElement, query: string): NullableElement {
+export function getFirstChildElement(element: NullableHTMLElement, query: string): NullableHTMLElement {
     if (element == null) return null
     return element.querySelector(query) as HTMLElement
 }

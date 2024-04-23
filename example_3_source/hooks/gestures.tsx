@@ -7,8 +7,8 @@ const threshold = 10
 let initial_x = 0
 let initial_y = 0
 
-function useClick(handleClick: (event: PointerEvent) => void) {
-    const onClick: (handleClick: (event: PointerEvent) => void) => ReactDOMAttributes = useGesture({
+function useClick(handleClick: (event: PointerEvent) => void): ReactDOMAttributes {
+    return useGesture({
         onPointerDown: ({ event }) => {
             initial_x = event.clientX
             initial_y = event.clientY
@@ -20,6 +20,5 @@ function useClick(handleClick: (event: PointerEvent) => void) {
             if (dx * dx + dy * dy > threshold * threshold) return
             args[0](event)
         }
-    })
-    return onClick(handleClick)
+    })(handleClick)
 }

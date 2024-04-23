@@ -18,29 +18,29 @@ export type TimeoutRef = { current?: NodeJS.Timeout }
 export type NullableAnchorElement = HTMLAnchorElement | null
 export type SetNullableAnchorElement = (element: NullableAnchorElement) => void
 
-export type ButtonElement = HTMLButtonElement | null
-export type SetButtonElement = (element: ButtonElement) => void
+export type NullableButtonElement = HTMLButtonElement | null
+export type SetNullableButtonElement = (element: NullableButtonElement) => void
 
-export type DivElement = HTMLDivElement | null
-export type SetDivElement = (element: DivElement) => void
+export type NullableDivElement = HTMLDivElement | null
+export type SetNullableDivElement = (element: NullableDivElement) => void
 
-export type NullableElement = HTMLElement | null
-export type SetElement = (element: NullableElement) => void
+export type NullableHTMLElement = HTMLElement | null
+export type SetNullableHTMLElement = (element: NullableHTMLElement) => void
 
 //
 //
 //
 
 export interface DropdownMenuState {
-    buttonElement: ButtonElement,
-    setButtonElement: SetButtonElement,
-    contentElement: DivElement,
-    setContentElement: SetDivElement,
+    buttonElement: NullableButtonElement,
+    setButtonElement: SetNullableButtonElement,
+    contentElement: NullableDivElement,
+    setContentElement: SetNullableDivElement,
 
-    element: NullableElement,
-    setElement: SetElement,
-    iconElement: NullableElement,
-    setIconElement: SetElement,
+    element: NullableHTMLElement,
+    setElement: SetNullableHTMLElement,
+    iconElement: NullableHTMLElement,
+    setIconElement: SetNullableHTMLElement,
 
     isOpen: boolean,
     setIsOpen: (isOpen: boolean) => void,

@@ -30,40 +30,34 @@ function closeSidenav(): void {
     topnavState.element?.focus()
 }
 
-function focusNextElement({ sidenavState, topnavState }: GlobalState) {
-    const menuButtonElement = topnavState.menuButtonElement
-    if (menuButtonElement == null) return
-    const sidenavElement = sidenavState.element
-    if (sidenavElement == null) return
+function focusNextElement() {
+    const { sidenavState, topnavState } = useGlobalStore.getState()
+    if (topnavState.menuButtonElement == null) return
+    if (sidenavState.element == null) return
     const focusedElement = document.activeElement as HTMLAnchorElement | null
-    if (focusedElement == null) return
 
-    const focusableElements = [menuButtonElement, ...Array.from(sidenavElement.querySelectorAll<HTMLAnchorElement>(queryString))]
+    if (focusedElement == null) return
+    const focusableElements = [topnavState.menuButtonElement, ...Array.from(sidenavState.element.querySelectorAll<HTMLAnchorElement>(queryString))]
     const nextIndex = Math.min(focusableElements.indexOf(focusedElement) + 1, focusableElements.length - 1)
     focusableElements[nextIndex]?.focus()
 }
 
-function focusPreviousElement({ sidenavState, topnavState }: GlobalState) {
-    const menuButtonElement = topnavState.menuButtonElement
-    if (menuButtonElement == null) return
-    const sidenavElement = sidenavState.element
-    if (sidenavElement == null) return
+function focusPreviousElement() {
+    const { sidenavState, topnavState } = useGlobalStore.getState()
+    if (topnavState.menuButtonElement == null) return
+    if (sidenavState.element == null) return
     const focusedElement = document.activeElement as HTMLElement | null
-    if (focusedElement == null) return
 
-    const focusableElements = [menuButtonElement, ...Array.from(sidenavElement.querySelectorAll<HTMLElement>(queryString))]
+    if (focusedElement == null) return
+    const focusableElements = [topnavState.menuButtonElement, ...Array.from(sidenavState.element.querySelectorAll<HTMLElement>(queryString))]
     const previousIndex = Math.max(focusableElements.indexOf(focusedElement) - 1, 0)
     focusableElements[previousIndex]?.focus()
 }
 
-function handleKeyDown(event: KeyboardEvent, globalState: GlobalState, router: AppRouterInstance): NullableBoolean {
-    const { dropdownMenuStateArray, layoutState, sidenavState, topnavState } = globalState
+function handleKeyDown(event: KeyboardEvent, router: AppRouterInstance): NullableBoolean {
+    const { dropdownMenuStateArray, layoutState, sidenavState, topnavState } = useGlobalStore.getState()
     if (sidenavState.element == null) return null
-    if (!sidenavState.element.contains(document.activeElement)) {
-        //TODO
-        // clearKeyDownTimeout()
-        return null
-    }
+    if (!sidenavState.element.contains(document.activeElement)) return null
 
     for (let index = 0; index < dropdownMenuStateArray.length; ++index) {
         const isKeyInputRepeating = handleKeyDown_DropdownMenu(dropdownMenuStateArray[index], event)
@@ -94,27 +88,21 @@ function handleKeyDown(event: KeyboardEvent, globalState: GlobalState, router: A
     if (event.key === 'ArrowDown') {
         event.preventDefault()
         event.stopPropagation()
-
-        focusNextElement(globalState)
+        focusNextElement()
         return true
     }
 
     if (event.key === 'ArrowUp') {
         event.preventDefault()
         event.stopPropagation()
-
-        console.log('focus previous element')
-        focusPreviousElement(globalState)
+        focusPreviousElement()
         return true
     }
 
     if (event.key === 'ArrowLeft') {
-        // console.log()
-        console.log('sidenav arrow left')
         event.preventDefault()
         event.stopPropagation()
 
-        // this way is more consistent with how ArrowUp is handle for topnav's menuButton;
         layoutState.setIndexGroup(topnavIndexGroup)
         sidenavState.setIsOpen(false)
         topnavState.menuButtonElement?.focus()

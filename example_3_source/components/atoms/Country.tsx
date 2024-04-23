@@ -6,6 +6,7 @@ import { useEffect, useRef } from 'react'
 import { FormikErrors } from 'formik'
 import { StringStringObject } from '../../constants/types'
 import { focusFirstChildElement, getFirstChildElement } from '../../constants/functions'
+import { useIndexGroupEffect } from '../../hooks/indexGroup'
 
 export { Country1 }
 export { Country2 }
@@ -22,6 +23,7 @@ function Country1({ setFieldValue }: { setFieldValue: (value: string) => (Promis
     const options = ['England', 'France', 'Germany', 'Musterland']
     const { layoutState } = useGlobalStore()
     const elementRef = useRef<HTMLDivElement | null>(null)
+    const localIndexGroup = 'main-country1'
 
     //
     // functions
@@ -50,11 +52,12 @@ function Country1({ setFieldValue }: { setFieldValue: (value: string) => (Promis
     // effects
     //
 
-    useEffect(() => {
-        const inputElement = getFirstChildElement(elementRef.current, 'input')
-        if (inputElement == null) return
-        inputElement.tabIndex = layoutState.indexGroup === 'main-country1' ? 0 : -1
-    }, [layoutState.indexGroup])
+    // useEffect(() => {
+    //     const inputElement = getFirstChildElement(elementRef.current, 'input')
+    //     if (inputElement == null) return
+    //     inputElement.tabIndex = layoutState.indexGroup === 'main-country1' ? 0 : -1
+    // }, [layoutState.indexGroup])
+    useIndexGroupEffect(elementRef.current, localIndexGroup, 'button, input')
 
     //
     //
@@ -122,14 +125,15 @@ function Country2({ setFieldValue }: { setFieldValue: (value: string) => (Promis
     // effects
     //
 
-    useEffect(() => {
-        const inputElement = getFirstChildElement(elementRef.current, 'input')
-        if (inputElement == null) return
-
-        inputElement.tabIndex = layoutState.indexGroup === localIndexGroup ? 0 : -1
-        inputElement.addEventListener('focus', () => setIndexGroup(localIndexGroup), true)
-        return () => { inputElement.removeEventListener('focus', () => setIndexGroup(localIndexGroup), true) }
-    }, [layoutState.indexGroup, setIndexGroup])
+    //     useEffect(() => {
+    //         const inputElement = getFirstChildElement(elementRef.current, 'input')
+    //         if (inputElement == null) return
+    // 
+    //         inputElement.tabIndex = layoutState.indexGroup === localIndexGroup ? 0 : -1
+    //         inputElement.addEventListener('focus', () => setIndexGroup(localIndexGroup), true)
+    //         return () => { inputElement.removeEventListener('focus', () => setIndexGroup(localIndexGroup), true) }
+    //     }, [layoutState.indexGroup, setIndexGroup])
+    useIndexGroupEffect(elementRef.current, localIndexGroup, 'input')
 
     //
     //
