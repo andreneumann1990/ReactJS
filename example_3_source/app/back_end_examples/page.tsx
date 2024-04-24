@@ -4,15 +4,12 @@ import { Box, Button, Link, TextField } from '@mui/material'
 import { useFormik } from 'formik'
 import { useEffect, useRef, useState } from 'react'
 import * as Yup from 'yup'
-import { backEndHRef, mainIndexGroup } from '../../constants/parameters'
+import { backEndHRef, focusableElementSelectors, mainIndexGroup } from '../../constants/parameters'
 import { useLayoutStore } from '../../hooks/stores'
-import { useIndexGroupEffect } from '../../hooks/indexGroup'
+import { useIndexGroupContainer, useIndexGroupEffect } from '../../hooks/indexGroup'
 import { NullableDivElement } from '../../constants/types'
 
 export default Page
-
-// TODO; add the onFocus event for all input element that have text in them;
-// or find a better way to sychronize indexGroup and the element currently being focused;
 
 //
 //
@@ -27,7 +24,7 @@ function Page() {
     const [greetingResponse, setGreetingResponse] = useState('')
     const [postFormResponse, setPostFormResponse] = useState<{ username?: string, password?: string, }>({})
 
-    const pageRef = useRef<NullableDivElement>(null)
+    const [pageElement, setPageElement] = useState<NullableDivElement>(null)
 
     //
     // functions
@@ -69,80 +66,85 @@ function Page() {
             .catch(() => { })
     }, [])
 
-    useIndexGroupEffect(pageRef.current, mainIndexGroup, 'a, button, input')
+    useIndexGroupEffect(pageElement, focusableElementSelectors)
 
     //
     //
     //
 
-    return (<div ref={pageRef}>
-        {/* header; */}
-        <h1 className="my-3 text-3xl font-bold">Back-End Examples</h1>
-
-        {/* <h2 className="my-1 text-xl font-bold">Link:</h2> */}
-        <ul className="*:my-2 pl-10">
-            <li>
-                Link:&nbsp;
-                <Link
-                    className="text-blue-300"
-                    href={backEndHRef}
-                >{backEndHRef}</Link>
-            </li>
-        </ul>
-
-        <h2 className="my-1 text-xl font-bold">GET requests:</h2>
-        <ul className="*:my-2 pl-10">
-            {greetingResponse === '' ?
-                (<li>no response yet</li>) :
-                (<li>{`Back-End: <${greetingResponse}>`}</li>)
-            }
-        </ul>
-
-        <h2 className="my-1 text-xl font-bold">POST requests:</h2>
-        <ul className="*:my-2 pl-10">
-            {postFormResponse.username == null ?
-                (<li>no response yet</li>) :
-                Object.entries(postFormResponse).map(([key, value], index) => (<li key={index}>{`Back-End: <${key}, ${value}>`}</li>))
-            }
-        </ul>
-        <Box
-            component="form"
-            sx={{ '& .MuiTextField-root': { m: 1, width: '25ch' }, }}
-            noValidate
-            autoComplete="off"
-            onSubmit={formik.handleSubmit}
+    return (
+        <div
+            {...useIndexGroupContainer(mainIndexGroup)}
+            ref={setPageElement}
         >
-            <div className="flex flex-wrap m-2">
-                <TextField
-                    {...formik.getFieldProps('username')}
-                    autoComplete="username"
-                    error={formik.touched.username && formik.errors.username != null} helperText={formik.errors.username}
-                    label="Username"
-                    required
-                    type="text"
-                    variant="filled"
-                />
-                <TextField
-                    {...formik.getFieldProps('password')}
-                    autoComplete="current-password"
-                    label="Password"
-                    required
-                    type="password"
-                    variant="filled"
-                />
-                {/* {!formik.touched.username || !formik.errors.username ? null : formik.errors.username} */}
-                {/* <Input ></Input> */}
-            </div>
-            <div className="inline-block mx-4">
-                {/* <Box component="div" className="grid items-center m-2"> */}
-                <Button
-                    className="m-2"
-                    type="submit"
-                    variant="contained"
-                >Submit</Button>
-                {/* </Box> */}
-            </div>
-        </Box>
-        {/* </form> */}
-    </div>)
+            {/* header; */}
+            <h1 className="my-3 text-3xl font-bold">Back-End Examples</h1>
+
+            {/* <h2 className="my-1 text-xl font-bold">Link:</h2> */}
+            <ul className="*:my-2 pl-10">
+                <li>
+                    Link:&nbsp;
+                    <Link
+                        className="text-blue-300"
+                        href={backEndHRef}
+                    >{backEndHRef}</Link>
+                </li>
+            </ul>
+
+            <h2 className="my-1 text-xl font-bold">GET requests:</h2>
+            <ul className="*:my-2 pl-10">
+                {greetingResponse === '' ?
+                    (<li>no response yet</li>) :
+                    (<li>{`Back-End: <${greetingResponse}>`}</li>)
+                }
+            </ul>
+
+            <h2 className="my-1 text-xl font-bold">POST requests:</h2>
+            <ul className="*:my-2 pl-10">
+                {postFormResponse.username == null ?
+                    (<li>no response yet</li>) :
+                    Object.entries(postFormResponse).map(([key, value], index) => (<li key={index}>{`Back-End: <${key}, ${value}>`}</li>))
+                }
+            </ul>
+            <Box
+                component="form"
+                sx={{ '& .MuiTextField-root': { m: 1, width: '25ch' }, }}
+                noValidate
+                autoComplete="off"
+                onSubmit={formik.handleSubmit}
+            >
+                <div className="flex flex-wrap m-2">
+                    <TextField
+                        {...formik.getFieldProps('username')}
+                        autoComplete="username"
+                        error={formik.touched.username && formik.errors.username != null} helperText={formik.errors.username}
+                        label="Username"
+                        required
+                        type="text"
+                        variant="filled"
+                    />
+                    <TextField
+                        {...formik.getFieldProps('password')}
+                        autoComplete="current-password"
+                        label="Password"
+                        required
+                        type="password"
+                        variant="filled"
+                    />
+                    {/* {!formik.touched.username || !formik.errors.username ? null : formik.errors.username} */}
+                    {/* <Input ></Input> */}
+                </div>
+                <div className="inline-block mx-4">
+                    {/* <Box component="div" className="grid items-center m-2"> */}
+                    <Button
+                        className="m-2"
+                        type="submit"
+                        variant="contained"
+                    >Submit</Button>
+                    {/* </Box> */}
+                </div>
+            </Box>
+            {/* </form> */}
+        </div>
+    )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import '../styles/globals.scss'
-import React, { KeyboardEvent, useRef } from 'react'
+import React from 'react'
 import Layout from '../components/layout/Layout'
 import { ThemeProvider } from '@mui/material/styles'
 import { darkTheme, initialDelay, maximumDelay, repeatDelay, defaultIndexGroup } from '../constants/parameters'
@@ -47,7 +47,8 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     // functions
     //
 
-    function handleKeyDown(event: KeyboardEvent): void {
+    // TODO; maybe do sequential instead and use a global? cooldown counter;
+    function handleKeyDown(event: React.KeyboardEvent): void {
         if (keyDownTimeout.current != null) {
             event.preventDefault()
             event.stopPropagation()
@@ -61,15 +62,11 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
             const event = useKeyboardEventStore.getState().event
             if (event == null) return
 
-            //TODO
-            // console.log(document.activeElement)
-
             let isKeyInputRepeating = null
             if (document.activeElement instanceof HTMLBodyElement) {
                 if (event.key === 'Enter' || event.key === 'ArrowRight' || event.key === 'ArrowDown') {
                     event.preventDefault()
                     event.stopPropagation()
-                    // layoutState.resetIndexGroup() //TODO
                     mainState.element?.focus()
                     isKeyInputRepeating = false
                 }
@@ -77,7 +74,6 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
                 if (event.key === 'Escape' || event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
                     event.preventDefault()
                     event.stopPropagation()
-                    // layoutState.resetIndexGroup()
                     topnavState.element?.focus()
                     isKeyInputRepeating = false
                 }
@@ -115,7 +111,7 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     //
     //
 
-    return (<>
+    return (
         <html lang="en">
             <head>
                 {/* <meta charSet="utf-8" /> */}
@@ -161,5 +157,5 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
                 </React.StrictMode>
             </body>
         </html>
-    </>)
+    )
 }

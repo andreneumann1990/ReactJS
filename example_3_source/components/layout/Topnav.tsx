@@ -1,17 +1,16 @@
 import { KeyboardEvent, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { isDebugEnabled, defaultIndexGroup, mainIndexGroup, sidenavIndexGroup, topnavIndexGroup } from '../../constants/parameters'
+import { isDebugEnabled, defaultIndexGroup, mainIndexGroup, sidenavIndexGroup, topnavIndexGroup, focusableElementSelectors } from '../../constants/parameters'
 import { stopKeyDownInput, triggerFlashEffect } from '../../constants/functions'
-import { NullableBoolean } from '../../constants/types'
-import { useGlobalStore, useSearchStore, useTopnavStore } from '../../hooks/stores'
+import { NullableBoolean, NullableHTMLElement } from '../../constants/types'
+import { useGlobalStore, useSearchStore, useSidenavStore, useTopnavStore } from '../../hooks/stores'
 import Search, { handleKeyDown_Search } from '../atoms/Search'
 import { keyDownTimeout } from '../../app/layout'
 import { useRouter } from 'next/navigation'
+import { useIndexGroupContainer, useIndexGroupEffect, useIndexGroupItem } from '../../hooks/indexGroup'
 
 export default Topnav
-export { handleKeyDown as handleKeyInput_Topnav }
-
-//TODO; check onFocusCapture again; set it inside the handleKeyDown function in layout??;
+export { handleKeyDown_Global as handleKeyInput_Topnav }
 
 //
 // parameters and variables
@@ -44,7 +43,7 @@ function focusPreviousElement(): void {
     const topnavState = useTopnavStore.getState()
     const topnavElement = topnavState.element
     if (topnavElement == null) return
-    const focusedElement = document.activeElement as HTMLElement | null
+    const focusedElement = document.activeElement as NullableHTMLElement
 
     if (focusedElement == null) return
     const focusableElements = Array.from(topnavElement.querySelectorAll<HTMLElement>(queryString))
@@ -54,7 +53,7 @@ function focusPreviousElement(): void {
     previousElement?.focus()
 }
 
-function handleKeyDown(event: KeyboardEvent): NullableBoolean {
+function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
     const { layoutState, mainState, sidenavState, topnavState } = useGlobalStore.getState()
     if (topnavState.element == null) return null
     if (!topnavState.element.contains(document.activeElement)) return null
@@ -80,26 +79,9 @@ function handleKeyDown(event: KeyboardEvent): NullableBoolean {
     const isKeyInputRepeating = handleKeyDown_Search(event)
     if (isKeyInputRepeating != null) return isKeyInputRepeating
 
-    //TODO; this ignores things like opening the sidenav, where you still focus on the menu button;
-    // it works for now because the tab index is set there differenctly; think about it again;
-    // if (layoutState.indexGroup !== topnavIndexGroup) {
-    //     layoutState.setIndexGroup(topnavIndexGroup)
-    // }
-
-    // if (document.activeElement === topnavState.element) {
-    //     if (event.key === 'Enter') {
-    //         event.preventDefault()
-    //         event.stopPropagation()
-    //         topnavState.menuButtonElement?.focus()
-    //         return false
-    //     }
-    //     return null
-    // }
-
     if (event.key === 'Escape') {
         event.preventDefault()
         event.stopPropagation()
-        // layoutState.resetIndexGroup()
         sidenavState.setIsOpen(false)
         topnavState.element?.focus()
         return false
@@ -178,15 +160,8 @@ function handleKeyDown(event: KeyboardEvent): NullableBoolean {
 }
 
 function toggleSidenav(): void {
-    const { layoutState, sidenavState, topnavState } = useGlobalStore.getState()
+    const sidenavState = useSidenavStore.getState()
     if (isDebugEnabled) console.log('Topnav: Toggle sidenav.')
-
-    if (!sidenavState.isOpen) {
-        //TODO
-        layoutState.setIndexGroup(sidenavIndexGroup)
-    } else if (document.activeElement === topnavState.menuButtonElement) {
-        layoutState.setIndexGroup(topnavIndexGroup)
-    }
     sidenavState.setIsOpen(!sidenavState.isOpen)
 }
 
@@ -203,8 +178,8 @@ function Topnav() {
     const { layoutState, sidenavState, topnavState } = useGlobalStore()
 
     const homeLinkRef = useRef<HTMLAnchorElement | null>(null)
-    const menuIconRef = useRef<HTMLElement | null>(null)
-    const closeIconRef = useRef<HTMLElement | null>(null)
+    const menuIconRef = useRef<NullableHTMLElement>(null)
+    const closeIconRef = useRef<NullableHTMLElement>(null)
 
     //
     // functions
@@ -230,16 +205,11 @@ function Topnav() {
         topnavState.setMenuButtonElement(element)
     }
 
-    const initializeTopnavElement = (element: HTMLElement | null) => {
+    const initializeTopnavElement = (element: NullableHTMLElement) => {
         if (topnavState.element != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Topnav: Initialize topnav element.')
         topnavState.setElement(element)
-    }
-
-    function setActiveTabIndexGroupToTopnav() {
-        console.log('focus') //TODO
-        layoutState.setIndexGroup(topnavIndexGroup)
     }
 
     //
@@ -263,35 +233,34 @@ function Topnav() {
         closeIconRef.current.classList.add('hidden')
     }, [sidenavState.isOpen, topnavState.menuButtonElement])
 
+    // update tabIndex values for focusable elements;
+    useIndexGroupEffect(topnavState.element, focusableElementSelectors)
+
     //
     //
     //
 
-    // tabIndex for onFocus(); TODO;
-    return (<>
-        {/* TODO; does not work; you tab behind the elements afterwards for some reason; */}
-        {/* <div
-            ref={focusAnchorRef}
-            tabIndex={layoutState.activeTabIndexGroup === tabIndexGroupTopnav ? 0 : -1}
-        >test</div> */}
-
+    return (
         <nav
-            // lg:h-[calc(var(--height-topnav)/2)]
+            // indexGroupItems are focusable as well;
+            {...useIndexGroupItem(defaultIndexGroup)}
             className="bg-background h-[--height-topnav] shadow-md"
             ref={initializeTopnavElement}
-            tabIndex={layoutState.indexGroup === defaultIndexGroup ? 0 : -1}
         >
             <div
+                // does not work on topnavElement since it changes indexGroup onFocusCapture;
+                {...useIndexGroupContainer(topnavIndexGroup)}
                 className="h-[--height-topnav] lg:h-auto grid [grid-template-columns:20%_60%_20%] lg:[grid-template-columns:20%_1fr_410px] justify-items-center justify-between"
             >
                 <div className="grid grid-flow-col justify-self-start">
                     {/* sidenav menu and home link; left; */}
                     <button
                         className="h-[--height-topnav]"
-                        // onFocusCapture={setActiveTabIndexGroupToTopnav}
                         onPointerUp={toggleSidenav}
                         ref={initializeMenuButtonElement}
-                        tabIndex={layoutState.indexGroup === topnavIndexGroup || layoutState.indexGroup === sidenavIndexGroup ? undefined : -1}
+
+                        data-no-tab-index-override
+                        tabIndex={layoutState.indexGroup === topnavIndexGroup || layoutState.indexGroup === sidenavIndexGroup ? 0 : -1}
                     >
                         <i
                             className="p-1 icon-medium material-icons"
@@ -307,7 +276,6 @@ function Topnav() {
                         href="/home"
                         onKeyDown={handleKeyDown_HomeLink}
                         ref={homeLinkRef}
-                        tabIndex={layoutState.indexGroup === topnavIndexGroup ? undefined : -1}
                     >
                         <i className="p-1 icon-medium material-icons">home</i>
                     </Link>
@@ -336,5 +304,5 @@ function Topnav() {
                 </div>
             </div>
         </nav >
-    </>)
+    )
 }

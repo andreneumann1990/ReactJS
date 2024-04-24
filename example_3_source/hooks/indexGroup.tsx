@@ -7,14 +7,17 @@ import { handleFocusCapture } from '../constants/functions'
 //
 //
 
-export function useIndexGroupEffect(rootContainerElement: NullableHTMLElement, indexGroup: string, selectors: string): void {
+// sets the tabIndex property of all elements found using the selectors string;
+// the value is either 0 or -1 based on the corresponding indexGroup string of the 
+// closest containerElement vs the global activeIndexGroup in layoutState;
+// containerElements are elements with a data-index-group attribute;
+export function useIndexGroupEffect(rootContainerElement: NullableHTMLElement, selectors: string): void {
     //
     // parameters and variables
     //
 
     const layoutState = useLayoutStore()
-    const elementArrayRef = useRef<HTMLElement[]>([])
-    const indexGroupArrayRef = useRef<string[]>([])
+    const containerElementArrayRef = useRef<{ containerElement: HTMLElement, indexGroup: string }[]>([])
 
     //
     // effects
@@ -23,52 +26,33 @@ export function useIndexGroupEffect(rootContainerElement: NullableHTMLElement, i
     useEffect(() => {
         // the if statement makes sure that the variables are initialized only once;
         if (rootContainerElement == null) return
-        let excludedContainerArray: HTMLElement[] = []
+        containerElementArrayRef.current = []
 
-        console.log('-----')
-        indexGroupArrayRef.current = []
-        // containerElement.querySelectorAll<HTMLElement>(`*:not([data-index-group="${indexGroup}"])`).forEach((element) => {
-        rootContainerElement.querySelectorAll<HTMLElement>('[data-index-group]').forEach((element) => {
-            console.log(element.dataset.indexGroup) //TODO
-            let indexGroup = element.dataset.indexGroup
+        let indexGroup = rootContainerElement.dataset.indexGroup
+        if (indexGroup != null) {
+            containerElementArrayRef.current.push({ containerElement: rootContainerElement, indexGroup })
+        }
+
+        rootContainerElement.querySelectorAll<HTMLElement>('[data-index-group]').forEach((containerElement) => {
+            let indexGroup = containerElement.dataset.indexGroup
             if (indexGroup == null) return
-            indexGroupArrayRef.current.push()
-            if (element.dataset.indexGroup == null) return
-            excludedContainerArray.push(element)
+            containerElementArrayRef.current.push({ containerElement, indexGroup })
         })
-
-        elementArrayRef.current = []
-        rootContainerElement.querySelectorAll<HTMLElement>(selectors).forEach((element) => {
-            let isExcluded = false
-            excludedContainerArray.forEach((excludedContainerElement) => {
-                if (!excludedContainerElement.contains(element)) return
-                isExcluded = true
-            })
-
-            if (isExcluded) return
-            elementArrayRef.current.push(element)
-        })
-
-        //TODO; it should be enough using onFocusCapture() on container elements;
-        //         elementArrayRef.current.forEach((element) => {
-        //             element.addEventListener('focus', handleFocusCapture(indexGroup), true)
-        //         })
-        // 
-        //         return () => {
-        //             elementArrayRef.current.forEach((element) => {
-        //                 element.removeEventListener('focus', handleFocusCapture(indexGroup), true)
-        //             })
-        //         }
-    }, [rootContainerElement, indexGroup, selectors])
+    }, [rootContainerElement, selectors])
 
     useEffect(() => {
         if (rootContainerElement == null) return
-        elementArrayRef.current.forEach((element) => {
-            element.tabIndex = layoutState.indexGroup === indexGroup ? 0 : -1
+        containerElementArrayRef.current.forEach(({ containerElement, indexGroup }) => {
+            containerElement.querySelectorAll<HTMLElement>(selectors).forEach((element) => {
+                if (element.dataset.noTabIndexOverride) return
+                element.tabIndex = layoutState.indexGroup === indexGroup ? 0 : -1
+            })
         })
-    }, [rootContainerElement, indexGroup, layoutState.indexGroup, selectors])
+    }, [rootContainerElement, layoutState.indexGroup, selectors])
 }
 
+// keep useIndexGroupContainer and useIndexGroupItem(s) separate; the onFocusCapture
+// interferes with tabIndex;
 export function useIndexGroupContainer(indexGroup: string) {
     return {
         'data-index-group': indexGroup,

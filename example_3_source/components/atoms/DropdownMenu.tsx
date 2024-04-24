@@ -1,25 +1,27 @@
-import React, { KeyboardEvent, ReactNode, useEffect } from 'react'
+import React, { ReactNode, useEffect } from 'react'
 import { triggerFlashEffect } from '../../constants/functions'
-import { isDebugEnabled } from '../../constants/parameters'
+import { isDebugEnabled, sidenavIndexGroup } from '../../constants/parameters'
 import { NullableBoolean, DropdownMenuState, SidenavState } from '../../constants/types'
-import { useDropdownMenuStoreArray, useGlobalStore, useSidenavStore } from '../../hooks/stores'
+import { useDropdownMenuStoreArray, useGlobalStore, useLayoutStore, useSidenavStore } from '../../hooks/stores'
 
 export default DropdownMenu
-export { handleKeyDown as handleKeyDown_DropdownMenu }
+export { handleKeyDown_Global as handleKeyDown_DropdownMenu }
 
 //
 // functions
 //
 
-function toggleContent(dropdownMenuState: DropdownMenuState, sidenavState: SidenavState): void {
+function toggleContent(id: number): void {
+    const dropdownMenuState: DropdownMenuState | undefined = useDropdownMenuStoreArray[id].getState()
+    if (dropdownMenuState == null) return
     if (dropdownMenuState.contentElement == null) return
     if (dropdownMenuState.iconElement == null) return
-    if (isDebugEnabled) console.log(`Dropdown: isOpen ${!dropdownMenuState.isOpen}`)
+    if (isDebugEnabled) console.log('DropdownMenu: Toggle menu.')
+    // if (isDebugEnabled) console.log(`DropdownMenu: isOpen ${!dropdownMenuState.isOpen}`)
 
     if (dropdownMenuState.isOpen) {
         dropdownMenuState.setIsOpen(false)
         delete dropdownMenuState.contentElement.dataset.active
-        console.log('deactivate')
 
         dropdownMenuState.contentElement.style.height = '0'
         dropdownMenuState.iconElement.style.transform = 'rotate(0deg)'
@@ -37,13 +39,14 @@ function toggleContent(dropdownMenuState: DropdownMenuState, sidenavState: Siden
 
     dropdownMenuState.contentElement.style.height = `${contentHeight}px`
     dropdownMenuState.iconElement.style.transform = 'rotate(-180deg)'
-    sidenavState.setLastActiveDropdownElement(dropdownMenuState.buttonElement)
+    useSidenavStore.getState().setLastActiveDropdownElement(dropdownMenuState.buttonElement)
 }
 
-function handleKeyDown(dropdownMenuState: DropdownMenuState, event: KeyboardEvent): NullableBoolean {
+function handleKeyDown_Global(id: number, event: React.KeyboardEvent): NullableBoolean {
+    const dropdownMenuState: DropdownMenuState | undefined = useDropdownMenuStoreArray[id].getState()
+    if (dropdownMenuState == null) return null
     if (dropdownMenuState.element == null) return null
     if (!dropdownMenuState.element?.contains(document.activeElement)) return null
-    const sidenavState = useSidenavStore.getState()
 
     if (document.activeElement === dropdownMenuState.buttonElement) {
         //TODO
@@ -52,7 +55,7 @@ function handleKeyDown(dropdownMenuState: DropdownMenuState, event: KeyboardEven
             event.preventDefault()
             event.stopPropagation()
 
-            toggleContent(dropdownMenuState, sidenavState)
+            toggleContent(id)
             triggerFlashEffect(event)
             return false
         }
@@ -61,7 +64,7 @@ function handleKeyDown(dropdownMenuState: DropdownMenuState, event: KeyboardEven
             event.preventDefault()
             event.stopPropagation()
 
-            toggleContent(dropdownMenuState, sidenavState)
+            toggleContent(id)
             triggerFlashEffect(event)
             return false
         }
@@ -72,11 +75,10 @@ function handleKeyDown(dropdownMenuState: DropdownMenuState, event: KeyboardEven
     }
 
     if (event.key === 'ArrowLeft' && dropdownMenuState.isOpen) {
-        console.log('hello3')
         event.preventDefault()
         event.stopPropagation()
 
-        toggleContent(dropdownMenuState, sidenavState)
+        toggleContent(id)
         dropdownMenuState.buttonElement?.focus()
         return true
     }
@@ -107,7 +109,7 @@ function DropdownMenu(props: {
     // const buttonRef = useRef<HTMLButtonElement | null>(null)
     // const contentRef = useRef<HTMLDivElement | null>(null)
     // const dropdownRef = useRef<HTMLDivElement | null>(null)
-    // const iconRef = useRef<HTMLElement | null>(null)
+    // const iconRef = useRef<NullableHTMLElement>(null)
 
     // const [dropdownMenuState.isOpen, dropdownMenuState.setIsOpen] = useState<boolean>(false)
     const queryString = 'a, button'
@@ -118,58 +120,51 @@ function DropdownMenu(props: {
 
     // close this one if another dropdown menu got opened;
     useEffect(() => {
-        if (isDebugEnabled) console.log(`Dropdown: isOpen ${dropdownMenuState.isOpen}`)
         if (!dropdownMenuState.isOpen) return
         if (sidenavState.lastActiveDropdownElement == null) return
 
         if (dropdownMenuState.buttonElement == null) return
         if (dropdownMenuState.buttonElement === sidenavState.lastActiveDropdownElement) return
+        toggleContent(props.id)
+    }, [dropdownMenuState.buttonElement, dropdownMenuState.isOpen, props.id, sidenavState.lastActiveDropdownElement])
 
-        //TODO; toggleContent() does not need everything in sidenavState; check if it is re-rendered too often;
-        toggleContent(dropdownMenuState, sidenavState)
-    }, [dropdownMenuState, sidenavState])
+    const layoutState = useLayoutStore()
 
-    //TODO
-    //     // update tabindex;
-    //     useEffect(() => {
-    //         if (dropdownMenuState.buttonElement == null) return
-    //         if (dropdownMenuState.contentElement == null) return
-    //         if (dropdownMenuState.element == null) return
-    // 
-    //         if (!sidenavState.isOpen) {
-    //             dropdownMenuState.element.querySelectorAll(queryString).forEach(element => {
-    //                 if (!(element instanceof HTMLElement)) return
-    //                 element.tabIndex = -1
-    //             })
-    //             return
-    //         }
-    // 
-    //         dropdownMenuState.buttonElement.removeAttribute('tabIndex')
-    //         if (dropdownMenuState.isOpen) {
-    //             dropdownMenuState.contentElement.querySelectorAll(queryString).forEach(element => {
-    //                 element.removeAttribute('tabIndex')
-    //             })
-    //             return
-    //         }
-    // 
-    //         dropdownMenuState.contentElement.querySelectorAll(queryString).forEach(element => {
-    //             if (!(element instanceof HTMLElement)) return
-    //             element.tabIndex = -1
-    //         })
-    //     }, [dropdownMenuState.buttonElement, dropdownMenuState.contentElement, dropdownMenuState.element, dropdownMenuState.isOpen, sidenavState.isOpen])
+    // update tabIndex; in contrast to useTabIndexEffect() this changes the tabIndex
+    // based on a state (i.e. isOpen) rather than layoutState.activeIndexGroup;
+    useEffect(() => {
+        // the layoutState.indexGroup dependency and setTimeout() are necessary; otherwise,
+        // the changes will get overriden by useIndexGroupEffect();
+        setTimeout(() => {
+            if (layoutState.indexGroup !== sidenavIndexGroup) return
+            const contentElement = dropdownMenuState.contentElement
+            if (contentElement == null) return
+
+            if (dropdownMenuState.isOpen) {
+                contentElement.querySelectorAll<HTMLElement>(queryString).forEach(element => {
+                    element.tabIndex = 0
+                })
+                return
+            }
+
+            contentElement.querySelectorAll<HTMLElement>(queryString).forEach(element => {
+                element.tabIndex = -1
+            })
+        }, 1)
+    }, [dropdownMenuState.contentElement, dropdownMenuState.isOpen, layoutState.indexGroup])
 
     //
     //
     //
 
-    return (<>
+    return (
         <div
             className={props.className}
             ref={dropdownMenuState.setElement}
         >
             <button
                 className="block p-5 w-full text-left text-2xl"
-                onPointerUp={() => toggleContent(dropdownMenuState, sidenavState)}
+                onPointerUp={() => toggleContent(props.id)}
                 ref={dropdownMenuState.setButtonElement}
             >
                 <div className="grid grid-cols-2 items-center">
@@ -187,5 +182,5 @@ function DropdownMenu(props: {
                 {props.children}
             </div>
         </div>
-    </>)
+    )
 }

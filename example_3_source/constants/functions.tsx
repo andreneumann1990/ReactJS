@@ -7,7 +7,7 @@ import { useLayoutStore } from '../hooks/stores'
 // functions
 //
 
-const getFocusableContainer = function (target: HTMLElement): HTMLElement | null {
+const getFocusableContainer = function (target: HTMLElement): NullableHTMLElement {
     if (target instanceof HTMLAnchorElement) return target
     if (target instanceof HTMLButtonElement) return target
     if (target.parentElement == null) return null
@@ -26,14 +26,14 @@ export function clearKeyDownTimeout(keyboardEventState: KeyboardEventState, keyD
     }
 }
 
-export function focusFirstChildElement(element: HTMLElement | null, query: string): void {
+export function focusFirstChildElement(element: NullableHTMLElement, query: string): void {
     if (element == null) return
     getFirstChildElement(element, query)?.focus()
 }
 
-export function focusNextElement(element: NullableHTMLElement, query: string): HTMLElement | null {
+export function focusNextElement(element: NullableHTMLElement, query: string): NullableHTMLElement {
     if (element == null) return null
-    const focusedElement = document.activeElement as HTMLElement | null
+    const focusedElement = document.activeElement as NullableHTMLElement
     if (focusedElement == null) return null
     const focusableElements = Array.from(element.querySelectorAll<HTMLElement>(query))
 
@@ -43,9 +43,9 @@ export function focusNextElement(element: NullableHTMLElement, query: string): H
     return nextElement
 }
 
-export function focusPreviousElement(element: NullableHTMLElement, query: string): HTMLElement | null {
+export function focusPreviousElement(element: NullableHTMLElement, query: string): NullableHTMLElement {
     if (element == null) return null
-    const focusedElement = document.activeElement as HTMLElement | null
+    const focusedElement = document.activeElement as NullableHTMLElement
     if (focusedElement == null) return null
     const focusableElements = Array.from(element.querySelectorAll<HTMLElement>(query))
 
@@ -63,16 +63,12 @@ export function getFirstChildElement(element: NullableHTMLElement, query: string
 
 export function handleFocusCapture(indexGroup: string): (event: React.FocusEvent) => void {
     return (event) => {
-        //TODO; scrollIntoView can be choppy if there are a lot of elements side-by-side;
-        // for example when using forms;
-        console.log(event.currentTarget)
         scrollIntoView(event.target as HTMLElement)
         useLayoutStore.getState().setIndexGroup(indexGroup)
     }
 }
 
-//TODO; check other things like sidenav for isMotionSafe;
-export function scrollIntoView(element: HTMLElement | null): void {
+export function scrollIntoView(element: NullableHTMLElement): void {
     element?.scrollIntoView({ behavior: isMotionSafe ? 'smooth' : 'instant', block: 'center', inline: 'center' })
 }
 
@@ -85,7 +81,7 @@ export function stopKeyDownInput(): NodeJS.Timeout {
 }
 
 export function triggerFlashEffect(event: { target: EventTarget | null }): void {
-    const element = event.target as HTMLElement | null
+    const element = event.target as NullableHTMLElement
     if (element == null) return
     const containerElement = getFocusableContainer(element)
     if (containerElement == null) return

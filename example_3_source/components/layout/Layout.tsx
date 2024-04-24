@@ -14,19 +14,6 @@ export default Layout
 
 function Layout({ children }: React.PropsWithChildren) {
     //
-    // parameters and variables
-    //
-
-    //TODO
-    // const isSearchOpen: boolean = useSearchStore(state => state.isOpen)
-    // const isSidenavOpen = useSidenavStore(state => state.isOpen)
-    // const { layoutState, mainState, topnavState } = useGlobalStore()
-
-    //
-    // functions
-    //
-
-    //
     // effects
     //
 
@@ -36,9 +23,11 @@ function Layout({ children }: React.PropsWithChildren) {
         return () => { document.removeEventListener('pointerup', triggerFlashEffect) }
     }, [])
 
-    useEffect(() => {
-        console.log('re-render')
-    }, [])
+    // for debugging only;
+    // useEffect(() => {
+    //     const interval = setInterval(() => { console.log(document.activeElement) }, 5000)
+    //     return () => clearInterval(interval)
+    // }, [])
 
     //
     //

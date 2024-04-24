@@ -5,6 +5,10 @@ import { StoreApi, UseBoundStore } from 'zustand'
 //
 //
 
+// I am not sure if I like it the `a new type for everything` approach; in some 
+// situations it is really handy to prevent writing the same object structure
+// more than once; on the other hand these types need to be imported every time;
+
 export type NullableBoolean = boolean | null
 export type NullableBooleanRef = MutableRefObject<NullableBoolean>
 export type NullableNumber = number | null
@@ -17,18 +21,21 @@ export type TimeoutRef = { current?: NodeJS.Timeout }
 
 export type NullableAnchorElement = HTMLAnchorElement | null
 export type SetNullableAnchorElement = (element: NullableAnchorElement) => void
-
 export type NullableButtonElement = HTMLButtonElement | null
 export type SetNullableButtonElement = (element: NullableButtonElement) => void
 
 export type NullableDivElement = HTMLDivElement | null
 export type SetNullableDivElement = (element: NullableDivElement) => void
-
 export type NullableFormElement = HTMLFormElement | null
 export type SetNullableFormElement = (element: NullableFormElement) => void
 
 export type NullableHTMLElement = HTMLElement | null
 export type SetNullableHTMLElement = (element: NullableHTMLElement) => void
+export type NullableImageElement = HTMLImageElement | null
+export type SetNullableImageElement = (element: NullableImageElement) => void
+
+export type NullableElement = Element | null
+export type NullableEventTarget = EventTarget | null
 
 //
 //
@@ -66,30 +73,20 @@ export interface GlobalState {
     topnavState: TopnavState
 }
 
-//TODO
-// export type NullableKeyboardEvent = KeyboardEvent | null
-// export interface KeyboardState {
-//     event: NullableKeyboardEvent,
-//     setEvent: (event: NullableKeyboardEvent) => void,
-// }
-
 export interface KeyboardEventState {
     event?: React.KeyboardEvent,
     setEvent: (event?: React.KeyboardEvent) => void,
 }
 
 export interface LayoutState {
-    _previousIndexGroup: string,
     indexGroup: string,
     setIndexGroup: (indexGroup: string) => void,
-    // resetIndexGroup: () => void,
-    restorePreviousIndexGroup: () => void,
 }
 export type LayoutStore = UseBoundStore<StoreApi<LayoutState>>
 
 export interface MainState {
-    element: HTMLElement | null,
-    setElement: (element: HTMLElement | null) => void,
+    element: NullableHTMLElement,
+    setElement: (element: NullableHTMLElement) => void,
     isActive: boolean,
     setIsActive: (isActive: boolean) => void,
 }
@@ -117,8 +114,8 @@ export interface SearchState {
 export type SearchStore = UseBoundStore<StoreApi<SearchState>>
 
 export interface SidenavState {
-    element: HTMLElement | null,
-    setElement: (element: HTMLElement | null) => void,
+    element: NullableHTMLElement,
+    setElement: (element: NullableHTMLElement) => void,
 
     isOpen: boolean,
     setIsOpen: (isOpen: boolean) => void,
@@ -129,8 +126,8 @@ export interface SidenavState {
 export type SidenavStore = UseBoundStore<StoreApi<SidenavState>>
 
 export interface TopnavState {
-    element: HTMLElement | null,
-    setElement: (element: HTMLElement | null) => void,
+    element: NullableHTMLElement,
+    setElement: (element: NullableHTMLElement) => void,
     homeLinkElement: NullableAnchorElement,
     setHomeLinkElement: SetNullableAnchorElement,
 

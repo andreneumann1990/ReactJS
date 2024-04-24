@@ -3,14 +3,13 @@ import { useDrag } from '@use-gesture/react'
 import { defaultIndexGroup, focusableElementSelectors, indexEntryTypesString, isDebugEnabled, mainIndexGroup, sidenavTransitionDuration } from '../../constants/parameters'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 import { useGlobalStore, useMainStore } from '../../hooks/stores'
-import { NullableBoolean } from '../../constants/types'
+import { NullableBoolean, NullableHTMLElement } from '../../constants/types'
 import { useSearchParams } from 'next/navigation'
-import { focusNextElement, focusPreviousElement, scrollIntoView } from '../../constants/functions'
-import { useClick } from '../../hooks/gestures'
-import { useIndexGroupContainer, useIndexGroupEffect, useIndexGroupItem } from '../../hooks/indexGroup'
+import { focusNextElement, focusPreviousElement } from '../../constants/functions'
+import { useIndexGroupItem } from '../../hooks/indexGroup'
 
 export default Main
-export { handleKeyDown as handleKeyDown_Main }
+export { handleKeyDown_Global as handleKeyDown_Main }
 
 //TODO; focus child elements;
 //TODO; change keys; up down is for scrolling;
@@ -34,7 +33,7 @@ let previousScrollTop: number = -1
 // functions
 //
 
-function handleKeyDown(event: KeyboardEvent): NullableBoolean {
+function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
     const { layoutState, mainState, topnavState } = useGlobalStore.getState()
     if (mainState.element == null) return null
     if (!mainState.element.contains(document.activeElement)) return null
@@ -102,17 +101,16 @@ function handleKeyDown(event: KeyboardEvent): NullableBoolean {
         }
 
         if (event.key === 'ArrowDown') {
-            console.log('prevent')
             event.preventDefault()
             event.stopPropagation()
-            scrollIntoView(focusNextElement(mainState.element, queryString))
+            focusNextElement(mainState.element, queryString)
             return true
         }
 
         if (event.key === 'ArrowUp') {
             event.preventDefault()
             event.stopPropagation()
-            scrollIntoView(focusPreviousElement(mainState.element, queryString))
+            focusPreviousElement(mainState.element, queryString)
             return true
         }
     }
@@ -165,7 +163,7 @@ function Main({ children }: React.PropsWithChildren) {
     // functions
     //
 
-    function initializeMainElement(element: HTMLElement | null): void {
+    function initializeMainElement(element: NullableHTMLElement): void {
         if (mainState.element != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Main: Initialize main element.')
@@ -251,27 +249,23 @@ function Main({ children }: React.PropsWithChildren) {
     }, [searchParams])
 
 
-    // add {...useIndexGroupItem(mainIndexGroup)} via useEffect() script; //TODO
-    useIndexGroupEffect(mainState.element, mainIndexGroup, focusableElementSelectors)
-
     //
     //
     //
 
-    return (<>
+    return (
         <main
             // sets onKeyDownCapture and onKeyUpCapture;
             {...dragAttributes}
-            {...useIndexGroupContainer(mainIndexGroup)}
+            onKeyDownCapture={undefined}
+            onKeyUpCapture={undefined}
+
             {...useIndexGroupItem(defaultIndexGroup)}
             // {...useClick(() => layoutState.setIndexGroup(mainIndexGroup))}
             className="h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:transition-colors motion-safe:ease-out motion-safe:duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
             ref={initializeMainElement}
-        //TODO; check again;
-        // tabIndex={layoutState.indexGroup === defaultIndexGroup ? 0 : -1}
-        // tabIndex={(mainState.isActive && layoutState.indexGroup === mainIndexGroup ? 0 : -1)}
         >
             {children}
         </main >
-    </>)
+    )
 }

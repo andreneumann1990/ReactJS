@@ -1,7 +1,7 @@
 import TextField from '@mui/material/TextField'
 import { Autocomplete, Box } from '@mui/material'
 import { useGlobalStore } from '../../hooks/stores'
-import { countries, mainIndexGroup } from '../../constants/parameters'
+import { countries, focusableElementSelectors, mainIndexGroup } from '../../constants/parameters'
 import { useEffect, useRef, useState } from 'react'
 import { FormikErrors } from 'formik'
 import { NullableDivElement, StringStringObject } from '../../constants/types'
@@ -45,16 +45,10 @@ function Country1({ setFieldValue }: { setFieldValue: (value: string) => (Promis
     }
 
     //
-    // effects
-    //
-
-    useIndexGroupEffect(containerElement, localIndexGroup, 'button, input')
-
-    //
     //
     //
 
-    return (<>
+    return (
         <div
             {...useIndexGroupItem(mainIndexGroup)}
             onKeyDown={handleKeyDown}
@@ -64,7 +58,6 @@ function Country1({ setFieldValue }: { setFieldValue: (value: string) => (Promis
                 {...useIndexGroupContainer(localIndexGroup)}
                 autoHighlight
                 className="m-1 px-2 py-1 rounded-md"
-                // data-index-group={localIndexGroup}
                 id="country1"
                 onChange={(_, value) => setFieldValue(value ?? '')}
                 options={options.map((option) => option)}
@@ -77,7 +70,7 @@ function Country1({ setFieldValue }: { setFieldValue: (value: string) => (Promis
                 )}
             />
         </div>
-    </>)
+    )
 }
 
 // From: https://mui.com/material-ui/react-autocomplete/
@@ -117,7 +110,7 @@ function Country2({ setFieldValue }: { setFieldValue: (value: string) => (Promis
     // effects
     //
 
-    useIndexGroupEffect(containerElement, localIndexGroup, 'button, input')
+    // useIndexGroupEffect(containerElement, focusableElementSelectors)
 
     //
     //

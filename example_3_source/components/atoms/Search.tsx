@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { isDebugEnabled, topnavIndexGroup } from '../../constants/parameters'
 import { useRouter } from 'next/navigation'
 import { useGlobalStore } from '../../hooks/stores'
-import { EntryData, NullableBoolean, SearchData } from '../../constants/types'
+import { EntryData, NullableBoolean, NullableHTMLElement, SearchData } from '../../constants/types'
 
 export default Search
 export { handleKeyDown_Global as handleKeyDown_Search }
@@ -27,60 +27,49 @@ function handleKeyDown_Global(event: React.KeyboardEvent): NullableBoolean {
     if (!searchState.inputElement.contains(document.activeElement)) return null
 
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-        //TODO
         event.preventDefault()
         return null
     }
 
-    //TODO remove?
-    // if (event.key === 'Escape') {
-    //     event.preventDefault()
-    //     searchState.inputElement.blur()
-    //     topnavState.element?.focus()
-    //     return false
-    // }
-
     if (Object.keys(searchState.resultsDataArray).length < 1) return null
-    const [keyIndex, entryIndex] = searchState.resultsSelectedIndex
+    const [groupIndex, entryIndex] = searchState.resultsSelectedIndex
 
     if (event.key === 'ArrowDown') {
-        const entryArray: EntryData[] | undefined = Object.values(searchState.resultsDataArray)[keyIndex]
+        event.preventDefault()
+        const entryArray: EntryData[] | undefined = Object.values(searchState.resultsDataArray)[groupIndex]
+
         if (entryArray == null) {
             if (isDebugEnabled) {
                 console.log('Search-Warning: Entry array could not be found.')
                 console.log(`Search-Warning: dataArray ${Object.values(searchState.resultsDataArray)}`)
-                console.log(`Search-Warning: keyIndex ${keyIndex}`)
+                console.log(`Search-Warning: groupIndex ${groupIndex}`)
             }
             return false
         }
 
         if (entryIndex < entryArray.length - 1) {
-            event.preventDefault()
-            searchState.setResultsSelectedIndex([keyIndex, entryIndex + 1])
-        } else if (keyIndex < Object.keys(searchState.resultsDataArray).length - 1) {
-            event.preventDefault()
-            searchState.setResultsSelectedIndex([keyIndex + 1, 0])
+            searchState.setResultsSelectedIndex([groupIndex, entryIndex + 1])
+        } else if (groupIndex < Object.keys(searchState.resultsDataArray).length - 1) {
+            searchState.setResultsSelectedIndex([groupIndex + 1, 0])
         }
         return true
     }
 
     if (event.key === 'ArrowUp') {
+        event.preventDefault()
         if (entryIndex > 0) {
-            event.preventDefault()
-            searchState.setResultsSelectedIndex([keyIndex, entryIndex - 1])
-        } else if (keyIndex > 0) {
-            const entryArray: EntryData[] | undefined = Object.values(searchState.resultsDataArray)[keyIndex - 1]
+            searchState.setResultsSelectedIndex([groupIndex, entryIndex - 1])
+        } else if (groupIndex > 0) {
+            const entryArray: EntryData[] | undefined = Object.values(searchState.resultsDataArray)[groupIndex - 1]
             if (entryArray == null) {
                 if (isDebugEnabled) {
                     console.log('Search-Warning: Entry array could not be found.')
                     console.log(`Search-Warning: dataArray ${Object.values(searchState.resultsDataArray)}`)
-                    console.log(`Search-Warning: (keyIndex - 1) ${keyIndex - 1}`)
+                    console.log(`Search-Warning: (groupIndex - 1) ${groupIndex - 1}`)
                 }
                 return false
             }
-
-            event.preventDefault()
-            searchState.setResultsSelectedIndex([keyIndex - 1, entryArray.length - 1])
+            searchState.setResultsSelectedIndex([groupIndex - 1, entryArray.length - 1])
         }
         return true
     }
@@ -104,7 +93,7 @@ function Search() {
     const [isFocused, setIsFocused] = useState<boolean>(false)
     const [isHovering, setIsHovering] = useState<boolean>(false)
     const [lastSearchQuery, setLastSearchQuery] = useState<string>('')
-    const [previouslyFocusedElement, setPreviouslyFocusedElement] = useState<HTMLElement | null>(null)
+    const [previouslyFocusedElement, setPreviouslyFocusedElement] = useState<NullableHTMLElement>(null)
 
     // const [searchState.resultsDataArray, searchState.setResultsDataArray] = useState<SearchData>({})
     // const [searchState.resultsSelectedIndex, searchState.setResultsSelectedIndex] = useState<[number, number]>([0, 0])
@@ -140,8 +129,8 @@ function Search() {
     function handleSearch(event: FormEvent) {
         event.preventDefault()
         if (Object.keys(searchState.resultsDataArray).length < 1) return
-        const [keyIndex, entryIndex] = searchState.resultsSelectedIndex
-        const href = Object.values(searchState.resultsDataArray)[keyIndex][entryIndex].href
+        const [groupIndex, entryIndex] = searchState.resultsSelectedIndex
+        const href = Object.values(searchState.resultsDataArray)[groupIndex][entryIndex].href
         if (typeof href != 'string') return
 
         router.push(href)
@@ -153,7 +142,9 @@ function Search() {
         const inputElement = event.target as HTMLInputElement | null
         if (inputElement == null) return
         if (inputElement.value === searchQuery) return
-        if (isDebugEnabled) console.log('Search: Update search query.')
+        if (isDebugEnabled) console.log(`Search: searchQuery ${inputElement.value}`)
+
+        setLastSearchQuery(searchQuery)
         setSearchQuery(inputElement.value)
     }
 
@@ -223,7 +214,7 @@ function Search() {
                     return
                 }
 
-                setPreviouslyFocusedElement(document.activeElement as HTMLElement | null)
+                setPreviouslyFocusedElement(document.activeElement as NullableHTMLElement)
                 searchState.inputElement.focus()
             }
         }
@@ -339,23 +330,26 @@ function Search() {
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                 >
-                    {Object.entries(searchState.resultsDataArray).map(([url_relative, entryArray], keyIndex) => {
-                        return (<div key={`d-${keyIndex}`}
-                            className="text-left p-2 pl-5 text-xl"
-                        >
-                            <header>{url_relative}</header>
-                            {entryArray.map((entry, entryIndex) => {
-                                return (<Link key={`l-${entryIndex}`}
-                                    className={'grid items-center my-3 text-left min-h-10 p-2 px-4 mt-2 border rounded-2xl' + (keyIndex === searchState.resultsSelectedIndex[0] && entryIndex === searchState.resultsSelectedIndex[1] ? ' bg-primary-active' : ' bg-primary')}
-                                    href={entry.href}
-                                >
-                                    <div
-                                        className="*:bg-yellow-700 text-base"
-                                        dangerouslySetInnerHTML={{ __html: entry.purifiedInnerHTML }}
-                                    ></div>
-                                </Link>)
-                            })}
-                        </div>)
+                    {Object.entries(searchState.resultsDataArray).map(([url_relative, entryArray], groupIndex) => {
+                        return (
+                            // a fragment would not work here unless they have an unique key as well;
+                            <div key={`search-results-group-${groupIndex}`}
+                                className="text-left p-2 pl-5 text-xl"
+                            >
+                                <header>{url_relative}</header>
+                                {entryArray.map((entry, entryIndex) => {
+                                    return (<Link key={`search-results-entry-${entryIndex}`}
+                                        className={'grid items-center my-3 text-left min-h-10 p-2 px-4 mt-2 border rounded-2xl' + (groupIndex === searchState.resultsSelectedIndex[0] && entryIndex === searchState.resultsSelectedIndex[1] ? ' bg-primary-active' : ' bg-primary')}
+                                        href={entry.href}
+                                    >
+                                        <div
+                                            className="*:bg-yellow-700 text-base"
+                                            dangerouslySetInnerHTML={{ __html: entry.purifiedInnerHTML }}
+                                        ></div>
+                                    </Link>)
+                                })}
+                            </div>
+                        )
                     })}
                     {/* key input hints and Algolia logo; */}
                     <div className="flex flex-row flex-wrap justify-center lg:justify-end items-center mx-5 my-2">

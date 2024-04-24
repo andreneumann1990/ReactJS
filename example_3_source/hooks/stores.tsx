@@ -45,21 +45,11 @@ useGlobalStore.getState = function (): GlobalState {
 }
 
 export const useLayoutStore: LayoutStore = create<LayoutState>((set, get) => ({
-    _previousIndexGroup: defaultIndexGroup,
     indexGroup: defaultIndexGroup,
     setIndexGroup: (indexGroup) => set((state) => {
-        if (isDebugEnabled) console.log(`Layout: indexGroup ${indexGroup}`)
-        state._previousIndexGroup = state.indexGroup
+        // if (isDebugEnabled) console.log(`Layout: indexGroup ${indexGroup}`)
         return { indexGroup }
     }),
-    // resetIndexGroup: () => set(() => {
-    //     if (isDebugEnabled) console.log(`Layout: indexGroup ${defaultIndexGroup}`)
-    //     return { indexGroup: defaultIndexGroup }
-    // }),
-    restorePreviousIndexGroup: () => set((state) => {
-        if (isDebugEnabled) console.log(`Layout: indexGroup ${state._previousIndexGroup}`)
-        return { indexGroup: state._previousIndexGroup }
-    })
 }))
 
 export const useMainStore: MainStore = create<MainState>((set) => ({

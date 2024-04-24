@@ -457,4 +457,4 @@ export const countries = [
     { code: 'ZW', label: 'Zimbabwe', phone: '263' },
 ]
 
-export const focusableElementSelectors = 'a, button, img, input, summary'
+export const focusableElementSelectors = 'a, button, input, summary'

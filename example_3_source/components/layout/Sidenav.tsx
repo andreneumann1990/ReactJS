@@ -1,18 +1,16 @@
-import { KeyboardEvent, useEffect } from 'react'
+import { useEffect } from 'react'
 import DropdownMenu, { handleKeyDown_DropdownMenu } from '../atoms/DropdownMenu'
 import Link from 'next/link'
 import { useClick } from '../../hooks/gestures'
 import { focusableElementSelectors, isDebugEnabled, sidenavIndexGroup, sidenavTransitionDuration, topnavIndexGroup } from '../../constants/parameters'
-import { triggerFlashEffect } from '../../constants/functions'
+import { focusNextElement, focusPreviousElement, triggerFlashEffect } from '../../constants/functions'
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
-import { NullableBoolean, GlobalState } from '../../constants/types'
+import { NullableBoolean, GlobalState, NullableHTMLElement } from '../../constants/types'
 import { useGlobalStore } from '../../hooks/stores'
-import { useIndexGroupEffect } from '../../hooks/indexGroup'
+import { useIndexGroupContainer, useIndexGroupEffect } from '../../hooks/indexGroup'
 
 export default Sidenav
-export { handleKeyDown as handleInput_Sidenav }
-
-//TODO; holding arrow keys;
+export { handleKeyDown_Global as handleInput_Sidenav }
 
 //
 // parameters and variables
@@ -25,44 +23,18 @@ const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"])'
 //
 
 function closeSidenav(): void {
-    const { layoutState, sidenavState, topnavState } = useGlobalStore.getState()
-    // layoutState.resetIndexGroup()
+    const { sidenavState, topnavState } = useGlobalStore.getState()
     sidenavState.setIsOpen(false)
     topnavState.element?.focus()
 }
 
-function focusNextElement() {
-    const { sidenavState, topnavState } = useGlobalStore.getState()
-    if (topnavState.menuButtonElement == null) return
-    if (sidenavState.element == null) return
-    const focusedElement = document.activeElement as HTMLAnchorElement | null
-
-    if (focusedElement == null) return
-    const focusableElements = [topnavState.menuButtonElement, ...Array.from(sidenavState.element.querySelectorAll<HTMLAnchorElement>(queryString))]
-    const nextIndex = Math.min(focusableElements.indexOf(focusedElement) + 1, focusableElements.length - 1)
-    focusableElements[nextIndex]?.focus()
-}
-
-function focusPreviousElement() {
-    const { sidenavState, topnavState } = useGlobalStore.getState()
-    if (topnavState.menuButtonElement == null) return
-    if (sidenavState.element == null) return
-    const focusedElement = document.activeElement as HTMLElement | null
-
-    if (focusedElement == null) return
-    const focusableElements = [topnavState.menuButtonElement, ...Array.from(sidenavState.element.querySelectorAll<HTMLElement>(queryString))]
-    const previousIndex = Math.max(focusableElements.indexOf(focusedElement) - 1, 0)
-    focusableElements[previousIndex]?.focus()
-}
-
-function handleKeyDown(event: KeyboardEvent, router: AppRouterInstance): NullableBoolean {
+function handleKeyDown_Global(event: React.KeyboardEvent, router: AppRouterInstance): NullableBoolean {
     const { dropdownMenuStateArray, layoutState, sidenavState, topnavState } = useGlobalStore.getState()
     if (sidenavState.element == null) return null
     if (!sidenavState.element.contains(document.activeElement)) return null
 
-    for (let index = 0; index < dropdownMenuStateArray.length; ++index) {
-        const isKeyInputRepeating = handleKeyDown_DropdownMenu(dropdownMenuStateArray[index], event)
-        console.log('is key input repeating ' + isKeyInputRepeating)
+    for (let id = 0; id < dropdownMenuStateArray.length; ++id) {
+        const isKeyInputRepeating = handleKeyDown_DropdownMenu(id, event)
         if (isKeyInputRepeating != null) return isKeyInputRepeating
     }
 
@@ -89,14 +61,18 @@ function handleKeyDown(event: KeyboardEvent, router: AppRouterInstance): Nullabl
     if (event.key === 'ArrowDown') {
         event.preventDefault()
         event.stopPropagation()
-        focusNextElement()
+        focusNextElement(sidenavState.element, queryString)
         return true
     }
 
     if (event.key === 'ArrowUp') {
         event.preventDefault()
         event.stopPropagation()
-        focusPreviousElement()
+
+        if (document.activeElement === focusPreviousElement(sidenavState.element, queryString)) {
+            topnavState.menuButtonElement?.focus()
+            return false
+        }
         return true
     }
 
@@ -129,7 +105,7 @@ function Sidenav() {
     //
 
     // this is called when the component mounts or unmounts; and called when it re-renders;
-    const initializeSidenavElement = (element: HTMLElement | null) => {
+    const initializeSidenavElement = (element: NullableHTMLElement) => {
         if (sidenavState.element != null) return
         if (element == null) return // should never happen!! since it gets never unmounted;
         if (isDebugEnabled) console.log('Sidenav: Initialize sidenav element.')
@@ -190,33 +166,34 @@ function Sidenav() {
     }, [sidenavState.element, sidenavState.isOpen, topnavState.menuButtonElement])
 
     // apply {...useIndexGroupItem(...)} via script;
-    useIndexGroupEffect(sidenavState.element, sidenavIndexGroup, focusableElementSelectors)
+    useIndexGroupEffect(sidenavState.element, focusableElementSelectors)
 
     //
     //
     //
 
-    return (<>
+    return (
         <nav
+            {...useIndexGroupContainer(sidenavIndexGroup)}
             className="fixed w-[min(500px,70vw)] h-[calc(100vh-var(--height-topnav))] left-[max(-500px,-70vw)] bg-background shadow-lg shadow-neutral-950 leading-10 overflow-y-auto overflow-x-hidden scrollbar-stable z-[100] transition-none motion-safe:transition-transform motion-safe:ease-out"
             ref={initializeSidenavElement}
             style={{ transitionDuration: sidenavTransitionDuration }}
         >
             <hr />
             <Link
-                {...useClick(() => closeSidenav())}
+                {...useClick(closeSidenav)}
                 className="block pl-4 py-[2px]"
                 href="/image_examples"
             // tabIndex={sidenavState.isOpen ? undefined : -1}
             >Image Examples</Link><hr />
             <Link
-                {...useClick(() => closeSidenav())}
+                {...useClick(closeSidenav)}
                 className="block pl-4 py-[2px]"
                 href="/form_examples"
             // tabIndex={sidenavState.isOpen ? undefined : -1}
             >Form Examples</Link><hr />
             <Link
-                {...useClick(() => closeSidenav())}
+                {...useClick(closeSidenav)}
                 className="block pl-4 py-[2px]"
                 href="/back_end_examples"
             // tabIndex={sidenavState.isOpen ? undefined : -1}
@@ -234,5 +211,5 @@ function Sidenav() {
                 <Link href="#" className="block pl-8 py-[2px]">Link 10</Link>
             </DropdownMenu><hr />
         </nav>
-    </>)
+    )
 }
