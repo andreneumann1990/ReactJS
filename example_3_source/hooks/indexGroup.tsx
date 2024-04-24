@@ -7,65 +7,78 @@ import { handleFocusCapture } from '../constants/functions'
 //
 //
 
-export function useIndexGroupEffect(containerElement: NullableHTMLElement, indexGroup: string, selectors: string): void {
+export function useIndexGroupEffect(rootContainerElement: NullableHTMLElement, indexGroup: string, selectors: string): void {
     //
     // parameters and variables
     //
 
     const layoutState = useLayoutStore()
-    const elementArrayRef = useRef<NodeListOf<Element>>()
-    const isInitializedRef = useRef<boolean>()
+    const elementArrayRef = useRef<HTMLElement[]>([])
+    const indexGroupArrayRef = useRef<string[]>([])
 
     //
     // effects
     //
 
     useEffect(() => {
-        if (containerElement == null) return
-        elementArrayRef.current = containerElement.querySelectorAll(selectors)
-    }, [containerElement, selectors])
+        // the if statement makes sure that the variables are initialized only once;
+        if (rootContainerElement == null) return
+        let excludedContainerArray: HTMLElement[] = []
+
+        console.log('-----')
+        indexGroupArrayRef.current = []
+        // containerElement.querySelectorAll<HTMLElement>(`*:not([data-index-group="${indexGroup}"])`).forEach((element) => {
+        rootContainerElement.querySelectorAll<HTMLElement>('[data-index-group]').forEach((element) => {
+            console.log(element.dataset.indexGroup) //TODO
+            let indexGroup = element.dataset.indexGroup
+            if (indexGroup == null) return
+            indexGroupArrayRef.current.push()
+            if (element.dataset.indexGroup == null) return
+            excludedContainerArray.push(element)
+        })
+
+        elementArrayRef.current = []
+        rootContainerElement.querySelectorAll<HTMLElement>(selectors).forEach((element) => {
+            let isExcluded = false
+            excludedContainerArray.forEach((excludedContainerElement) => {
+                if (!excludedContainerElement.contains(element)) return
+                isExcluded = true
+            })
+
+            if (isExcluded) return
+            elementArrayRef.current.push(element)
+        })
+
+        //TODO; it should be enough using onFocusCapture() on container elements;
+        //         elementArrayRef.current.forEach((element) => {
+        //             element.addEventListener('focus', handleFocusCapture(indexGroup), true)
+        //         })
+        // 
+        //         return () => {
+        //             elementArrayRef.current.forEach((element) => {
+        //                 element.removeEventListener('focus', handleFocusCapture(indexGroup), true)
+        //             })
+        //         }
+    }, [rootContainerElement, indexGroup, selectors])
 
     useEffect(() => {
-        if (containerElement == null) return
-        if (elementArrayRef.current == null) return
-
-        elementArrayRef.current.forEach((element: Element) => {
-            if (!(element instanceof HTMLElement)) return
-            console.log(element.dataset.indexGroup) //TODO
-            if (element.dataset.indexGroup != indexGroup) return
-            element.dataset.indexGroup = indexGroup
+        if (rootContainerElement == null) return
+        elementArrayRef.current.forEach((element) => {
             element.tabIndex = layoutState.indexGroup === indexGroup ? 0 : -1
         })
-    }, [containerElement, indexGroup, layoutState.indexGroup, selectors])
-
-    useEffect(() => {
-        if (containerElement == null) return
-        if (elementArrayRef.current == null) return
-        if (isInitializedRef.current) return
-
-        elementArrayRef.current.forEach((element: Element) => {
-            if (!(element instanceof HTMLElement)) return
-            if (element.dataset.indexGroup != indexGroup) return
-            element.addEventListener('focusin', handleFocusCapture(indexGroup), true)
-        })
-        isInitializedRef.current = true
-
-        return () => {
-            if (elementArrayRef.current == null) return
-            elementArrayRef.current.forEach((element: Element) => {
-                if (!(element instanceof HTMLElement)) return
-                if (element.dataset.indexGroup != indexGroup) return
-                element.removeEventListener('focusin', handleFocusCapture(indexGroup), true)
-            })
-        }
-    }, [containerElement, indexGroup, selectors])
+    }, [rootContainerElement, indexGroup, layoutState.indexGroup, selectors])
 }
 
-export function useIndexGroup(indexGroup: string) {
-    const layoutState = useLayoutStore()
+export function useIndexGroupContainer(indexGroup: string) {
     return {
         'data-index-group': indexGroup,
-        onFocusCapture: () => { handleFocusCapture(indexGroup) },
+        onFocusCapture: handleFocusCapture(indexGroup),
+    }
+}
+
+export function useIndexGroupItem(indexGroup: string) {
+    const layoutState = useLayoutStore()
+    return {
         tabIndex: layoutState.indexGroup === indexGroup ? 0 : -1,
     }
 }

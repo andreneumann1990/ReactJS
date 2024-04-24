@@ -2,11 +2,12 @@ import { KeyboardEvent, useEffect } from 'react'
 import DropdownMenu, { handleKeyDown_DropdownMenu } from '../atoms/DropdownMenu'
 import Link from 'next/link'
 import { useClick } from '../../hooks/gestures'
-import { isDebugEnabled, sidenavTransitionDuration, topnavIndexGroup } from '../../constants/parameters'
+import { focusableElementSelectors, isDebugEnabled, sidenavIndexGroup, sidenavTransitionDuration, topnavIndexGroup } from '../../constants/parameters'
 import { triggerFlashEffect } from '../../constants/functions'
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import { NullableBoolean, GlobalState } from '../../constants/types'
 import { useGlobalStore } from '../../hooks/stores'
+import { useIndexGroupEffect } from '../../hooks/indexGroup'
 
 export default Sidenav
 export { handleKeyDown as handleInput_Sidenav }
@@ -25,7 +26,7 @@ const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"])'
 
 function closeSidenav(): void {
     const { layoutState, sidenavState, topnavState } = useGlobalStore.getState()
-    layoutState.resetIndexGroup()
+    // layoutState.resetIndexGroup()
     sidenavState.setIsOpen(false)
     topnavState.element?.focus()
 }
@@ -188,6 +189,9 @@ function Sidenav() {
         }
     }, [sidenavState.element, sidenavState.isOpen, topnavState.menuButtonElement])
 
+    // apply {...useIndexGroupItem(...)} via script;
+    useIndexGroupEffect(sidenavState.element, sidenavIndexGroup, focusableElementSelectors)
+
     //
     //
     //
@@ -200,22 +204,22 @@ function Sidenav() {
         >
             <hr />
             <Link
+                {...useClick(() => closeSidenav())}
                 className="block pl-4 py-[2px]"
                 href="/image_examples"
-                tabIndex={sidenavState.isOpen ? undefined : -1}
-                {...useClick(() => closeSidenav())}
+            // tabIndex={sidenavState.isOpen ? undefined : -1}
             >Image Examples</Link><hr />
             <Link
+                {...useClick(() => closeSidenav())}
                 className="block pl-4 py-[2px]"
                 href="/form_examples"
-                tabIndex={sidenavState.isOpen ? undefined : -1}
-                {...useClick(() => closeSidenav())}
+            // tabIndex={sidenavState.isOpen ? undefined : -1}
             >Form Examples</Link><hr />
             <Link
+                {...useClick(() => closeSidenav())}
                 className="block pl-4 py-[2px]"
                 href="/back_end_examples"
-                tabIndex={sidenavState.isOpen ? undefined : -1}
-                {...useClick(() => closeSidenav())}
+            // tabIndex={sidenavState.isOpen ? undefined : -1}
             >Back-End Examples</Link><hr />
             <DropdownMenu id={0} text="Dropdown 1">
                 <Link href="#" className="block pl-8 py-[2px]">Link 3</Link>

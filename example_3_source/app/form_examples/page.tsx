@@ -1,15 +1,15 @@
 'use client'
 
 import { FormikConfig, useFormik } from 'formik'
-import { MouseEvent, SyntheticEvent, useEffect, useRef, } from 'react'
+import { MouseEvent, SyntheticEvent, useEffect, useRef, useState, } from 'react'
 import * as Yup from 'yup'
 import { Country1, Country2 } from '../../components/atoms/Country'
 import Link from 'next/link'
 import { Button } from '@mui/material'
-import { mainIndexGroup } from '../../constants/parameters'
+import { focusableElementSelectors, mainIndexGroup } from '../../constants/parameters'
 import { useLayoutStore } from '../../hooks/stores'
-import { handleFocusCapture, scrollIntoView } from '../../constants/functions'
-import { useIndexGroup, useIndexGroupEffect } from '../../hooks/indexGroup'
+import { useIndexGroupItem, useIndexGroupEffect, useIndexGroupContainer } from '../../hooks/indexGroup'
+import { NullableDivElement, NullableFormElement } from '../../constants/types'
 
 //TODO; handle tabIndex;
 
@@ -18,33 +18,12 @@ function Page() {
     // parameters and variables
     //
 
-    const layoutState = useLayoutStore()
-    const { setIndexGroup } = layoutState
-    const country1Ref = useRef<HTMLElement>()
-    const form1Ref = useRef<HTMLFormElement | null>(null)
-    const pageRef = useRef<HTMLDivElement | null>(null)
+    const form1Ref = useRef<NullableFormElement>(null)
+    const [pageElement, setPageElement] = useState<NullableDivElement>(null)
 
     //
     // functions
     //
-
-    function handleKeyDown_Country1(event: React.KeyboardEvent): void {
-        if (event.key === 'Enter') {
-            event.preventDefault()
-            event.stopPropagation()
-            layoutState.setIndexGroup('main-country1')
-            country1Ref.current?.focus()
-            return
-        }
-
-        if (event.key === 'Escape') {
-            event.preventDefault()
-            event.stopPropagation()
-            layoutState.setIndexGroup('main');
-            (event.currentTarget as HTMLElement)?.focus()
-            return
-        }
-    }
 
     const form1 = useFormik({
         initialValues: {
@@ -163,7 +142,11 @@ function Page() {
     //             form1InputElementArray.forEach((element: HTMLInputElement) => { element.removeEventListener('focus', handleFocusCapture(mainIndexGroup), true) })
     //         }
     //     }, [layoutState.indexGroup, setIndexGroup])
-    useIndexGroupEffect(form1Ref.current, mainIndexGroup, 'a, button, input')
+
+    //TODO
+    useIndexGroupEffect(pageElement, mainIndexGroup, focusableElementSelectors)
+    // useIndexGroupEffect(pageElement, mainIndexGroup, 'a, button, input')
+    // useIndexGroupEffect(form1Ref.current, mainIndexGroup, 'a, button, input')
 
     //
     //
@@ -172,8 +155,8 @@ function Page() {
     //TODO; maybe use div elements with data-attributes to layout the indexGroups;
 
     return (<div
-        data-index-group={mainIndexGroup}
-        ref={pageRef}
+        {...useIndexGroupContainer(mainIndexGroup)}
+        ref={setPageElement}
     >
         {/* header; */}
         <h1 className="my-3 text-3xl font-bold">Form Examples</h1>
@@ -273,8 +256,9 @@ function Page() {
                             // TODO; maybe there is a better way; problem: useIndexGroupEffect() overrides the values of child elements and pre-set attributes like these ones;
                             // maybe use data-attributes to communicate the indexGroup of elements?;
                             {...form1.getFieldProps('hidden')}
-                            {...useIndexGroup('hidden')}
+                            // {...useIndexGroup('hidden')}
                             className="ml-2 m-1 px-2 py-1 rounded-md"
+                            tabIndex={-1}
                             type="hidden"
                         />
                     </p>
@@ -495,36 +479,37 @@ function Page() {
                             rounded-md does not work since it is applied to the container without border; 
                             customization might be difficult when using these; 
                         */}
-                        <div
+                        {/* <div
+                            {...useIndexGroup(mainIndexGroup)}
                             data-index-group={mainIndexGroup}
                             // {...useIndexGroup(mainIndexGroup)}
                             onKeyDown={handleKeyDown_Country1}
                         // tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1} //TODO
-                        >
-                            <div data-index-group="main-country1">
-                                <Country1 setFieldValue={(value) => form2.setFieldValue('country1', value)} />
-                            </div>
-                        </div>
+                        > */}
+                        {/* <div data-index-group="main-country1"> */}
+                        <Country1 setFieldValue={(value) => form2.setFieldValue('country1', value)} />
+                        {/* </div> */}
+                        {/* </div> */}
                     </div>
                 </div>
                 <div className="grid px-5 items-center">
                     <div>
                         Copied from:&nbps;
                         <Link
-                            {...useIndexGroup(mainIndexGroup)}
+                            // {...useIndexGroup(mainIndexGroup)}
                             className="text-blue-300"
                             href="https://mui.com/material-ui/react-autocomplete/"
                         >https://mui.com/material-ui/react-autocomplete/</Link>
-                        <div data-index-group="main-country2">
-                            <Country2 setFieldValue={(value) => form2.setFieldValue('country2', value)}
-                            />
-                        </div>
+                        {/* <div data-index-group="main-country2"> */}
+                        <Country2 setFieldValue={(value) => form2.setFieldValue('country2', value)}
+                        />
+                        {/* </div> */}
                     </div>
                 </div>
             </div>
             <br />
             <Button
-                {...useIndexGroup(mainIndexGroup)}
+                // {...useIndexGroup(mainIndexGroup)}
                 type="submit"
                 variant="outlined"
             >Submit</Button>

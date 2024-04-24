@@ -2,11 +2,11 @@ import TextField from '@mui/material/TextField'
 import { Autocomplete, Box } from '@mui/material'
 import { useGlobalStore } from '../../hooks/stores'
 import { countries, mainIndexGroup } from '../../constants/parameters'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { FormikErrors } from 'formik'
-import { StringStringObject } from '../../constants/types'
+import { NullableDivElement, StringStringObject } from '../../constants/types'
 import { focusFirstChildElement, getFirstChildElement } from '../../constants/functions'
-import { useIndexGroupEffect } from '../../hooks/indexGroup'
+import { useIndexGroupItem, useIndexGroupEffect, useIndexGroupContainer } from '../../hooks/indexGroup'
 
 export { Country1 }
 export { Country2 }
@@ -21,8 +21,7 @@ function Country1({ setFieldValue }: { setFieldValue: (value: string) => (Promis
     //
 
     const options = ['England', 'France', 'Germany', 'Musterland']
-    const { layoutState } = useGlobalStore()
-    const elementRef = useRef<HTMLDivElement | null>(null)
+    const [containerElement, setContainerElement] = useState<NullableDivElement>(null)
     const localIndexGroup = 'main-country1'
 
     //
@@ -33,17 +32,14 @@ function Country1({ setFieldValue }: { setFieldValue: (value: string) => (Promis
         if (event.key === 'Enter') {
             event.preventDefault()
             event.stopPropagation()
-            layoutState.setIndexGroup('main-country1')
-            focusFirstChildElement(elementRef.current, 'input')
+            focusFirstChildElement(containerElement, 'input')
             return
         }
 
         if (event.key === 'Escape') {
             event.preventDefault()
             event.stopPropagation()
-            layoutState.setIndexGroup('main')
-            elementRef.current?.focus()
-            // (event.currentTarget as HTMLElement)?.focus()
+            containerElement?.focus()
             return
         }
     }
@@ -52,12 +48,7 @@ function Country1({ setFieldValue }: { setFieldValue: (value: string) => (Promis
     // effects
     //
 
-    // useEffect(() => {
-    //     const inputElement = getFirstChildElement(elementRef.current, 'input')
-    //     if (inputElement == null) return
-    //     inputElement.tabIndex = layoutState.indexGroup === 'main-country1' ? 0 : -1
-    // }, [layoutState.indexGroup])
-    useIndexGroupEffect(elementRef.current, localIndexGroup, 'button, input')
+    useIndexGroupEffect(containerElement, localIndexGroup, 'button, input')
 
     //
     //
@@ -65,13 +56,15 @@ function Country1({ setFieldValue }: { setFieldValue: (value: string) => (Promis
 
     return (<>
         <div
+            {...useIndexGroupItem(mainIndexGroup)}
             onKeyDown={handleKeyDown}
-            ref={elementRef}
-            tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1}
+            ref={setContainerElement}
         >
             <Autocomplete
+                {...useIndexGroupContainer(localIndexGroup)}
                 autoHighlight
                 className="m-1 px-2 py-1 rounded-md"
+                // data-index-group={localIndexGroup}
                 id="country1"
                 onChange={(_, value) => setFieldValue(value ?? '')}
                 options={options.map((option) => option)}
@@ -82,7 +75,6 @@ function Country1({ setFieldValue }: { setFieldValue: (value: string) => (Promis
                         InputProps={{ ...params.InputProps }}
                     />
                 )}
-                tabIndex={layoutState.indexGroup === 'main-country1' ? 0 : -1}
             />
         </div>
     </>)
@@ -96,7 +88,7 @@ function Country2({ setFieldValue }: { setFieldValue: (value: string) => (Promis
 
     const { layoutState } = useGlobalStore()
     const { setIndexGroup } = layoutState
-    const elementRef = useRef<HTMLDivElement | null>(null)
+    const [containerElement, setContainerElement] = useState<NullableDivElement>(null)
     const localIndexGroup = 'main-country2'
 
     //
@@ -107,16 +99,16 @@ function Country2({ setFieldValue }: { setFieldValue: (value: string) => (Promis
         if (event.key === 'Enter') {
             event.preventDefault()
             event.stopPropagation()
-            layoutState.setIndexGroup(localIndexGroup)
-            focusFirstChildElement(elementRef.current, 'input')
+            // layoutState.setIndexGroup(localIndexGroup)
+            focusFirstChildElement(containerElement, 'input')
             return
         }
 
         if (event.key === 'Escape') {
             event.preventDefault()
             event.stopPropagation()
-            layoutState.setIndexGroup('main')
-            elementRef.current?.focus()
+            // layoutState.setIndexGroup('main')
+            containerElement?.focus()
             return
         }
     }
@@ -125,15 +117,7 @@ function Country2({ setFieldValue }: { setFieldValue: (value: string) => (Promis
     // effects
     //
 
-    //     useEffect(() => {
-    //         const inputElement = getFirstChildElement(elementRef.current, 'input')
-    //         if (inputElement == null) return
-    // 
-    //         inputElement.tabIndex = layoutState.indexGroup === localIndexGroup ? 0 : -1
-    //         inputElement.addEventListener('focus', () => setIndexGroup(localIndexGroup), true)
-    //         return () => { inputElement.removeEventListener('focus', () => setIndexGroup(localIndexGroup), true) }
-    //     }, [layoutState.indexGroup, setIndexGroup])
-    useIndexGroupEffect(elementRef.current, localIndexGroup, 'input')
+    useIndexGroupEffect(containerElement, localIndexGroup, 'button, input')
 
     //
     //
@@ -141,13 +125,16 @@ function Country2({ setFieldValue }: { setFieldValue: (value: string) => (Promis
 
     return (
         <div
+            {...useIndexGroupItem(mainIndexGroup)}
             onKeyDown={handleKeyDown}
-            ref={elementRef}
-            tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1}
+            ref={setContainerElement}
+        // tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1}
         >
             <Autocomplete
+                {...useIndexGroupContainer(localIndexGroup)}
                 autoHighlight
                 className="m-1 px-2 py-1 rounded-md"
+                // data-index-group={localIndexGroup}
                 getOptionLabel={(option) => option.label}
                 id="country2"
                 onChange={(_, value: { label: string } | null) => setFieldValue(value?.label ?? '')}

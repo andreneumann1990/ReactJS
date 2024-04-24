@@ -1,12 +1,13 @@
 import React, { KeyboardEvent, useEffect, useRef } from 'react'
 import { useDrag } from '@use-gesture/react'
-import { defaultIndexGroup, indexEntryTypesString, isDebugEnabled, mainIndexGroup, sidenavTransitionDuration } from '../../constants/parameters'
+import { defaultIndexGroup, focusableElementSelectors, indexEntryTypesString, isDebugEnabled, mainIndexGroup, sidenavTransitionDuration } from '../../constants/parameters'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 import { useGlobalStore, useMainStore } from '../../hooks/stores'
 import { NullableBoolean } from '../../constants/types'
 import { useSearchParams } from 'next/navigation'
 import { focusNextElement, focusPreviousElement, scrollIntoView } from '../../constants/functions'
 import { useClick } from '../../hooks/gestures'
+import { useIndexGroupContainer, useIndexGroupEffect, useIndexGroupItem } from '../../hooks/indexGroup'
 
 export default Main
 export { handleKeyDown as handleKeyDown_Main }
@@ -95,7 +96,7 @@ function handleKeyDown(event: KeyboardEvent): NullableBoolean {
 
         if (event.key === 'Escape') {
             event.preventDefault()
-            layoutState.resetIndexGroup()
+            // layoutState.resetIndexGroup()
             mainState.element?.focus()
             return false
         }
@@ -249,6 +250,10 @@ function Main({ children }: React.PropsWithChildren) {
         }
     }, [searchParams])
 
+
+    // add {...useIndexGroupItem(mainIndexGroup)} via useEffect() script; //TODO
+    useIndexGroupEffect(mainState.element, mainIndexGroup, focusableElementSelectors)
+
     //
     //
     //
@@ -257,11 +262,13 @@ function Main({ children }: React.PropsWithChildren) {
         <main
             // sets onKeyDownCapture and onKeyUpCapture;
             {...dragAttributes}
+            {...useIndexGroupContainer(mainIndexGroup)}
+            {...useIndexGroupItem(defaultIndexGroup)}
             // {...useClick(() => layoutState.setIndexGroup(mainIndexGroup))}
             className="h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:transition-colors motion-safe:ease-out motion-safe:duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
             ref={initializeMainElement}
-            //TODO; check again;
-            tabIndex={layoutState.indexGroup === defaultIndexGroup ? 0 : -1}
+        //TODO; check again;
+        // tabIndex={layoutState.indexGroup === defaultIndexGroup ? 0 : -1}
         // tabIndex={(mainState.isActive && layoutState.indexGroup === mainIndexGroup ? 0 : -1)}
         >
             {children}

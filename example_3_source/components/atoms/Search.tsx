@@ -168,7 +168,8 @@ function Search() {
 
     // set focus; don't close when focused => update state;
     function handleFocus(): void {
-        layoutState.setIndexGroup(topnavIndexGroup)
+        //TODO
+        // layoutState.setIndexGroup(topnavIndexGroup)
         setIsFocused(true)
     }
 

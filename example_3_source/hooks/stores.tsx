@@ -52,10 +52,10 @@ export const useLayoutStore: LayoutStore = create<LayoutState>((set, get) => ({
         state._previousIndexGroup = state.indexGroup
         return { indexGroup }
     }),
-    resetIndexGroup: () => set(() => {
-        if (isDebugEnabled) console.log(`Layout: indexGroup ${defaultIndexGroup}`)
-        return { indexGroup: defaultIndexGroup }
-    }),
+    // resetIndexGroup: () => set(() => {
+    //     if (isDebugEnabled) console.log(`Layout: indexGroup ${defaultIndexGroup}`)
+    //     return { indexGroup: defaultIndexGroup }
+    // }),
     restorePreviousIndexGroup: () => set((state) => {
         if (isDebugEnabled) console.log(`Layout: indexGroup ${state._previousIndexGroup}`)
         return { indexGroup: state._previousIndexGroup }

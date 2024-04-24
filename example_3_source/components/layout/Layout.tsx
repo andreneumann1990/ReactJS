@@ -36,6 +36,10 @@ function Layout({ children }: React.PropsWithChildren) {
         return () => { document.removeEventListener('pointerup', triggerFlashEffect) }
     }, [])
 
+    useEffect(() => {
+        console.log('re-render')
+    }, [])
+
     //
     //
     //

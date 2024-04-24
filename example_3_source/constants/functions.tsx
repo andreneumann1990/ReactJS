@@ -18,10 +18,12 @@ const getFocusableContainer = function (target: HTMLElement): HTMLElement | null
 // main
 //
 
-export function clearKeyDownTimeout(keyboardEventState: KeyboardEventState, keyDownTimeoutRef: TimeoutRef): void {
-    keyboardEventState.setEvent(undefined)
-    clearTimeout(keyDownTimeoutRef.current)
-    keyDownTimeoutRef.current = undefined
+export function clearKeyDownTimeout(keyboardEventState: KeyboardEventState, keyDownTimeoutRef: TimeoutRef): () => void {
+    return () => {
+        keyboardEventState.setEvent(undefined)
+        clearTimeout(keyDownTimeoutRef.current)
+        keyDownTimeoutRef.current = undefined
+    }
 }
 
 export function focusFirstChildElement(element: HTMLElement | null, query: string): void {
@@ -59,8 +61,11 @@ export function getFirstChildElement(element: NullableHTMLElement, query: string
     return element.querySelector(query) as HTMLElement
 }
 
-export function handleFocusCapture(indexGroup: string): (event: FocusEvent) => void {
+export function handleFocusCapture(indexGroup: string): (event: React.FocusEvent) => void {
     return (event) => {
+        //TODO; scrollIntoView can be choppy if there are a lot of elements side-by-side;
+        // for example when using forms;
+        console.log(event.currentTarget)
         scrollIntoView(event.target as HTMLElement)
         useLayoutStore.getState().setIndexGroup(indexGroup)
     }

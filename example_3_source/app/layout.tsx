@@ -14,6 +14,7 @@ import { handleKeyDown_Search } from '../components/atoms/Search'
 import { create } from 'zustand'
 import { KeyboardEventState } from '../constants/types'
 import { clearKeyDownTimeout } from '../constants/functions'
+import { useIndexGroupContainer, useIndexGroupItem } from '../hooks/indexGroup'
 
 export default RootLayout
 
@@ -61,14 +62,14 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
             if (event == null) return
 
             //TODO
-            console.log(document.activeElement)
+            // console.log(document.activeElement)
 
             let isKeyInputRepeating = null
             if (document.activeElement instanceof HTMLBodyElement) {
                 if (event.key === 'Enter' || event.key === 'ArrowRight' || event.key === 'ArrowDown') {
                     event.preventDefault()
                     event.stopPropagation()
-                    layoutState.resetIndexGroup()
+                    // layoutState.resetIndexGroup() //TODO
                     mainState.element?.focus()
                     isKeyInputRepeating = false
                 }
@@ -76,7 +77,7 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
                 if (event.key === 'Escape' || event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
                     event.preventDefault()
                     event.stopPropagation()
-                    layoutState.resetIndexGroup()
+                    // layoutState.resetIndexGroup()
                     topnavState.element?.focus()
                     isKeyInputRepeating = false
                 }
@@ -144,10 +145,11 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
                 use it; see `https://developer.mozilla.org/en-US/docs/Web/CSS/font-smooth`;
             */}
             <body
+                {...useIndexGroupContainer(defaultIndexGroup)}
                 className="w-full bg-background [color:--color-text] [font-size:100%] [font-family:Helvetica,Arial,sans-serif]"
-                onBlur={() => clearKeyDownTimeout(keyboardEventState, keyDownTimeout)}
+                onBlur={clearKeyDownTimeout(keyboardEventState, keyDownTimeout)}
                 onKeyDown={handleKeyDown}
-                onKeyUp={() => clearKeyDownTimeout(keyboardEventState, keyDownTimeout)}
+                onKeyUp={clearKeyDownTimeout(keyboardEventState, keyDownTimeout)}
             >
                 <noscript>You need to enable JavaScript to run this app.</noscript>
                 <React.StrictMode>

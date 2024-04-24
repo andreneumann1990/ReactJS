@@ -107,7 +107,7 @@ function Page() {
                 if (event.key === 'Enter') {
                     event.preventDefault()
                     event.stopPropagation()
-                    layoutState.setIndexGroup(imageRowIndexGroup)
+                    // layoutState.setIndexGroup(imageRowIndexGroup) //TODO
                     imageRowFirstImage.current?.focus()
                     keyDownTimeoutRef.current = stopKeyDownInput()
                     return
@@ -119,7 +119,7 @@ function Page() {
                 if (event.key === 'Escape') {
                     event.preventDefault()
                     event.stopPropagation()
-                    layoutState.setIndexGroup(mainIndexGroup)
+                    // layoutState.setIndexGroup(mainIndexGroup) //TODO
                     imageRowElement?.focus()
                     keyDownTimeoutRef.current = stopKeyDownInput()
                     return
@@ -215,8 +215,8 @@ function Page() {
                 alt=""
                 className="p-1 mx-auto"
                 height={0}
-                onBlurCapture={() => layoutState.setIndexGroup(mainIndexGroup)}
-                onFocusCapture={() => layoutState.setIndexGroup(overlayIndexGroup)}
+                // onBlurCapture={() => layoutState.setIndexGroup(mainIndexGroup)}
+                // onFocusCapture={() => layoutState.setIndexGroup(overlayIndexGroup)}
                 onKeyDown={handleKeyDown_Overlay}
                 ref={overlayImageRef}
                 src="/icons/logo192.png"
@@ -232,8 +232,8 @@ function Page() {
                 <Link
                     className="text-blue-300"
                     href="https://pixabay.com/collections/example_2-21740818/"
-                    onFocusCapture={() => layoutState.setIndexGroup(mainIndexGroup)}
-                    tabIndex={layoutState.indexGroup === mainIndexGroup ? undefined : -1}
+                // onFocusCapture={() => layoutState.setIndexGroup(mainIndexGroup)}
+                // tabIndex={layoutState.indexGroup === mainIndexGroup ? undefined : -1}
                 >https://pixabay.com/collections/example_2-21740818/</Link>
             </li>
         </ul >

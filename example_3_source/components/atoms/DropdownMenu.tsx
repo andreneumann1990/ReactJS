@@ -129,33 +129,34 @@ function DropdownMenu(props: {
         toggleContent(dropdownMenuState, sidenavState)
     }, [dropdownMenuState, sidenavState])
 
-    // update tabindex;
-    useEffect(() => {
-        if (dropdownMenuState.buttonElement == null) return
-        if (dropdownMenuState.contentElement == null) return
-        if (dropdownMenuState.element == null) return
-
-        if (!sidenavState.isOpen) {
-            dropdownMenuState.element.querySelectorAll(queryString).forEach(element => {
-                if (!(element instanceof HTMLElement)) return
-                element.tabIndex = -1
-            })
-            return
-        }
-
-        dropdownMenuState.buttonElement.removeAttribute('tabIndex')
-        if (dropdownMenuState.isOpen) {
-            dropdownMenuState.contentElement.querySelectorAll(queryString).forEach(element => {
-                element.removeAttribute('tabIndex')
-            })
-            return
-        }
-
-        dropdownMenuState.contentElement.querySelectorAll(queryString).forEach(element => {
-            if (!(element instanceof HTMLElement)) return
-            element.tabIndex = -1
-        })
-    }, [dropdownMenuState.buttonElement, dropdownMenuState.contentElement, dropdownMenuState.element, dropdownMenuState.isOpen, sidenavState.isOpen])
+    //TODO
+    //     // update tabindex;
+    //     useEffect(() => {
+    //         if (dropdownMenuState.buttonElement == null) return
+    //         if (dropdownMenuState.contentElement == null) return
+    //         if (dropdownMenuState.element == null) return
+    // 
+    //         if (!sidenavState.isOpen) {
+    //             dropdownMenuState.element.querySelectorAll(queryString).forEach(element => {
+    //                 if (!(element instanceof HTMLElement)) return
+    //                 element.tabIndex = -1
+    //             })
+    //             return
+    //         }
+    // 
+    //         dropdownMenuState.buttonElement.removeAttribute('tabIndex')
+    //         if (dropdownMenuState.isOpen) {
+    //             dropdownMenuState.contentElement.querySelectorAll(queryString).forEach(element => {
+    //                 element.removeAttribute('tabIndex')
+    //             })
+    //             return
+    //         }
+    // 
+    //         dropdownMenuState.contentElement.querySelectorAll(queryString).forEach(element => {
+    //             if (!(element instanceof HTMLElement)) return
+    //             element.tabIndex = -1
+    //         })
+    //     }, [dropdownMenuState.buttonElement, dropdownMenuState.contentElement, dropdownMenuState.element, dropdownMenuState.isOpen, sidenavState.isOpen])
 
     //
     //

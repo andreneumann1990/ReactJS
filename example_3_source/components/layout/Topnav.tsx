@@ -99,7 +99,7 @@ function handleKeyDown(event: KeyboardEvent): NullableBoolean {
     if (event.key === 'Escape') {
         event.preventDefault()
         event.stopPropagation()
-        layoutState.resetIndexGroup()
+        // layoutState.resetIndexGroup()
         sidenavState.setIsOpen(false)
         topnavState.element?.focus()
         return false
@@ -182,6 +182,7 @@ function toggleSidenav(): void {
     if (isDebugEnabled) console.log('Topnav: Toggle sidenav.')
 
     if (!sidenavState.isOpen) {
+        //TODO
         layoutState.setIndexGroup(sidenavIndexGroup)
     } else if (document.activeElement === topnavState.menuButtonElement) {
         layoutState.setIndexGroup(topnavIndexGroup)
@@ -215,7 +216,7 @@ function Topnav() {
             router.push('/home')
             triggerFlashEffect(event)
 
-            layoutState.resetIndexGroup()
+            // layoutState.resetIndexGroup()
             topnavState.element?.focus()
             keyDownTimeout.current = stopKeyDownInput()
             return

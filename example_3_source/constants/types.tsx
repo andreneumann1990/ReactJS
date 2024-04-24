@@ -24,6 +24,9 @@ export type SetNullableButtonElement = (element: NullableButtonElement) => void
 export type NullableDivElement = HTMLDivElement | null
 export type SetNullableDivElement = (element: NullableDivElement) => void
 
+export type NullableFormElement = HTMLFormElement | null
+export type SetNullableFormElement = (element: NullableFormElement) => void
+
 export type NullableHTMLElement = HTMLElement | null
 export type SetNullableHTMLElement = (element: NullableHTMLElement) => void
 
@@ -79,7 +82,7 @@ export interface LayoutState {
     _previousIndexGroup: string,
     indexGroup: string,
     setIndexGroup: (indexGroup: string) => void,
-    resetIndexGroup: () => void,
+    // resetIndexGroup: () => void,
     restorePreviousIndexGroup: () => void,
 }
 export type LayoutStore = UseBoundStore<StoreApi<LayoutState>>
