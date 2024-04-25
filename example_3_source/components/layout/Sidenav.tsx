@@ -2,10 +2,10 @@ import { useEffect } from 'react'
 import DropdownMenu, { handleKeyDown_DropdownMenu } from '../atoms/DropdownMenu'
 import Link from 'next/link'
 import { useClick } from '../../hooks/gestures'
-import { focusableElementSelectors, isDebugEnabled, sidenavIndexGroup, sidenavTransitionDuration, topnavIndexGroup } from '../../constants/parameters'
+import { focusableElementSelectors, isDebugEnabled, maximumDelay, repeatDelay, sidenavIndexGroup, sidenavTransitionDuration, topnavIndexGroup } from '../../constants/parameters'
 import { focusNextElement, focusPreviousElement, triggerFlashEffect } from '../../constants/functions'
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
-import { NullableBoolean, GlobalState, NullableHTMLElement } from '../../constants/types'
+import { NullableHTMLElement, NullableNumber } from '../../constants/types'
 import { useGlobalStore } from '../../hooks/stores'
 import { useIndexGroupContainer, useIndexGroupEffect } from '../../hooks/indexGroup'
 
@@ -28,21 +28,21 @@ function closeSidenav(): void {
     topnavState.element?.focus()
 }
 
-function handleKeyDown_Global(event: React.KeyboardEvent, router: AppRouterInstance): NullableBoolean {
+function handleKeyDown_Global(event: React.KeyboardEvent, router: AppRouterInstance): NullableNumber {
     const { dropdownMenuStateArray, layoutState, sidenavState, topnavState } = useGlobalStore.getState()
     if (sidenavState.element == null) return null
     if (!sidenavState.element.contains(document.activeElement)) return null
 
     for (let id = 0; id < dropdownMenuStateArray.length; ++id) {
-        const isKeyInputRepeating = handleKeyDown_DropdownMenu(id, event)
-        if (isKeyInputRepeating != null) return isKeyInputRepeating
+        const newCooldown: NullableNumber = handleKeyDown_DropdownMenu(id, event)
+        if (newCooldown != null) return newCooldown
     }
 
     if (event.key === 'Escape') {
         event.preventDefault()
         event.stopPropagation()
         closeSidenav()
-        return false
+        return maximumDelay
     }
 
     if (event.target instanceof HTMLAnchorElement) {
@@ -54,7 +54,7 @@ function handleKeyDown_Global(event: React.KeyboardEvent, router: AppRouterInsta
             router.push(event.target.href)
             triggerFlashEffect(event)
             closeSidenav()
-            return false
+            return maximumDelay
         }
     }
 
@@ -62,7 +62,7 @@ function handleKeyDown_Global(event: React.KeyboardEvent, router: AppRouterInsta
         event.preventDefault()
         event.stopPropagation()
         focusNextElement(sidenavState.element, queryString)
-        return true
+        return repeatDelay
     }
 
     if (event.key === 'ArrowUp') {
@@ -71,9 +71,9 @@ function handleKeyDown_Global(event: React.KeyboardEvent, router: AppRouterInsta
 
         if (document.activeElement === focusPreviousElement(sidenavState.element, queryString)) {
             topnavState.menuButtonElement?.focus()
-            return false
+            return maximumDelay
         }
-        return true
+        return repeatDelay
     }
 
     if (event.key === 'ArrowLeft') {
@@ -83,7 +83,7 @@ function handleKeyDown_Global(event: React.KeyboardEvent, router: AppRouterInsta
         layoutState.setIndexGroup(topnavIndexGroup)
         sidenavState.setIsOpen(false)
         topnavState.menuButtonElement?.focus()
-        return false
+        return maximumDelay
     }
     return null
 }

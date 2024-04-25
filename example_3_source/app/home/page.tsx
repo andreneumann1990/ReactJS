@@ -1,9 +1,7 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { focusableElementSelectors, mainIndexGroup } from '../../constants/parameters'
-import { useLayoutStore } from '../../hooks/stores'
-import { handleFocusCapture } from '../../constants/functions'
 import { NullableDivElement } from '../../constants/types'
 import { useIndexGroupContainer, useIndexGroupEffect } from '../../hooks/indexGroup'
 

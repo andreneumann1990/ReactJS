@@ -1,33 +1,20 @@
 'use client'
 
 import '../styles/globals.scss'
-import React, { useState } from 'react'
-import Layout from '../components/layout/Layout'
+import React, { useEffect, useRef } from 'react'
+import Layout, { handleKeyDown_Layout } from '../components/layout/Layout'
 import { ThemeProvider } from '@mui/material/styles'
-import { darkTheme, initialDelay, maximumDelay, repeatDelay, defaultIndexGroup } from '../constants/parameters'
+import { darkTheme, initialDelay, defaultIndexGroup } from '../constants/parameters'
 import { handleInput_Sidenav as handleKeyDown_Sidenav } from '../components/layout/Sidenav'
 import { useRouter } from 'next/navigation'
-import { useGlobalStore } from '../hooks/stores'
+import { useLayoutStore } from '../hooks/stores'
 import { handleKeyInput_Topnav as handleKeyDown_Topnav } from '../components/layout/Topnav'
 import { handleKeyDown_Main } from '../components/layout/Main'
-import { handleKeyDown_Search } from '../components/atoms/Search'
-import { create } from 'zustand'
-import { KeyboardEventState, NullableHTMLElement } from '../constants/types'
-import { clearKeyDownTimeout, repeatKeyDownInput, stopKeyDownInput } from '../constants/functions'
-import { useIndexGroupContainer, useIndexGroupItem } from '../hooks/indexGroup'
+import { NullableNumber } from '../constants/types'
+import { clearKeyDownTimeout } from '../constants/functions'
+import { useIndexGroupContainer } from '../hooks/indexGroup'
 
 export default RootLayout
-
-//
-// parameters and variables
-//
-
-const useKeyboardEventStore = create<KeyboardEventState>((set) => ({
-    event: undefined,
-    setEvent: (event) => set(() => ({ event })),
-}))
-
-export let keyDownTimeout: { current?: NodeJS.Timeout } = {}
 
 //
 // main
@@ -38,93 +25,48 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     // parameters and variables
     //
 
-    // this is very convenient to write; but this means that this component re-renders
-    // for every change made to globalState
-    const keyboardEventState = useKeyboardEventStore()
     const router = useRouter()
-    const [previouslyFocusedElement, setPreviouslyFocusedElement] = useState<NullableHTMLElement>(null)
+    const previousDateRef = useRef<Date>(new Date())
+    const keyDownCooldown = useLayoutStore(state => state.keyDownCooldown)
+    const setIsFirstKeyDown = useLayoutStore(state => state.setIsFirstKeyDown)
 
     //
     // functions
     //
 
-    // TODO; maybe do sequential instead and use a global? cooldown counter;
+    // onKeyDown makes sure that onKeyDown or onKeyDownCapture events of child nodes 
+    // are called first;
+    // stopPropagation() during child events makes sure that later onKeyDown events don't 
+    // override the cooldown before the update is applied;
     function handleKeyDown(event: React.KeyboardEvent): void {
-        if (keyDownTimeout.current != null) {
+        const layoutState = useLayoutStore.getState()
+        layoutState.setKeyDownCooldown(layoutState.keyDownCooldown - (new Date().getTime() - previousDateRef.current.getTime()))
+        previousDateRef.current = new Date()
+
+        if (layoutState.keyDownCooldown > 0) {
             event.preventDefault()
             event.stopPropagation()
-            keyboardEventState.setEvent(event)
             return
         }
 
-        function handleInput(initialDelay?: number): void {
-            const globalState = useGlobalStore.getState()
-            const { layoutState, mainState, searchState, topnavState } = globalState
-            const event = useKeyboardEventStore.getState().event
-            if (event == null) return
+        let newCooldown: NullableNumber = handleKeyDown_Layout(event)
+        if (newCooldown == null) newCooldown = handleKeyDown_Main(event)
+        if (newCooldown == null) newCooldown = handleKeyDown_Sidenav(event, router)
+        if (newCooldown == null) newCooldown = handleKeyDown_Topnav(event)
 
-            // focus search input in topnav by ctrl+k;
-            if (event.ctrlKey && event.key === 'k') {
-                event.preventDefault()
-                event.stopPropagation()
-
-                if (document.activeElement === searchState.inputElement) {
-                    previouslyFocusedElement?.focus()
-                    searchState.inputElement?.blur()
-                    keyDownTimeout.current = stopKeyDownInput()
-                    return
-                }
-
-                setPreviouslyFocusedElement(document.activeElement as NullableHTMLElement)
-                searchState.inputElement?.focus()
-                keyDownTimeout.current = stopKeyDownInput()
-                return
-            }
-
-            let isKeyInputRepeating = null
-            if (document.activeElement instanceof HTMLBodyElement) {
-                if (event.key === 'Enter' || event.key === 'ArrowRight' || event.key === 'ArrowDown') {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    mainState.element?.focus()
-                    isKeyInputRepeating = false
-                }
-
-                if (event.key === 'Escape' || event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    topnavState.element?.focus()
-                    isKeyInputRepeating = false
-                }
-            }
-
-            if (isKeyInputRepeating != null) {
-                keyDownTimeout.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)
-                return
-            }
-
-            isKeyInputRepeating = handleKeyDown_Main(event)
-            if (isKeyInputRepeating != null) {
-                keyDownTimeout.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)
-                return
-            }
-
-            isKeyInputRepeating = handleKeyDown_Sidenav(event, router)
-            if (isKeyInputRepeating != null) {
-                keyDownTimeout.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)
-                return
-            }
-
-            isKeyInputRepeating = handleKeyDown_Topnav(event)
-            if (isKeyInputRepeating != null) {
-                keyDownTimeout.current = setTimeout(() => { handleInput() }, isKeyInputRepeating ? (initialDelay ?? repeatDelay) : maximumDelay)
-                return
-            }
-        }
-
-        keyboardEventState.setEvent(event)
-        handleInput(initialDelay)
+        if (newCooldown == null) return
+        layoutState.setKeyDownCooldown(Math.max(newCooldown ?? 0, layoutState.isFirstKeyDown ? initialDelay : 0))
     }
+
+    //
+    // effects
+    //
+
+    // update isFirstKeyDown based on the cooldown;
+    useEffect(() => {
+        if (keyDownCooldown <= 0) return
+        setIsFirstKeyDown(false)
+    }, [keyDownCooldown, setIsFirstKeyDown])
 
     //
     //
@@ -162,9 +104,8 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
             <body
                 {...useIndexGroupContainer(defaultIndexGroup)}
                 className="w-full bg-background [color:--color-text] [font-size:100%] [font-family:Helvetica,Arial,sans-serif] overflow-y-hidden"
-                onBlur={clearKeyDownTimeout(keyboardEventState, keyDownTimeout)}
                 onKeyDown={handleKeyDown}
-                onKeyUp={clearKeyDownTimeout(keyboardEventState, keyDownTimeout)}
+                onKeyUp={clearKeyDownTimeout}
             >
                 <noscript>You need to enable JavaScript to run this app.</noscript>
                 <React.StrictMode>

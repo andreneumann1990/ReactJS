@@ -1,11 +1,11 @@
-import React, { KeyboardEvent, useEffect, useRef } from 'react'
+import React, { KeyboardEvent, useEffect } from 'react'
 import { useDrag } from '@use-gesture/react'
-import { defaultIndexGroup, focusableElementSelectors, indexEntryTypesString, isDebugEnabled, mainIndexGroup, sidenavTransitionDuration } from '../../constants/parameters'
+import { defaultIndexGroup, indexEntryTypesString, isDebugEnabled, mainIndexGroup, maximumDelay, repeatDelay, sidenavTransitionDuration } from '../../constants/parameters'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
-import { useGlobalStore, useMainStore } from '../../hooks/stores'
-import { NullableBoolean, NullableHTMLElement } from '../../constants/types'
+import { useGlobalStore } from '../../hooks/stores'
+import { NullableHTMLElement, NullableNumber } from '../../constants/types'
 import { useSearchParams } from 'next/navigation'
-import { compareStrings, focusNextElement, focusPreviousElement, normalizeString } from '../../constants/functions'
+import { focusNextElement, focusPreviousElement, normalizeString } from '../../constants/functions'
 import { useIndexGroupItem } from '../../hooks/indexGroup'
 
 export default Main
@@ -35,10 +35,11 @@ let previousScrollTop: number = -1
 // functions
 //
 
-function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
+function handleKeyDown_Global(event: KeyboardEvent): NullableNumber {
+    console.log('main')
     const { layoutState, mainState, topnavState } = useGlobalStore.getState()
     if (mainState.element == null) return null
-    if (!mainState.element.contains(document.activeElement)) return null
+    if (!mainState.element.contains(document.activeElement)) return
 
     if (layoutState.indexGroup === defaultIndexGroup) {
         if (event.key === 'ArrowUp') {
@@ -50,23 +51,23 @@ function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
 
             if (previousScrollTop > 0) {
                 previousScrollTop = 0
-                return false
+                return maximumDelay
             }
 
             event.preventDefault()
             event.stopPropagation()
             topnavState.element?.focus()
-            return false
+            return maximumDelay
         }
 
         if (event.key === 'Enter') {
+            console.log('main enter')
             event.preventDefault()
             event.stopPropagation()
-            layoutState.setIndexGroup(mainIndexGroup)
 
-            // wait for the indexGroup change to be applied;
+            layoutState.setIndexGroup(mainIndexGroup)
             setTimeout(() => focusNextElement(mainState.element, queryString), 1)
-            return false
+            return maximumDelay
         }
 
         // what is this?; is this unique?;
@@ -80,23 +81,23 @@ function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
     if (layoutState.indexGroup === mainIndexGroup) {
         if (event.key === 'Escape') {
             event.preventDefault()
-            // layoutState.resetIndexGroup()
             mainState.element?.focus()
-            return false
+            return maximumDelay
         }
 
         if (event.key === 'ArrowDown') {
+            console.log('next')
             event.preventDefault()
             event.stopPropagation()
-            focusNextElement(mainState.element, queryString)
-            return true
+            console.log(focusNextElement(mainState.element, queryString))
+            return repeatDelay
         }
 
         if (event.key === 'ArrowUp') {
             event.preventDefault()
             event.stopPropagation()
             focusPreviousElement(mainState.element, queryString)
-            return true
+            return repeatDelay
         }
     }
     return null
@@ -111,8 +112,9 @@ function Main({ children }: React.PropsWithChildren) {
     // parameters and variables
     //
 
-    // const focusAnchor = useRef<HTMLDivElement | null>(null)
-    const { layoutState, mainState, searchState, sidenavState } = useGlobalStore()
+    // useGlobalStore() is very convenient to write; but this means that this component
+    // re-renders for every change made to globalState
+    const { mainState, searchState, sidenavState } = useGlobalStore()
     const { setIsActive } = mainState
     const searchParams = useSearchParams()
 

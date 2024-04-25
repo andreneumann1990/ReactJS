@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { DropdownMenuState, DropdownMenuStore, GlobalState, LayoutState, LayoutStore, MainState, MainStore, SearchState, SearchStore, SidenavState, SidenavStore, TopnavState, TopnavStore } from '../constants/types'
-import { isDebugEnabled, defaultIndexGroup } from '../constants/parameters'
+import { defaultIndexGroup, isDebugEnabled } from '../constants/parameters'
 
 //
 //
@@ -44,12 +44,22 @@ useGlobalStore.getState = function (): GlobalState {
     }
 }
 
-export const useLayoutStore: LayoutStore = create<LayoutState>((set, get) => ({
+export const useLayoutStore: LayoutStore = create<LayoutState>((set) => ({
     indexGroup: defaultIndexGroup,
-    setIndexGroup: (indexGroup) => set((state) => {
-        // if (isDebugEnabled) console.log(`Layout: indexGroup ${indexGroup}`)
+    setIndexGroup: (indexGroup) => set(() => {
+        if (isDebugEnabled) {
+            // console.log(`Layout: indexGroup ${indexGroup}`)
+        }
         return { indexGroup }
     }),
+
+    isFirstKeyDown: true,
+    setIsFirstKeyDown: (isFirstKeyDown) => set(() => ({ isFirstKeyDown })),
+    keyDownCooldown: 0,
+    setKeyDownCooldown: (keyDownCooldown) => set(() => ({ keyDownCooldown })),
+
+    previousFocusedElement: null,
+    setPreviousFocusedElement: (previousFocusedElement) => set(() => ({ previousFocusedElement })),
 }))
 
 export const useMainStore: MainStore = create<MainState>((set) => ({

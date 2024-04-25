@@ -1,12 +1,11 @@
 import TextField from '@mui/material/TextField'
 import { Autocomplete, Box } from '@mui/material'
-import { useGlobalStore } from '../../hooks/stores'
-import { countries, focusableElementSelectors, mainIndexGroup } from '../../constants/parameters'
-import { useEffect, useRef, useState } from 'react'
+import { countries, mainIndexGroup } from '../../constants/parameters'
+import { useState } from 'react'
 import { FormikErrors } from 'formik'
 import { NullableDivElement, StringStringObject } from '../../constants/types'
-import { focusFirstChildElement, getFirstChildElement } from '../../constants/functions'
-import { useIndexGroupItem, useIndexGroupEffect, useIndexGroupContainer } from '../../hooks/indexGroup'
+import { focusFirstChildElement } from '../../constants/functions'
+import { useIndexGroupItem, useIndexGroupContainer } from '../../hooks/indexGroup'
 
 export { Country1 }
 export { Country2 }
@@ -79,8 +78,6 @@ function Country2({ setFieldValue }: { setFieldValue: (value: string) => (Promis
     // parameters and variables
     //
 
-    const { layoutState } = useGlobalStore()
-    const { setIndexGroup } = layoutState
     const [containerElement, setContainerElement] = useState<NullableDivElement>(null)
     const localIndexGroup = 'main-country2'
 

@@ -19,7 +19,7 @@ const nextConfig = {
     },
 
     publicRuntimeConfig: {
-        backEndHRef: isProduction ? "https://example-3-b52da596edfb.herokuapp.com" : 'http://localhost:8080',
+        backEndHRef: isProduction ? 'https://example-3-b52da596edfb.herokuapp.com' : 'http://localhost:8080',
     },
 }
 

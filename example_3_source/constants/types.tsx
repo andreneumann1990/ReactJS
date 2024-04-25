@@ -1,4 +1,4 @@
-import { KeyboardEvent, MutableRefObject } from 'react'
+import { MutableRefObject } from 'react'
 import { StoreApi, UseBoundStore } from 'zustand'
 
 //
@@ -76,14 +76,16 @@ export interface GlobalState {
     topnavState: TopnavState
 }
 
-export interface KeyboardEventState {
-    event?: React.KeyboardEvent,
-    setEvent: (event?: React.KeyboardEvent) => void,
-}
-
 export interface LayoutState {
     indexGroup: string,
     setIndexGroup: (indexGroup: string) => void,
+    isFirstKeyDown: boolean,
+    setIsFirstKeyDown: (isFirstKeyDown: boolean) => void,
+
+    keyDownCooldown: number,
+    setKeyDownCooldown: (keyDownCooldown: number) => void,
+    previousFocusedElement: NullableHTMLElement,
+    setPreviousFocusedElement: (previousFocusedElement: NullableHTMLElement) => void,
 }
 export type LayoutStore = UseBoundStore<StoreApi<LayoutState>>
 

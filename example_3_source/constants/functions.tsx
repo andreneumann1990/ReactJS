@@ -1,6 +1,6 @@
 import tinycolor from 'tinycolor2'
-import { isDebugEnabled, maximumDelay, repeatDelay } from './parameters'
-import { KeyboardEventState, NullableBoolean, NullableHTMLElement, NullableNumber, NullableString, TimeoutRef } from './types'
+import { maximumDelay } from './parameters'
+import { NullableHTMLElement } from './types'
 import { useLayoutStore } from '../hooks/stores'
 
 //
@@ -18,12 +18,10 @@ const getFocusableContainer = function (target: HTMLElement): NullableHTMLElemen
 // main
 //
 
-export function clearKeyDownTimeout(keyboardEventState: KeyboardEventState, keyDownTimeoutRef: TimeoutRef): () => void {
-    return () => {
-        keyboardEventState.setEvent(undefined)
-        clearTimeout(keyDownTimeoutRef.current)
-        keyDownTimeoutRef.current = undefined
-    }
+export function clearKeyDownTimeout(): void {
+    const { setIsFirstKeyDown, setKeyDownCooldown } = useLayoutStore.getState()
+    setIsFirstKeyDown(true)
+    setKeyDownCooldown(0)
 }
 
 export function focusFirstChildElement(element: NullableHTMLElement, query: string): void {

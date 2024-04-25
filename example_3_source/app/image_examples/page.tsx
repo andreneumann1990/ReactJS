@@ -3,24 +3,14 @@
 import { useDrag } from '@use-gesture/react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useClick } from '../../hooks/gestures'
 import { focusableElementSelectors, initialDelay, mainIndexGroup, maximumDelay, repeatDelay } from '../../constants/parameters'
-import { useGlobalStore } from '../../hooks/stores'
-import { clearKeyDownTimeout, focusNextElement, focusPreviousElement, repeatKeyDownInput, stopKeyDownInput } from '../../constants/functions'
-import { KeyboardEventState, NullableDivElement, NullableEventTarget, NullableHTMLElement, NullableImageElement } from '../../constants/types'
-import { create } from 'zustand'
+import { useGlobalStore, useLayoutStore } from '../../hooks/stores'
+import { focusNextElement, focusPreviousElement, } from '../../constants/functions'
+import { NullableDivElement, NullableEventTarget, NullableHTMLElement, NullableImageElement } from '../../constants/types'
 import { useIndexGroupContainer, useIndexGroupEffect, useIndexGroupItem } from '../../hooks/indexGroup'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
-
-//
-//
-//
-
-const useKeyboardEventStore = create<KeyboardEventState>((set) => ({
-    event: undefined,
-    setEvent: (event) => set(() => ({ event })),
-}))
 
 //
 // main
@@ -31,8 +21,8 @@ export default function Page() {
     // parameters and variables
     //
 
-    const { layoutState, sidenavState } = useGlobalStore()
-    const keyboardEventState = useKeyboardEventStore()
+    const { sidenavState } = useGlobalStore()
+    const indexGroup = useLayoutStore(state => state.indexGroup)
 
     const [imageRowElement, setImageRowElement] = useState<HTMLDivElement | null>(null)
     const [overlayElement, setOverlayElement] = useState<HTMLDivElement | null>(null)
@@ -46,11 +36,6 @@ export default function Page() {
     const overlayIndexGroup = 'main-overlay'
     const queryString = 'img[tabIndex="0"]'
 
-    // it seems like moving information from inside to outside is possible but from 
-    // outside to inside is not via useRef; in that case I need a store (to update 
-    // the event for example);
-    const keyDownTimeoutRef = useRef<NodeJS.Timeout>()
-
     const dragAttributes: ReactDOMAttributes = useDrag(({ delta: [dx,], event }) => {
         if (imageRowElement == null) return
         event.preventDefault()
@@ -61,9 +46,10 @@ export default function Page() {
     // functions
     //
 
-    function closeOverlay(): void {
+    const closeOverlay = useCallback(() => {
         if (overlayElement == null) return
-        const overlayImageElement = overlayElement.querySelector('img')
+        if (overlayElement.getAttribute('open') == null) return
+        const overlayImageElement = overlayImageRef.current
         if (overlayImageElement == null) return
 
         overlayImageElement.src = './icons/logo192.png'
@@ -71,7 +57,11 @@ export default function Page() {
         overlayImageElement.width = 0
         overlayImageElement.height = 0
         overlayElement.removeAttribute('open')
-    }
+
+        if (!(previouslyFocusedElementRef.current instanceof HTMLBodyElement)) {
+            previouslyFocusedElementRef.current?.focus()
+        }
+    }, [overlayElement])
 
     function openOverlay(event: { target: NullableEventTarget, currentTarget: NullableEventTarget }): void {
         if (overlayElement == null) return
@@ -94,85 +84,78 @@ export default function Page() {
     }
 
     function handleKeyDown_ImageRow(event: React.KeyboardEvent): void {
-        if (keyDownTimeoutRef.current != null) {
-            keyboardEventState.setEvent(event)
-            event.preventDefault()
-            event.stopPropagation()
+        const layoutState = useLayoutStore.getState()
+        if (layoutState.keyDownCooldown > 0) return
+
+        if (layoutState.indexGroup === mainIndexGroup) {
+            if (event.key === 'Enter') {
+                event.preventDefault()
+                event.stopPropagation()
+                imageRowFirstImage.current?.focus()
+                layoutState.setKeyDownCooldown(maximumDelay)
+                return
+            }
             return
         }
 
-        function handleInput(isFirstKeyDown?: boolean): void {
-            const event = useKeyboardEventStore.getState().event
-            if (event == null) return
-
-            if (layoutState.indexGroup === mainIndexGroup) {
-                if (event.key === 'Enter') {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    imageRowFirstImage.current?.focus()
-                    keyDownTimeoutRef.current = stopKeyDownInput()
-                    return
-                }
+        if (layoutState.indexGroup === imageRowIndexGroup) {
+            if (event.key === 'Escape') {
+                event.preventDefault()
+                event.stopPropagation()
+                imageRowElement?.focus()
+                layoutState.setKeyDownCooldown(maximumDelay)
                 return
             }
 
-            if (layoutState.indexGroup === imageRowIndexGroup) {
-                if (event.key === 'Escape') {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    imageRowElement?.focus()
-                    keyDownTimeoutRef.current = stopKeyDownInput()
-                    return
-                }
-
-                if (event.key === 'ArrowRight') {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    focusNextElement(imageRowElement, queryString)
-                    keyDownTimeoutRef.current = repeatKeyDownInput(handleInput, isFirstKeyDown ? initialDelay : repeatDelay)
-                    return
-                }
-
-                if (event.key === 'ArrowLeft') {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    focusPreviousElement(imageRowElement, queryString)
-                    keyDownTimeoutRef.current = repeatKeyDownInput(handleInput, isFirstKeyDown ? initialDelay : repeatDelay)
-                    return
-                }
-
-                if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-                    event.preventDefault()
-                    event.stopPropagation()
-                    return
-                }
+            if (event.key === 'ArrowRight') {
+                event.preventDefault()
+                event.stopPropagation()
+                focusNextElement(imageRowElement, queryString)
+                layoutState.setKeyDownCooldown(layoutState.isFirstKeyDown ? initialDelay : repeatDelay)
                 return
             }
+
+            if (event.key === 'ArrowLeft') {
+                event.preventDefault()
+                event.stopPropagation()
+                focusPreviousElement(imageRowElement, queryString)
+                layoutState.setKeyDownCooldown(layoutState.isFirstKeyDown ? initialDelay : repeatDelay)
+                return
+            }
+
+            if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                event.preventDefault()
+                event.stopPropagation()
+                return
+            }
+            return
         }
-
-        keyboardEventState.setEvent(event)
-        handleInput(true)
     }
 
     function handleKeyDown_Overlay(event: React.KeyboardEvent) {
+        const layoutState = useLayoutStore.getState()
+        if (layoutState.keyDownCooldown > 0) return
+
         if (event.key === 'Escape') {
             event.preventDefault()
-            event.stopPropagation()
-            closeOverlay();
-            (event.currentTarget as NullableHTMLElement)?.blur()
+            event.stopPropagation();
 
-            if (!(previouslyFocusedElementRef.current instanceof HTMLBodyElement)) {
-                previouslyFocusedElementRef.current?.focus()
-            }
+            (event.currentTarget as NullableHTMLElement)?.blur()
+            closeOverlay()
+            layoutState.setKeyDownCooldown(maximumDelay)
             return
         }
     }
 
     function handleKeyDown_SingleImage(event: React.KeyboardEvent): void {
+        const layoutState = useLayoutStore.getState()
+        if (layoutState.keyDownCooldown > 0) return
+
         if (event.key === 'Enter') {
             event.preventDefault()
             event.stopPropagation()
             openOverlay(event)
+            layoutState.setKeyDownCooldown(maximumDelay)
             return
         }
     }
@@ -181,15 +164,16 @@ export default function Page() {
     // effects
     //
 
+    // close overlay when indexGroup changes back;
+    useEffect(() => {
+        if (indexGroup !== overlayIndexGroup) closeOverlay()
+    }, [closeOverlay, indexGroup])
+
     useIndexGroupEffect(pageElement, focusableElementSelectors + ', img')
 
     //
     //
     //
-
-    // const [isLoading, setIsLoading] = useState<boolean>(true)
-    // useEffect(() => { setIsLoading(false) }, [])
-    // if (isLoading) return (<></>)
 
     return (
         <div
@@ -198,6 +182,7 @@ export default function Page() {
         >
             {/* overlay; fullscreen picture view; */}
             <div
+                // {...useClick(handleClick)}
                 {...useIndexGroupContainer(overlayIndexGroup)}
                 className="fixed hidden open:block h-[calc(100vh-var(--height-topnav))] w-full p-10 top-[--height-topnav] left-0 overflow-y-auto z-10 bg-secondary motion-safe:animate-fade-in"
                 ref={setOverlayElement}
@@ -214,8 +199,6 @@ export default function Page() {
                     alt=""
                     className="p-1 mx-auto"
                     height={0}
-                    // onBlurCapture={() => layoutState.setIndexGroup(mainIndexGroup)}
-                    // onFocusCapture={() => layoutState.setIndexGroup(overlayIndexGroup)}
                     onKeyDown={handleKeyDown_Overlay}
                     ref={(element) => { overlayImageRef.current = element }}
                     src="./icons/logo192.png"
@@ -268,9 +251,7 @@ export default function Page() {
                 onKeyUpCapture={undefined}
 
                 {...useIndexGroupItem(mainIndexGroup)}
-                onBlur={clearKeyDownTimeout(keyboardEventState, keyDownTimeoutRef)}
                 onKeyDown={handleKeyDown_ImageRow}
-                onKeyUp={clearKeyDownTimeout(keyboardEventState, keyDownTimeoutRef)}
                 ref={setImageRowElement}
             >
                 <div

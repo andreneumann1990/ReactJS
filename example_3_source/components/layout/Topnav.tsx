@@ -1,11 +1,10 @@
 import { KeyboardEvent, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { isDebugEnabled, defaultIndexGroup, mainIndexGroup, sidenavIndexGroup, topnavIndexGroup, focusableElementSelectors } from '../../constants/parameters'
-import { stopKeyDownInput, triggerFlashEffect } from '../../constants/functions'
-import { NullableBoolean, NullableHTMLElement } from '../../constants/types'
-import { useGlobalStore, useSearchStore, useSidenavStore, useTopnavStore } from '../../hooks/stores'
+import { isDebugEnabled, defaultIndexGroup, sidenavIndexGroup, topnavIndexGroup, focusableElementSelectors, maximumDelay, repeatDelay } from '../../constants/parameters'
+import { triggerFlashEffect } from '../../constants/functions'
+import { NullableHTMLElement, NullableNumber } from '../../constants/types'
+import { useGlobalStore, useLayoutStore, useSearchStore, useSidenavStore, useTopnavStore } from '../../hooks/stores'
 import Search, { handleKeyDown_Search } from '../atoms/Search'
-import { keyDownTimeout } from '../../app/layout'
 import { useRouter } from 'next/navigation'
 import { useIndexGroupContainer, useIndexGroupEffect, useIndexGroupItem } from '../../hooks/indexGroup'
 
@@ -53,7 +52,7 @@ function focusPreviousElement(): void {
     previousElement?.focus()
 }
 
-function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
+function handleKeyDown_Global(event: KeyboardEvent): NullableNumber {
     const { layoutState, mainState, sidenavState, topnavState } = useGlobalStore.getState()
     if (topnavState.element == null) return null
     if (!topnavState.element.contains(document.activeElement)) return null
@@ -63,7 +62,7 @@ function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
             event.preventDefault()
             event.stopPropagation()
             mainState.element?.focus()
-            return true
+            return repeatDelay
         }
 
         if (event.key === 'Enter') {
@@ -71,20 +70,20 @@ function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
             event.stopPropagation()
             layoutState.setIndexGroup(topnavIndexGroup)
             topnavState.menuButtonElement?.focus()
-            return false
+            return maximumDelay
         }
         return null
     }
 
-    const isKeyInputRepeating = handleKeyDown_Search(event)
-    if (isKeyInputRepeating != null) return isKeyInputRepeating
+    const newCooldown = handleKeyDown_Search(event)
+    if (newCooldown != null) return newCooldown
 
     if (event.key === 'Escape') {
         event.preventDefault()
         event.stopPropagation()
         sidenavState.setIsOpen(false)
         topnavState.element?.focus()
-        return false
+        return maximumDelay
     }
 
     if (document.activeElement === topnavState.menuButtonElement) {
@@ -94,7 +93,7 @@ function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
 
             triggerFlashEffect(event)
             toggleSidenav()
-            return false
+            return maximumDelay
         }
 
         if (event.key === 'ArrowDown') {
@@ -103,7 +102,7 @@ function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
 
             if (!sidenavState.isOpen) {
                 toggleSidenav()
-                return true
+                return repeatDelay
             }
 
             // for some reason repeating the down-arrow input skips the focus of the first 
@@ -111,7 +110,7 @@ function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
             // instead;
             const firstElement = sidenavState.element?.querySelector<HTMLElement>(sidenavQueryString)
             firstElement?.focus()
-            return true
+            return repeatDelay
         }
 
         if ((event.key === 'ArrowLeft' || event.key === 'ArrowUp') && sidenavState.isOpen) {
@@ -120,7 +119,7 @@ function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
 
             toggleSidenav()
             triggerFlashEffect(event)
-            return false
+            return maximumDelay
         }
 
         if (event.key === 'ArrowRight' && sidenavState.isOpen) {
@@ -129,32 +128,22 @@ function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
 
             toggleSidenav()
             triggerFlashEffect(event)
-            return true
+            return repeatDelay
         }
     }
-
-    // if (document.activeElement === topnavState.homeLinkElement) {
-    //     if (event.key === 'Enter') {
-    //         console.log('homeLink')
-    //         triggerFlashEffect(event)
-    //         layoutState.resetIndexGroup()
-    //         topnavState.element.focus()
-    //         return true
-    //     }
-    // }
 
     if (event.key === 'ArrowLeft') {
         event.preventDefault()
         event.stopPropagation()
         focusPreviousElement()
-        return true
+        return repeatDelay
     }
 
     if (event.key === 'ArrowRight') {
         event.preventDefault()
         event.stopPropagation()
         focusNextElement()
-        return true
+        return repeatDelay
     }
     return null
 }
@@ -186,14 +175,14 @@ function Topnav() {
     //
 
     function handleKeyDown_HomeLink(event: React.KeyboardEvent): void {
-        if (keyDownTimeout.current != null) return
+        const { keyDownCooldown, setKeyDownCooldown } = useLayoutStore.getState()
+        if (keyDownCooldown > 0) return
+
         if (event.key === 'Enter') {
             router.push('/home')
             triggerFlashEffect(event)
-
-            // layoutState.resetIndexGroup()
             topnavState.element?.focus()
-            keyDownTimeout.current = stopKeyDownInput()
+            setKeyDownCooldown(maximumDelay)
             return
         }
     }

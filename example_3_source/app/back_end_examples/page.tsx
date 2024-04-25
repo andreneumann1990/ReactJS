@@ -2,10 +2,9 @@
 
 import { Box, Button, Link, TextField } from '@mui/material'
 import { useFormik } from 'formik'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import * as Yup from 'yup'
 import { backEndHRef, focusableElementSelectors, mainIndexGroup } from '../../constants/parameters'
-import { useLayoutStore } from '../../hooks/stores'
 import { useIndexGroupContainer, useIndexGroupEffect } from '../../hooks/indexGroup'
 import { NullableDivElement } from '../../constants/types'
 
@@ -20,7 +19,6 @@ function Page() {
     // parameters and variables
     //
 
-    const layoutState = useLayoutStore()
     const [greetingResponse, setGreetingResponse] = useState('')
     const [postFormResponse, setPostFormResponse] = useState<{ username?: string, password?: string, }>({})
 
@@ -89,6 +87,7 @@ function Page() {
                         href={backEndHRef}
                     >{backEndHRef}</Link>
                 </li>
+                <li>heroku requires a paid dynos to run the back-end; :/</li>
             </ul>
 
             <h2 className="my-1 text-xl font-bold">GET requests:</h2>

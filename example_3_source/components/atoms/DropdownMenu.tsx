@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect } from 'react'
 import { triggerFlashEffect } from '../../constants/functions'
-import { isDebugEnabled, sidenavIndexGroup } from '../../constants/parameters'
-import { NullableBoolean, DropdownMenuState, SidenavState } from '../../constants/types'
+import { isDebugEnabled, maximumDelay, repeatDelay, sidenavIndexGroup } from '../../constants/parameters'
+import { DropdownMenuState, NullableNumber } from '../../constants/types'
 import { useDropdownMenuStoreArray, useGlobalStore, useLayoutStore, useSidenavStore } from '../../hooks/stores'
 
 export default DropdownMenu
@@ -42,7 +42,7 @@ function toggleContent(id: number): void {
     useSidenavStore.getState().setLastActiveDropdownElement(dropdownMenuState.buttonElement)
 }
 
-function handleKeyDown_Global(id: number, event: React.KeyboardEvent): NullableBoolean {
+function handleKeyDown_Global(id: number, event: React.KeyboardEvent): NullableNumber {
     const dropdownMenuState: DropdownMenuState | undefined = useDropdownMenuStoreArray[id].getState()
     if (dropdownMenuState == null) return null
     if (dropdownMenuState.element == null) return null
@@ -55,7 +55,7 @@ function handleKeyDown_Global(id: number, event: React.KeyboardEvent): NullableB
 
             toggleContent(id)
             triggerFlashEffect(event)
-            return false
+            return maximumDelay
         }
 
         if (event.key === 'ArrowRight' && !dropdownMenuState.isOpen) {
@@ -64,7 +64,7 @@ function handleKeyDown_Global(id: number, event: React.KeyboardEvent): NullableB
 
             toggleContent(id)
             triggerFlashEffect(event)
-            return false
+            return maximumDelay
         }
 
         if (event.key === 'ArrowLeft' && dropdownMenuState.isOpen) {
@@ -78,7 +78,7 @@ function handleKeyDown_Global(id: number, event: React.KeyboardEvent): NullableB
 
         toggleContent(id)
         dropdownMenuState.buttonElement?.focus()
-        return true
+        return repeatDelay
     }
     return null
 }

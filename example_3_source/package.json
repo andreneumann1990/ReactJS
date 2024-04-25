@@ -1,6 +1,6 @@
 {
     "name": "example_3_source",
-    "version": "0.0.2",
+    "version": "0.0.3",
     "private": true,
     "homepage": "https://andreneumann1990.github.io/reactjs/example_3",
     "scripts": {
@@ -77,7 +77,7 @@
         "rules": {
             "@next/next/no-img-element": "off",
             "@typescript-eslint/no-explicit-any": "off",
-            "@typescript-eslint/no-unused-vars": "off",
+            "@typescript-eslint/no-unused-vars": "warn",
             "no-trailing-spaces": "off",
             "quotes": [
                 "error",

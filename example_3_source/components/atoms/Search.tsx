@@ -2,10 +2,10 @@ import React, { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'reac
 import algoliasearch from 'algoliasearch/lite'
 import DOMPurify from 'dompurify'
 import Link from 'next/link'
-import { isDebugEnabled, topnavIndexGroup } from '../../constants/parameters'
+import { isDebugEnabled, maximumDelay, repeatDelay, topnavIndexGroup } from '../../constants/parameters'
 import { useRouter } from 'next/navigation'
 import { useGlobalStore } from '../../hooks/stores'
-import { EntryData, NullableBoolean, NullableHTMLElement, SearchData } from '../../constants/types'
+import { EntryData, NullableNumber, SearchData } from '../../constants/types'
 import { scrollIntoView } from '../../constants/functions'
 
 export default Search
@@ -22,8 +22,8 @@ const algoliaIndex = algoliasearch('2QYN25VL0K', 'ba0b8a970db7843753c13218f38ae4
 //
 
 // navigate via arrow keys; escape to close;
-function handleKeyDown_Global(event: React.KeyboardEvent): NullableBoolean {
-    const { searchState, topnavState } = useGlobalStore.getState()
+function handleKeyDown_Global(event: React.KeyboardEvent): NullableNumber {
+    const { searchState } = useGlobalStore.getState()
     if (searchState.inputElement == null) return null
     if (!searchState.inputElement.contains(document.activeElement)) return null
 
@@ -46,7 +46,7 @@ function handleKeyDown_Global(event: React.KeyboardEvent): NullableBoolean {
                 console.log(`Search-Warning: dataArray ${Object.values(searchState.resultsDataArray)}`)
                 console.log(`Search-Warning: groupIndex ${groupIndex}`)
             }
-            return false
+            return maximumDelay
         }
 
         if (entryIndex < entryArray.length - 1) {
@@ -56,7 +56,7 @@ function handleKeyDown_Global(event: React.KeyboardEvent): NullableBoolean {
             searchState.setResultsSelectedIndex([groupIndex + 1, 0])
             scrollIntoView(searchState.resultsElement?.querySelector(`#search-results-${groupIndex + 1}-0`))
         }
-        return true
+        return repeatDelay
     }
 
     if (event.key === 'ArrowUp') {
@@ -74,13 +74,13 @@ function handleKeyDown_Global(event: React.KeyboardEvent): NullableBoolean {
                     console.log(`Search-Warning: dataArray ${Object.values(searchState.resultsDataArray)}`)
                     console.log(`Search-Warning: (groupIndex - 1) ${groupIndex - 1}`)
                 }
-                return false
+                return maximumDelay
             }
 
             searchState.setResultsSelectedIndex([groupIndex - 1, entryArray.length - 1])
             scrollIntoView(searchState.resultsElement?.querySelector(`#search-results-${groupIndex - 1}-${entryArray.length - 1}`))
         }
-        return true
+        return repeatDelay
     }
     return null
 }
@@ -341,7 +341,7 @@ function Search() {
                         )
                     })}
                     {/* key input hints and Algolia logo; */}
-                    <div className="flex flex-row flex-wrap justify-center lg:justify-end items-center mx-5 my-2">
+                    <div className="flex flex-row flex-wrap justify-center lg:justify-end items-center mx-5">
                         <div className="flex lg:hidden flex-col sm:flex-row items-center">
                             <div className="inline-grid grid-flow-col justify-center px-2">
                                 <i className="material-icons">arrow_upward</i>
@@ -357,7 +357,7 @@ function Search() {
                                 <span className="inline-block p-1 text-xs">to close</span>
                             </div>
                         </div>
-                        <div className="">
+                        <div className="my-2">
                             <p className="inline-block p-1 text-xs">
                                 Search by
                             </p>

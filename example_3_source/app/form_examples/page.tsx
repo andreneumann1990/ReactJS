@@ -1,14 +1,13 @@
 'use client'
 
-import { FormikConfig, useFormik } from 'formik'
-import { MouseEvent, SyntheticEvent, useEffect, useRef, useState, } from 'react'
+import { useFormik } from 'formik'
+import { MouseEvent, useRef, useState, } from 'react'
 import * as Yup from 'yup'
 import { Country1, Country2 } from '../../components/atoms/Country'
 import Link from 'next/link'
 import { Button } from '@mui/material'
 import { focusableElementSelectors, mainIndexGroup } from '../../constants/parameters'
-import { useLayoutStore } from '../../hooks/stores'
-import { useIndexGroupItem, useIndexGroupEffect, useIndexGroupContainer } from '../../hooks/indexGroup'
+import { useIndexGroupEffect, useIndexGroupContainer } from '../../hooks/indexGroup'
 import { NullableDivElement, NullableFormElement } from '../../constants/types'
 
 function Page() {
@@ -103,14 +102,6 @@ function Page() {
     function resetForm(event: MouseEvent): void {
         form1.resetForm()
         handleClick(event)
-    }
-
-    function handleChangeForCountry1(value: string) {
-        form2.setFieldValue('country1', value)
-    }
-
-    function handleChangeForCountry2(value: string) {
-        form2.setFieldValue('country2', value)
     }
 
     //
