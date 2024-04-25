@@ -288,11 +288,11 @@ function Search() {
 
     return (
         <form
-            className="w-full relative grid grid-flow-col [grid-template-columns:var(--height-topnav)_auto] items-center"
+            className="pl-2 w-full relative flex flex-row items-center"
             onSubmit={handleSearch}
         >
-            <i className="p-1 icon-medium material-icons">search</i>
-            <div className="relative pr-1">
+            <i className="hidden sm:block p-1 icon-medium material-icons">search</i>
+            <div className="relative pr-1 w-[inherit]">
                 {/* search input; */}
                 <input name="searchInput" className="w-full px-4 py-1 rounded-2xl peer"
                     type="text"

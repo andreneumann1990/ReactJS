@@ -165,7 +165,7 @@ function DropdownMenu(props: {
                 onPointerUp={() => toggleContent(props.id)}
                 ref={dropdownMenuState.setButtonElement}
             >
-                <div className="grid grid-cols-2 items-center">
+                <div className="grid [grid-template-columns:1fr_32px] items-center">
                     {props.text}
                     <i ref={dropdownMenuState.setIconElement} className="icon-medium material-icons justify-self-end motion-safe:transition-transform motion-safe:ease-out motion-safe:duration-300">computer</i>
                 </div>

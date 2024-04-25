@@ -7,7 +7,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useClick } from '../../hooks/gestures'
 import { focusableElementSelectors, initialDelay, mainIndexGroup, maximumDelay, repeatDelay } from '../../constants/parameters'
 import { useGlobalStore, useLayoutStore } from '../../hooks/stores'
-import { focusNextElement, focusPreviousElement, } from '../../constants/functions'
+import { focusNextElement, focusPreviousElement, scrollIntoView, } from '../../constants/functions'
 import { NullableDivElement, NullableEventTarget, NullableHTMLElement, NullableImageElement } from '../../constants/types'
 import { useIndexGroupContainer, useIndexGroupEffect, useIndexGroupItem } from '../../hooks/indexGroup'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
@@ -37,9 +37,9 @@ export default function Page() {
     const queryString = 'img[tabIndex="0"]'
 
     const dragAttributes: ReactDOMAttributes = useDrag(({ delta: [dx,], event }) => {
-        if (imageRowElement == null) return
         event.preventDefault()
-        imageRowElement.scrollBy({ left: -dx })
+        const currentElement = event.currentTarget as HTMLElement
+        currentElement.scrollBy({ left: -dx })
     }, { eventOptions: { capture: true }, enabled: !sidenavState.isOpen })()
 
     //
@@ -79,6 +79,7 @@ export default function Page() {
 
         // focus() does not work when the attribute open is not set yet;
         previouslyFocusedElementRef.current = event.currentTarget as HTMLElement
+        scrollIntoView(previouslyFocusedElementRef.current)
         overlayElement.setAttribute('open', '')
         overlayImageRef.current?.focus()
     }
@@ -246,15 +247,15 @@ export default function Page() {
                 <li>click or drag</li>
             </ul>
             <div
-                {...dragAttributes}
-                onKeyDownCapture={undefined}
-                onKeyUpCapture={undefined}
-
                 {...useIndexGroupItem(mainIndexGroup)}
                 onKeyDown={handleKeyDown_ImageRow}
                 ref={setImageRowElement}
             >
                 <div
+                    {...dragAttributes}
+                    onKeyDownCapture={undefined}
+                    onKeyUpCapture={undefined}
+
                     // onFocusCapture() interferes with useIndexGroupItem();
                     {...useIndexGroupContainer(imageRowIndexGroup)}
                     className="flex w-full border items-center overflow-x-hidden touch-none"
@@ -267,7 +268,6 @@ export default function Page() {
                         ref={imageRowFirstImage}
                         onKeyDown={handleKeyDown_SingleImage}
                         src="./images/sunset-3008779_1280.jpg"
-                        // tabIndex={layoutState.indexGroup === imageRowIndexGroup ? 0 : -1}
                         width={250}
                     ></Image>
                     <Image
@@ -277,7 +277,6 @@ export default function Page() {
                         height={250}
                         onKeyDown={handleKeyDown_SingleImage}
                         src="./images/forest-5855196_1280.jpg"
-                        // tabIndex={layoutState.indexGroup === imageRowIndexGroup ? 0 : -1}
                         width={250}
                     ></Image>
                     <Image
@@ -287,7 +286,6 @@ export default function Page() {
                         height={250}
                         onKeyDown={handleKeyDown_SingleImage}
                         src="./images/cute-7270285.svg"
-                        // tabIndex={layoutState.indexGroup === imageRowIndexGroup ? 0 : -1}
                         width={250}
                     ></Image>
                     <Image
@@ -297,7 +295,6 @@ export default function Page() {
                         height={250}
                         onKeyDown={handleKeyDown_SingleImage}
                         src="./images/floral-background-6622475_1280.png"
-                        // tabIndex={layoutState.indexGroup === imageRowIndexGroup ? 0 : -1}
                         width={250}
                     ></Image>
                 </div>

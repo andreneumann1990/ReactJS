@@ -239,7 +239,7 @@ function Topnav() {
             <div
                 // does not work on topnavElement since it changes indexGroup onFocusCapture;
                 {...useIndexGroupContainer(topnavIndexGroup)}
-                className="h-[--height-topnav] lg:h-auto grid [grid-template-columns:20%_60%_20%] lg:[grid-template-columns:20%_1fr_410px] justify-items-center justify-between"
+                className="h-[--height-topnav] lg:h-auto grid [grid-template-columns:20%_1fr_10px] sm:[grid-template-columns:20%_1fr_10%] lg:[grid-template-columns:20%_1fr_410px] justify-items-center justify-between"
             >
                 <div className="grid grid-flow-col justify-self-start">
                     {/* sidenav menu and home link; left; */}

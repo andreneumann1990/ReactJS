@@ -7,9 +7,12 @@ import { NullableHTMLElement, NullableNumber } from '../../constants/types'
 import { useSearchParams } from 'next/navigation'
 import { focusNextElement, focusPreviousElement, normalizeString } from '../../constants/functions'
 import { useIndexGroupItem } from '../../hooks/indexGroup'
+import { useClick } from '../../hooks/gestures'
 
 export default Main
 export { handleKeyDown_Global as handleKeyDown_Main }
+
+//TODO; you can't refresh the page by scrolling up on mobile;
 
 //
 // parameters and variables
@@ -150,6 +153,17 @@ function Main({ children }: React.PropsWithChildren) {
     // functions
     //
 
+    function handleClick(event: React.PointerEvent): void {
+        if (mainState.element == null) return
+        if (mainState.element.dataset.inactive == null) return
+        event.preventDefault()
+        event.stopPropagation()
+
+        searchState.setIsOpen(false)
+        sidenavState.setIsOpen(false)
+        mainState.element.focus()
+    }
+
     function initializeMainElement(element: NullableHTMLElement): void {
         if (mainState.element != null) return
         if (element == null) return
@@ -254,8 +268,9 @@ function Main({ children }: React.PropsWithChildren) {
             onKeyDownCapture={undefined}
             onKeyUpCapture={undefined}
 
+            {...useClick(handleClick)}
             {...useIndexGroupItem(defaultIndexGroup)}
-            className="h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:transition-colors motion-safe:ease-out motion-safe:duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
+            className="h-[calc(100vh-var(--height-topnav))] px-5 sm:pl-16 sm:pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:transition-colors motion-safe:ease-out motion-safe:duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none data-inactive:cursor-none"
             ref={initializeMainElement}
         >
             {children}
