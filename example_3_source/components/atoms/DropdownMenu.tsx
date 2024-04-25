@@ -49,8 +49,6 @@ function handleKeyDown_Global(id: number, event: React.KeyboardEvent): NullableB
     if (!dropdownMenuState.element?.contains(document.activeElement)) return null
 
     if (document.activeElement === dropdownMenuState.buttonElement) {
-        //TODO
-        // if (event.target === dropdownMenuState.buttonElement) {
         if (event.key === 'Enter') {
             event.preventDefault()
             event.stopPropagation()

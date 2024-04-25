@@ -6,6 +6,7 @@ import { isDebugEnabled, topnavIndexGroup } from '../../constants/parameters'
 import { useRouter } from 'next/navigation'
 import { useGlobalStore } from '../../hooks/stores'
 import { EntryData, NullableBoolean, NullableHTMLElement, SearchData } from '../../constants/types'
+import { scrollIntoView } from '../../constants/functions'
 
 export default Search
 export { handleKeyDown_Global as handleKeyDown_Search }
@@ -36,6 +37,7 @@ function handleKeyDown_Global(event: React.KeyboardEvent): NullableBoolean {
 
     if (event.key === 'ArrowDown') {
         event.preventDefault()
+        event.stopPropagation()
         const entryArray: EntryData[] | undefined = Object.values(searchState.resultsDataArray)[groupIndex]
 
         if (entryArray == null) {
@@ -49,16 +51,21 @@ function handleKeyDown_Global(event: React.KeyboardEvent): NullableBoolean {
 
         if (entryIndex < entryArray.length - 1) {
             searchState.setResultsSelectedIndex([groupIndex, entryIndex + 1])
+            scrollIntoView(searchState.resultsElement?.querySelector(`#search-results-${groupIndex}-${entryIndex + 1}`))
         } else if (groupIndex < Object.keys(searchState.resultsDataArray).length - 1) {
             searchState.setResultsSelectedIndex([groupIndex + 1, 0])
+            scrollIntoView(searchState.resultsElement?.querySelector(`#search-results-${groupIndex + 1}-0`))
         }
         return true
     }
 
     if (event.key === 'ArrowUp') {
         event.preventDefault()
+        event.stopPropagation()
+
         if (entryIndex > 0) {
             searchState.setResultsSelectedIndex([groupIndex, entryIndex - 1])
+            scrollIntoView(searchState.resultsElement?.querySelector(`#search-results-${groupIndex}-${entryIndex - 1}`))
         } else if (groupIndex > 0) {
             const entryArray: EntryData[] | undefined = Object.values(searchState.resultsDataArray)[groupIndex - 1]
             if (entryArray == null) {
@@ -69,7 +76,9 @@ function handleKeyDown_Global(event: React.KeyboardEvent): NullableBoolean {
                 }
                 return false
             }
+
             searchState.setResultsSelectedIndex([groupIndex - 1, entryArray.length - 1])
+            scrollIntoView(searchState.resultsElement?.querySelector(`#search-results-${groupIndex - 1}-${entryArray.length - 1}`))
         }
         return true
     }
@@ -194,6 +203,16 @@ function Search() {
         if (isDebugEnabled) console.log('Search: isOpen false')
         setIsOpen(false)
     }, [isFocused, isHovering, searchState.inputElement, searchState.isOpen, setIsOpen, sidenavState.isOpen])
+
+    // show / hide resultsElement;
+    useEffect(() => {
+        if (searchState.resultsElement == null) return
+        if (searchState.isOpen) {
+            searchState.resultsElement.style.display = 'block'
+            return
+        }
+        searchState.resultsElement.style.display = 'none'
+    }, [searchState.isOpen, searchState.resultsElement])
 
     // select search input field by ctrl+k;
     useEffect(() => {
@@ -325,28 +344,34 @@ function Search() {
                 <div
                     // making hover:block conditional to searchState.isOpen does not work in all cases;
                     // maybe a race condition?;
-                    className={'absolute w-full lg:min-w-[600px] mt-1 bg-secondary shadow-md text-center hidden peer-focus:block hover:block'}
+                    className={'absolute w-full lg:min-w-[600px] max-h-[calc(100vh-var(--height-topnav))] mt-1 bg-secondary shadow-md text-center overflow-y-scroll scrollbar-stable-both'}
                     ref={initializeResultsElement}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
+                    style={{ display: 'none' }}
                 >
                     {Object.entries(searchState.resultsDataArray).map(([url_relative, entryArray], groupIndex) => {
                         return (
                             // a fragment would not work here unless they have an unique key as well;
-                            <div key={`search-results-group-${groupIndex}`}
-                                className="text-left p-2 pl-5 text-xl"
+                            <div
+                                className="text-left p-2 pl-5 text-xl break-all"
+                                key={`search-results-group-${groupIndex}`}
                             >
                                 <header>{url_relative}</header>
                                 {entryArray.map((entry, entryIndex) => {
-                                    return (<Link key={`search-results-entry-${entryIndex}`}
-                                        className={'grid items-center my-3 text-left min-h-10 p-2 px-4 mt-2 border rounded-2xl' + (groupIndex === searchState.resultsSelectedIndex[0] && entryIndex === searchState.resultsSelectedIndex[1] ? ' bg-primary-active' : ' bg-primary')}
-                                        href={entry.href}
-                                    >
-                                        <div
-                                            className="*:bg-yellow-700 text-base"
-                                            dangerouslySetInnerHTML={{ __html: entry.purifiedInnerHTML }}
-                                        ></div>
-                                    </Link>)
+                                    return (
+                                        <Link
+                                            className={'grid items-center my-3 text-left min-h-10 p-2 px-4 mt-2 border rounded-2xl' + (groupIndex === searchState.resultsSelectedIndex[0] && entryIndex === searchState.resultsSelectedIndex[1] ? ' bg-primary-active' : ' bg-primary')}
+                                            href={entry.href}
+                                            id={`search-results-${groupIndex}-${entryIndex}`}
+                                            key={`search-results-entry-${entryIndex}`}
+                                        >
+                                            <div
+                                                className="*:bg-yellow-700 text-base"
+                                                dangerouslySetInnerHTML={{ __html: entry.purifiedInnerHTML }}
+                                            ></div>
+                                        </Link>
+                                    )
                                 })}
                             </div>
                         )

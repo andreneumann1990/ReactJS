@@ -68,7 +68,7 @@ export function handleFocusCapture(indexGroup: string): (event: React.FocusEvent
     }
 }
 
-export function scrollIntoView(element: NullableHTMLElement): void {
+export function scrollIntoView(element?: NullableHTMLElement): void {
     element?.scrollIntoView({ behavior: isMotionSafe ? 'smooth' : 'instant', block: 'center', inline: 'center' })
 }
 

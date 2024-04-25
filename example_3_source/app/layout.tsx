@@ -142,7 +142,7 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
             */}
             <body
                 {...useIndexGroupContainer(defaultIndexGroup)}
-                className="w-full bg-background [color:--color-text] [font-size:100%] [font-family:Helvetica,Arial,sans-serif]"
+                className="w-full bg-background [color:--color-text] [font-size:100%] [font-family:Helvetica,Arial,sans-serif] overflow-y-hidden"
                 onBlur={clearKeyDownTimeout(keyboardEventState, keyDownTimeout)}
                 onKeyDown={handleKeyDown}
                 onKeyUp={clearKeyDownTimeout(keyboardEventState, keyDownTimeout)}
