@@ -102,7 +102,7 @@ function Search() {
     const [isFocused, setIsFocused] = useState<boolean>(false)
     const [isHovering, setIsHovering] = useState<boolean>(false)
     const [lastSearchQuery, setLastSearchQuery] = useState<string>('')
-    const [previouslyFocusedElement, setPreviouslyFocusedElement] = useState<NullableHTMLElement>(null)
+    // const [previouslyFocusedElement, setPreviouslyFocusedElement] = useState<NullableHTMLElement>(null)
 
     // const [searchState.resultsDataArray, searchState.setResultsDataArray] = useState<SearchData>({})
     // const [searchState.resultsSelectedIndex, searchState.setResultsSelectedIndex] = useState<[number, number]>([0, 0])
@@ -168,8 +168,6 @@ function Search() {
 
     // set focus; don't close when focused => update state;
     function handleFocus(): void {
-        //TODO
-        // layoutState.setIndexGroup(topnavIndexGroup)
         setIsFocused(true)
     }
 
@@ -214,40 +212,6 @@ function Search() {
         searchState.resultsElement.style.display = 'none'
     }, [searchState.isOpen, searchState.resultsElement])
 
-    // select search input field by ctrl+k;
-    useEffect(() => {
-        //TODO; move to layout.tsx;
-        function handleKeyDown(event: KeyboardEvent): void {
-            if (event.ctrlKey && event.key === 'k') {
-                event.preventDefault()
-            }
-        }
-
-        function handleKeyUpInput(event: KeyboardEvent): void {
-            if (searchState.inputElement == null) return
-            if (event.ctrlKey && event.key === 'k') {
-                event.preventDefault()
-                if (document.activeElement === searchState.inputElement) {
-                    previouslyFocusedElement?.focus()
-                    searchState.inputElement.blur()
-                    return
-                }
-
-                setPreviouslyFocusedElement(document.activeElement as NullableHTMLElement)
-                searchState.inputElement.focus()
-            }
-        }
-
-        // for some reason `keypress` does not trigger??;
-        document.addEventListener('keydown', handleKeyDown)
-        document.addEventListener('keyup', handleKeyUpInput)
-
-        return (() => {
-            document.removeEventListener('keydown', handleKeyDown)
-            document.removeEventListener('keyup', handleKeyUpInput)
-        })
-    }, [previouslyFocusedElement, searchState.inputElement])
-
     // search after query is updated, i.e. onChange();
     useEffect(() => {
         if (searchQuery === '') {
@@ -291,7 +255,7 @@ function Search() {
 
                 let matchedWordArray: string[] = []
                 innerHTML.split('<em>').forEach((str: string) => {
-                    if (str === '') return
+                    if (str.indexOf('</em>') === -1) return
                     matchedWordArray.push(str.split('</em>')[0])
                 })
 

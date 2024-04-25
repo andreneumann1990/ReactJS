@@ -1,5 +1,3 @@
-'use client'
-
 import { createTheme } from '@mui/material'
 
 //
@@ -27,8 +25,6 @@ export const initialDelay = 400
 export const maximumDelay = 2147483647
 export const repeatDelay = 100
 
-// window needs 'use client';
-export const isMotionSafe = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 export const sidenavTransitionDuration = '0.5s'
 
 // From: https://bitbucket.org/atlassian/atlaskit-mk-2/raw/4ad0e56649c3e6c973e226b7efaeb28cb240ccb0/packages/core/select/src/data/countries.js

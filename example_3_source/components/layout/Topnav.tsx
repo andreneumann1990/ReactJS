@@ -264,11 +264,11 @@ function Topnav() {
                     >
                         <i
                             className="p-1 icon-medium material-icons"
-                            ref={menuIconRef}
+                            ref={(element) => { menuIconRef.current = element }}
                         >menu</i>
                         <i
                             className="p-1 icon-medium material-icons hidden"
-                            ref={closeIconRef}
+                            ref={(element) => { closeIconRef.current = element }}
                         >close</i>
                     </button>
                     <Link

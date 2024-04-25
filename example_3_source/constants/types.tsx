@@ -9,34 +9,36 @@ import { StoreApi, UseBoundStore } from 'zustand'
 // situations it is really handy to prevent writing the same object structure
 // more than once; on the other hand these types need to be imported every time;
 
-export type NullableBoolean = boolean | null
+export type NullableBoolean = boolean | null | undefined
 export type NullableBooleanRef = MutableRefObject<NullableBoolean>
-export type NullableNumber = number | null
+export type NullableNumber = number | null | undefined
 export type NullableNumberRef = MutableRefObject<NullableNumber>
 
-export type NullableString = string | null
+export type NullableString = string | null | undefined
 export type StringStringObject = { [field: string]: string }
 
 export type BooleanRef = MutableRefObject<boolean>
 export type TimeoutRef = { current?: NodeJS.Timeout }
 
-export type NullableAnchorElement = HTMLAnchorElement | null
+export type NullableAnchorElement = HTMLAnchorElement | null | undefined
 export type SetNullableAnchorElement = (element: NullableAnchorElement) => void
-export type NullableButtonElement = HTMLButtonElement | null
+export type NullableButtonElement = HTMLButtonElement | null | undefined
 export type SetNullableButtonElement = (element: NullableButtonElement) => void
 
-export type NullableDivElement = HTMLDivElement | null
+export type NullableDivElement = HTMLDivElement | null | undefined
 export type SetNullableDivElement = (element: NullableDivElement) => void
-export type NullableFormElement = HTMLFormElement | null
+export type NullableFormElement = HTMLFormElement | null | undefined
 export type SetNullableFormElement = (element: NullableFormElement) => void
 
-export type NullableHTMLElement = HTMLElement | null
+export type NullableHTMLElement = HTMLElement | null | undefined
 export type SetNullableHTMLElement = (element: NullableHTMLElement) => void
-export type NullableImageElement = HTMLImageElement | null
+export type NullableImageElement = HTMLImageElement | null | undefined
 export type SetNullableImageElement = (element: NullableImageElement) => void
 
-export type NullableElement = Element | null
-export type NullableEventTarget = EventTarget | null
+export type NullableInputElement = HTMLInputElement | null | undefined
+export type SetNullableInputElement = (element: NullableInputElement) => void
+export type NullableElement = Element | null | undefined
+export type NullableEventTarget = EventTarget | null | undefined
 
 //
 //
@@ -99,15 +101,15 @@ export interface SearchData {
 
 export type Pair = [number, number]
 export interface SearchState {
-    inputElement: HTMLInputElement | null,
-    setInputElement: (element: HTMLInputElement | null) => void,
+    inputElement: NullableInputElement,
+    setInputElement: (element: NullableInputElement) => void,
     isOpen: boolean,
     setIsOpen: (isOpen: boolean) => void,
 
     resultsDataArray: SearchData,
     setResultsDataArray: (data: SearchData) => void,
-    resultsElement: HTMLDivElement | null,
-    setResultsElement: (element: HTMLDivElement | null) => void,
+    resultsElement: NullableDivElement,
+    setResultsElement: (element: NullableDivElement) => void,
 
     resultsSelectedIndex: Pair,
     setResultsSelectedIndex: (index: Pair) => void,
@@ -121,8 +123,8 @@ export interface SidenavState {
     isOpen: boolean,
     setIsOpen: (isOpen: boolean) => void,
 
-    lastActiveDropdownElement: HTMLButtonElement | null,
-    setLastActiveDropdownElement: (element: HTMLButtonElement | null) => void,
+    lastActiveDropdownElement: NullableButtonElement,
+    setLastActiveDropdownElement: (element: NullableButtonElement) => void,
 }
 export type SidenavStore = UseBoundStore<StoreApi<SidenavState>>
 
@@ -132,7 +134,7 @@ export interface TopnavState {
     homeLinkElement: NullableAnchorElement,
     setHomeLinkElement: SetNullableAnchorElement,
 
-    menuButtonElement: HTMLButtonElement | null,
-    setMenuButtonElement: (element: HTMLButtonElement | null) => void,
+    menuButtonElement: NullableButtonElement,
+    setMenuButtonElement: (element: NullableButtonElement) => void,
 }
 export type TopnavStore = UseBoundStore<StoreApi<TopnavState>>

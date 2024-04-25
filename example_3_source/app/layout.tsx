@@ -1,7 +1,7 @@
 'use client'
 
 import '../styles/globals.scss'
-import React from 'react'
+import React, { useState } from 'react'
 import Layout from '../components/layout/Layout'
 import { ThemeProvider } from '@mui/material/styles'
 import { darkTheme, initialDelay, maximumDelay, repeatDelay, defaultIndexGroup } from '../constants/parameters'
@@ -12,8 +12,8 @@ import { handleKeyInput_Topnav as handleKeyDown_Topnav } from '../components/lay
 import { handleKeyDown_Main } from '../components/layout/Main'
 import { handleKeyDown_Search } from '../components/atoms/Search'
 import { create } from 'zustand'
-import { KeyboardEventState } from '../constants/types'
-import { clearKeyDownTimeout } from '../constants/functions'
+import { KeyboardEventState, NullableHTMLElement } from '../constants/types'
+import { clearKeyDownTimeout, repeatKeyDownInput, stopKeyDownInput } from '../constants/functions'
 import { useIndexGroupContainer, useIndexGroupItem } from '../hooks/indexGroup'
 
 export default RootLayout
@@ -38,10 +38,11 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     // parameters and variables
     //
 
-    const globalState = useGlobalStore()
-    const { layoutState, mainState, sidenavState, topnavState } = globalState
+    // this is very convenient to write; but this means that this component re-renders
+    // for every change made to globalState
     const keyboardEventState = useKeyboardEventStore()
     const router = useRouter()
+    const [previouslyFocusedElement, setPreviouslyFocusedElement] = useState<NullableHTMLElement>(null)
 
     //
     // functions
@@ -58,9 +59,27 @@ function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
 
         function handleInput(initialDelay?: number): void {
             const globalState = useGlobalStore.getState()
-            const { layoutState, mainState, topnavState } = globalState
+            const { layoutState, mainState, searchState, topnavState } = globalState
             const event = useKeyboardEventStore.getState().event
             if (event == null) return
+
+            // focus search input in topnav by ctrl+k;
+            if (event.ctrlKey && event.key === 'k') {
+                event.preventDefault()
+                event.stopPropagation()
+
+                if (document.activeElement === searchState.inputElement) {
+                    previouslyFocusedElement?.focus()
+                    searchState.inputElement?.blur()
+                    keyDownTimeout.current = stopKeyDownInput()
+                    return
+                }
+
+                setPreviouslyFocusedElement(document.activeElement as NullableHTMLElement)
+                searchState.inputElement?.focus()
+                keyDownTimeout.current = stopKeyDownInput()
+                return
+            }
 
             let isKeyInputRepeating = null
             if (document.activeElement instanceof HTMLBodyElement) {

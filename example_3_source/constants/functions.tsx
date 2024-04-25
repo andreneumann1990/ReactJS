@@ -1,5 +1,5 @@
 import tinycolor from 'tinycolor2'
-import { isDebugEnabled, isMotionSafe, maximumDelay, repeatDelay } from './parameters'
+import { isDebugEnabled, maximumDelay, repeatDelay } from './parameters'
 import { KeyboardEventState, NullableBoolean, NullableHTMLElement, NullableNumber, NullableString, TimeoutRef } from './types'
 import { useLayoutStore } from '../hooks/stores'
 
@@ -68,8 +68,8 @@ export function handleFocusCapture(indexGroup: string): (event: React.FocusEvent
     }
 }
 
-export function scrollIntoView(element?: NullableHTMLElement): void {
-    element?.scrollIntoView({ behavior: isMotionSafe ? 'smooth' : 'instant', block: 'center', inline: 'center' })
+export function scrollIntoView(element: NullableHTMLElement): void {
+    element?.scrollIntoView({ behavior: isMotionSafe() ? 'smooth' : 'instant', block: 'center', inline: 'center' })
 }
 
 export function repeatKeyDownInput(handleInput: () => void, delay: number): NodeJS.Timeout {
@@ -96,15 +96,13 @@ export function compareStrings(str1: string, str2: string) {
     let differences = []
 
     for (let i = 0; i < maxLength; i++) {
-        if (str1[i] !== str2[i]) {
-            differences.push({
-                index: i,
-                str1Char: str1.charCodeAt(i) || '', // handle cases where one string is shorter
-                str2Char: str2.charCodeAt(i) || ''  // handle cases where one string is shorter
-            })
-        }
+        if (str1[i] === str2[i]) continue
+        differences.push({
+            index: i,
+            str1Char: str1.charCodeAt(i) || '',
+            str2Char: str2.charCodeAt(i) || '',
+        })
     }
-
     return differences
 }
 
@@ -112,4 +110,9 @@ export function normalizeString(str: string): string {
     // \u00A0 handles &nbps; \s includes spaces, tabs and line breaks; /g makes 
     // replace() behave like replaceAll();
     return str.replace(/\u00A0/g, ' ').replace(/\s/g, ' ')
+}
+
+export function isMotionSafe() {
+    if (window == null) return true
+    return !window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }

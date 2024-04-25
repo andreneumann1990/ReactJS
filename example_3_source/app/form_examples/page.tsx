@@ -133,7 +133,7 @@ function Page() {
 
             <h2 className="my-1 text-xl font-bold">All Input Types:</h2>
             <form
-                ref={form1Ref}
+                ref={(element) => { form1Ref.current = element }}
                 onSubmit={form1.handleSubmit}
             >
                 <div ref={normalizeHeights} className="grid grid-flow-row md:grid-cols-2 xl:grid-cols-3 border-x-[1px] items-center">

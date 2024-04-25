@@ -11,9 +11,6 @@ import { useIndexGroupItem } from '../../hooks/indexGroup'
 export default Main
 export { handleKeyDown_Global as handleKeyDown_Main }
 
-//TODO; focus child elements;
-//TODO; change keys; up down is for scrolling;
-
 //
 // parameters and variables
 //
@@ -22,11 +19,16 @@ const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"]), div[ta
 
 // what is the difference between useRef and a normal variable??; useRef can be 
 // only used like other hooks and does not trigger a re-render; a normal variable 
-// does not trigger a re-render either; they are local if inside a function component;
+// does not trigger a re-render either; they are local if inside a function 
+// component; local variables reset when the component re-renders;
 //
-// in this case it is fine; but there are problems here; this is a global variable;
-// this means that effectively the Main component should never be re-used; a more
-// general pattern would be probably better; TODO;
+// in this case it is fine; but there might be problems; this is a global variable;
+// this means that effectively the Main component should never be re-used;
+//
+// I could add it to useMainStore(); in that case it might trigger re-render 
+// when changed;
+//
+// leave it as is for now;
 let previousScrollTop: number = -1
 
 //
@@ -76,23 +78,6 @@ function handleKeyDown_Global(event: KeyboardEvent): NullableBoolean {
     }
 
     if (layoutState.indexGroup === mainIndexGroup) {
-        //TODO; maybe put this directly on the elements;
-        //         if (document.activeElement?.tagName === 'SUMMARY') {
-        //             if (event.key === 'ArrowRight') {
-        //                 event.preventDefault()
-        //                 event.stopPropagation()
-        //                 document.activeElement.parentElement?.setAttribute('open', '')
-        //                 return false
-        //             }
-        // 
-        //             if (event.key === 'ArrowLeft') {
-        //                 event.preventDefault()
-        //                 event.stopPropagation()
-        //                 document.activeElement.parentElement?.removeAttribute('open')
-        //                 return false
-        //             }
-        //         }
-
         if (event.key === 'Escape') {
             event.preventDefault()
             // layoutState.resetIndexGroup()
