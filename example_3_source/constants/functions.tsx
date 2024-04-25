@@ -1,6 +1,6 @@
 import tinycolor from 'tinycolor2'
 import { isDebugEnabled, isMotionSafe, maximumDelay, repeatDelay } from './parameters'
-import { KeyboardEventState, NullableBoolean, NullableHTMLElement, NullableNumber, TimeoutRef } from './types'
+import { KeyboardEventState, NullableBoolean, NullableHTMLElement, NullableNumber, NullableString, TimeoutRef } from './types'
 import { useLayoutStore } from '../hooks/stores'
 
 //
@@ -89,4 +89,27 @@ export function triggerFlashEffect(event: { target: EventTarget | null }): void 
     const backgroundColorString = containerElement.style.backgroundColor
     const backgroundColor = tinycolor(containerElement.style.backgroundColor)
     containerElement.animate({ backgroundColor: [backgroundColorString, backgroundColor.brighten(50).toString(), backgroundColorString] }, 300)
+}
+
+export function compareStrings(str1: string, str2: string) {
+    let maxLength = Math.max(str1.length, str2.length)
+    let differences = []
+
+    for (let i = 0; i < maxLength; i++) {
+        if (str1[i] !== str2[i]) {
+            differences.push({
+                index: i,
+                str1Char: str1.charCodeAt(i) || '', // handle cases where one string is shorter
+                str2Char: str2.charCodeAt(i) || ''  // handle cases where one string is shorter
+            })
+        }
+    }
+
+    return differences
+}
+
+export function normalizeString(str: string): string {
+    // \u00A0 handles &nbps; \s includes spaces, tabs and line breaks; /g makes 
+    // replace() behave like replaceAll();
+    return str.replace(/\u00A0/g, ' ').replace(/\s/g, ' ')
 }

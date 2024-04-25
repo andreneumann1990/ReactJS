@@ -5,7 +5,7 @@ import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/typ
 import { useGlobalStore, useMainStore } from '../../hooks/stores'
 import { NullableBoolean, NullableHTMLElement } from '../../constants/types'
 import { useSearchParams } from 'next/navigation'
-import { focusNextElement, focusPreviousElement } from '../../constants/functions'
+import { compareStrings, focusNextElement, focusPreviousElement, normalizeString } from '../../constants/functions'
 import { useIndexGroupItem } from '../../hooks/indexGroup'
 
 export default Main
@@ -189,8 +189,9 @@ function Main({ children }: React.PropsWithChildren) {
 
     // navigate to searched element;
     useEffect(() => {
-        const innerText = searchParams.get('search')?.replaceAll(/[\n\r\t]/g, '')
+        let innerText = searchParams.get('search')
         if (innerText == null) return
+        innerText = normalizeString(innerText)
 
         const searchResultElementArray = Array.from(document.querySelectorAll(indexEntryTypesString)).reduce<HTMLElement[]>((accumulator, current) => {
             if (!(current instanceof HTMLElement)) return accumulator
@@ -198,14 +199,15 @@ function Main({ children }: React.PropsWithChildren) {
             // might not work in every case; in some cases the innerText is empty or null 
             // for some reason; this seems to be happening inside <details> elements; inner
             // HTML can only be used as a substitute if no html tags are used inside;
-            if (current.innerText.replaceAll(/[\n\r\t]/g, '') !== innerText && current.innerHTML.replaceAll(/[\n\r\t]/g, '') !== innerText) return accumulator
+            if (normalizeString(current.innerText) !== innerText && normalizeString(current.innerHTML) !== innerText) {
+                return accumulator
+            }
 
             accumulator.push(current)
             return accumulator
         }, [])
 
         if (searchResultElementArray.length < 1) {
-            // TODO: got this when searching for the back-end link url; lol, I have to deploy first for the url to match; todo check if it works when deployed;
             if (isDebugEnabled) console.log(`Main: No element found for search params "${innerText}".`)
             return
         }
@@ -217,37 +219,42 @@ function Main({ children }: React.PropsWithChildren) {
         const detailsElement = firstSearchResultElement.closest('details')
         if (detailsElement != null) detailsElement.setAttribute('open', '')
         const highlightWordArray = searchParams.get('select')?.split(',')
+        if (highlightWordArray == null) return
+
         const selection = window.getSelection()
+        if (selection == null) return
+        selection.removeAllRanges()
+        const textNodeArray: Text[] = []
 
-        function getTextNode(element: ChildNode): ChildNode {
-            if (element.firstChild == null) return element
-            return getTextNode(element.firstChild)
+        function addTextNodesToArray(node: Node) {
+            node.childNodes.forEach((childNode) => {
+                addTextNodesToArray(childNode)
+            })
+
+            if (!(node instanceof Text)) return
+            textNodeArray.push(node)
         }
+        addTextNodesToArray(firstSearchResultElement)
 
-        if (highlightWordArray != null && selection != null) {
-            selection.removeAllRanges()
-            const textElement = getTextNode(firstSearchResultElement)
-
+        textNodeArray.forEach((textNode: Text) => {
             highlightWordArray.forEach((word: string) => {
-                if (textElement == null) return
-                if (textElement.textContent == null) return
-                const startIndex = textElement.textContent.toLowerCase().indexOf(word.toLowerCase())
+                if (textNode.textContent == null) return
+                const startIndex = normalizeString(textNode.textContent).toLowerCase().indexOf(normalizeString(word).toLowerCase())
                 if (startIndex === -1) return
-
                 const range = document.createRange()
+
                 if (selection.rangeCount < 1) {
-                    range.setStart(textElement, startIndex)
-                    range.setEnd(textElement, startIndex + word.length)
+                    range.setStart(textNode, startIndex)
+                    range.setEnd(textNode, startIndex + word.length)
                     selection.addRange(range)
                     return
                 }
 
-                range.setEnd(textElement, startIndex + word.length)
-                selection.extend(textElement, range.endOffset)
+                range.setEnd(textNode, startIndex + word.length)
+                selection.extend(textNode, range.endOffset)
             })
-        }
+        })
     }, [searchParams])
-
 
     //
     //
@@ -261,7 +268,6 @@ function Main({ children }: React.PropsWithChildren) {
             onKeyUpCapture={undefined}
 
             {...useIndexGroupItem(defaultIndexGroup)}
-            // {...useClick(() => layoutState.setIndexGroup(mainIndexGroup))}
             className="h-[calc(100vh-var(--height-topnav))] pl-16 pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:transition-colors motion-safe:ease-out motion-safe:duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
             ref={initializeMainElement}
         >

@@ -66,7 +66,7 @@ export default function Page() {
         const overlayImageElement = overlayElement.querySelector('img')
         if (overlayImageElement == null) return
 
-        overlayImageElement.src = '/icons/logo192.png'
+        overlayImageElement.src = './icons/logo192.png'
         overlayImageElement.alt = ''
         overlayImageElement.width = 0
         overlayImageElement.height = 0
@@ -214,7 +214,7 @@ export default function Page() {
                     // onFocusCapture={() => layoutState.setIndexGroup(overlayIndexGroup)}
                     onKeyDown={handleKeyDown_Overlay}
                     ref={overlayImageRef}
-                    src="/icons/logo192.png"
+                    src="./icons/logo192.png"
                     width={0}
                 ></Image>
             </div>

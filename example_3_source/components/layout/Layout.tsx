@@ -29,6 +29,10 @@ function Layout({ children }: React.PropsWithChildren) {
     //     return () => clearInterval(interval)
     // }, [])
 
+    // useEffect(() => {
+    //     setTimeout(() => { console.log(window.getSelection()) }, 5000)
+    // }, [])
+
     //
     //
     //

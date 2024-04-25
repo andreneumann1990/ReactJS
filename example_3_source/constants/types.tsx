@@ -14,6 +14,7 @@ export type NullableBooleanRef = MutableRefObject<NullableBoolean>
 export type NullableNumber = number | null
 export type NullableNumberRef = MutableRefObject<NullableNumber>
 
+export type NullableString = string | null
 export type StringStringObject = { [field: string]: string }
 
 export type BooleanRef = MutableRefObject<boolean>
