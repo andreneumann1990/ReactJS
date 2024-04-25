@@ -12,7 +12,8 @@ import { useClick } from '../../hooks/gestures'
 export default Main
 export { handleKeyDown_Global as handleKeyDown_Main }
 
-//TODO; you can't refresh the page by scrolling up on mobile;
+// TODO; you can't refresh the page by scrolling up on mobile; do I want to add 
+// it?; it doesn't seem to be default;
 
 //
 // parameters and variables
@@ -39,7 +40,6 @@ let previousScrollTop: number = -1
 //
 
 function handleKeyDown_Global(event: KeyboardEvent): NullableNumber {
-    console.log('main')
     const { layoutState, mainState, topnavState } = useGlobalStore.getState()
     if (mainState.element == null) return null
     if (!mainState.element.contains(document.activeElement)) return
@@ -64,7 +64,6 @@ function handleKeyDown_Global(event: KeyboardEvent): NullableNumber {
         }
 
         if (event.key === 'Enter') {
-            console.log('main enter')
             event.preventDefault()
             event.stopPropagation()
 
@@ -89,7 +88,6 @@ function handleKeyDown_Global(event: KeyboardEvent): NullableNumber {
         }
 
         if (event.key === 'ArrowDown') {
-            console.log('next')
             event.preventDefault()
             event.stopPropagation()
             console.log(focusNextElement(mainState.element, queryString))
@@ -159,6 +157,7 @@ function Main({ children }: React.PropsWithChildren) {
         event.preventDefault()
         event.stopPropagation()
 
+        if (isDebugEnabled) console.log('Main: Clicked. Close search and sidenav.')
         searchState.setIsOpen(false)
         sidenavState.setIsOpen(false)
         mainState.element.focus()
@@ -270,7 +269,7 @@ function Main({ children }: React.PropsWithChildren) {
 
             {...useClick(handleClick)}
             {...useIndexGroupItem(defaultIndexGroup)}
-            className="h-[calc(100vh-var(--height-topnav))] px-5 sm:pl-16 sm:pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:transition-colors motion-safe:ease-out motion-safe:duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none data-inactive:cursor-none"
+            className="h-[calc(100vh-var(--height-topnav))] px-5 sm:pl-16 sm:pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:transition-colors motion-safe:ease-out motion-safe:duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
             ref={initializeMainElement}
         >
             {children}

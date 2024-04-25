@@ -98,7 +98,7 @@ function Sidenav() {
     //
 
     const globalState = useGlobalStore()
-    const { sidenavState, topnavState } = globalState
+    const { sidenavState } = globalState
 
     //
     // functions
@@ -128,42 +128,6 @@ function Sidenav() {
         }
         sidenavElement.style.transform = 'translateX(0)'
     }, [sidenavState.element, sidenavState.isOpen])
-
-    // close when clicking outside;
-    useEffect(() => {
-        let startX = 0
-        let startY = 0
-
-        const thresholdSquared = 81
-        const distanceSquared = (x: number, y: number) => {
-            return x * x + y * y
-        }
-
-        const handlePointerDown = (event: PointerEvent) => {
-            startX = event.screenX
-            startY = event.screenY
-        }
-
-        const handlePointerUp = (event: PointerEvent) => {
-            if (distanceSquared(event.screenX - startX, event.screenY - startY) > thresholdSquared) return
-            if (!sidenavState.isOpen) return
-            if (sidenavState.element == null) return
-            if (sidenavState.element.contains(event.target as Node)) return
-
-            if (topnavState.menuButtonElement == null) return
-            if (topnavState.menuButtonElement.contains(event.target as Node)) return
-            if (isDebugEnabled) console.log('Sidenav: Clicked outside. Close sidenav.')
-            closeSidenav()
-        }
-
-        document.addEventListener('pointerdown', handlePointerDown)
-        document.addEventListener('pointerup', handlePointerUp)
-
-        return () => {
-            document.removeEventListener('pointerdown', handlePointerDown)
-            document.removeEventListener('pointerup', handlePointerUp)
-        }
-    }, [sidenavState.element, sidenavState.isOpen, topnavState.menuButtonElement])
 
     // apply {...useIndexGroupItem(...)} via script;
     useIndexGroupEffect(sidenavState.element, focusableElementSelectors)

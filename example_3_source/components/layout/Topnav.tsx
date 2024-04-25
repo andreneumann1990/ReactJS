@@ -7,6 +7,7 @@ import { useGlobalStore, useLayoutStore, useSearchStore, useSidenavStore, useTop
 import Search, { handleKeyDown_Search } from '../atoms/Search'
 import { useRouter } from 'next/navigation'
 import { useIndexGroupContainer, useIndexGroupEffect, useIndexGroupItem } from '../../hooks/indexGroup'
+import { useClick } from '../../hooks/gestures'
 
 export default Topnav
 export { handleKeyDown_Global as handleKeyInput_Topnav }
@@ -164,7 +165,7 @@ function Topnav() {
     //
 
     const router = useRouter()
-    const { layoutState, sidenavState, topnavState } = useGlobalStore()
+    const { layoutState, searchState, sidenavState, topnavState } = useGlobalStore()
 
     const homeLinkRef = useRef<HTMLAnchorElement | null>(null)
     const menuIconRef = useRef<NullableHTMLElement>(null)
@@ -173,6 +174,18 @@ function Topnav() {
     //
     // functions
     //
+
+    function handleClick(event: React.PointerEvent): void {
+        const target = event.target as Node
+        if (topnavState.menuButtonElement?.contains(target)) return
+        if (searchState.inputElement?.contains(target)) return
+        if (searchState.resultsElement?.contains(target)) return
+
+        if (isDebugEnabled) console.log('Topnav: Clicked. Close sidenav.')
+        event.preventDefault()
+        event.stopPropagation()
+        sidenavState.setIsOpen(false)
+    }
 
     function handleKeyDown_HomeLink(event: React.KeyboardEvent): void {
         const { keyDownCooldown, setKeyDownCooldown } = useLayoutStore.getState()
@@ -233,6 +246,7 @@ function Topnav() {
         <nav
             // indexGroupItems are focusable as well;
             {...useIndexGroupItem(defaultIndexGroup)}
+            {...useClick(handleClick)}
             className="bg-background h-[--height-topnav] shadow-md"
             ref={initializeTopnavElement}
         >
