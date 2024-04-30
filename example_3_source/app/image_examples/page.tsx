@@ -36,10 +36,17 @@ export default function Page() {
     const overlayIndexGroup = 'main-overlay'
     const queryString = 'img[tabIndex="0"]'
 
-    const dragAttributes: ReactDOMAttributes = useDrag(({ delta: [dx,], event }) => {
+    const dragAttributes: ReactDOMAttributes = useDrag(({ delta: [deltaX], event }) => {
+        // don't use event.stopPropgation(); otherwise, it prevents click recognition as well;
         event.preventDefault()
         const currentElement = event.currentTarget as HTMLElement
-        currentElement.scrollBy({ left: -dx })
+
+        // the scrolling can feel weird when using the device toolbar in Chrome DevTools; 
+        // adding devicePixelRatio makes it worse since it sets it to 2 for example even 
+        // though it might be 1 for the physical screen; it doesn't work for my smartphone;
+        // maybe ChatGPT is wrong about using devicePixelRatio?;
+        // currentElement.scrollBy({ left: -deltaX / window.devicePixelRatio })
+        currentElement.scrollBy({ left: -deltaX })
     }, { eventOptions: { capture: true }, enabled: !sidenavState.isOpen })()
 
     //
@@ -258,7 +265,7 @@ export default function Page() {
 
                     // onFocusCapture() interferes with useIndexGroupItem();
                     {...useIndexGroupContainer(imageRowIndexGroup)}
-                    className="flex w-full border items-center overflow-x-hidden touch-none"
+                    className="flex w-full border items-center overflow-x-hidden touch-pan-y"
                 >
                     <Image
                         {...useClick(openOverlay)}

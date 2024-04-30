@@ -4,20 +4,27 @@ import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/typ
 export { useClick }
 
 const threshold = 10
-let initial_x = 0
-let initial_y = 0
+let initialX = 0
+let initialY = 0
+let isClickCanceled = false
 
 function useClick(handleClick: (event: React.PointerEvent) => void): ReactDOMAttributes {
     return useGesture({
         onPointerDown: ({ event }) => {
-            initial_x = event.clientX
-            initial_y = event.clientY
+            initialX = event.clientX
+            initialY = event.clientY
+            isClickCanceled = false
+        },
+
+        onPointerMove: ({ event }) => {
+            const dx = event.clientX - initialX
+            const dy = event.clientY - initialY
+            if (dx * dx + dy * dy <= threshold * threshold) return
+            isClickCanceled = true
         },
 
         onPointerUp: ({ event, args }) => {
-            const dx = event.clientX - initial_x
-            const dy = event.clientY - initial_y
-            if (dx * dx + dy * dy > threshold * threshold) return
+            if (isClickCanceled) return
             args[0](event)
         }
     })(handleClick)

@@ -454,3 +454,6 @@ export const countries = [
 ]
 
 export const focusableElementSelectors = 'a, button, input, summary'
+
+export const maximumPullLength = 180
+export const refreshThreshold = 160

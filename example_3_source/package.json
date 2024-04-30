@@ -28,6 +28,7 @@
         "sass": "^1.72.0",
         "timers-promises": "^1.0.1",
         "tinycolor2": "^1.6.0",
+        "use-pull-to-refresh": "^2.2.1",
         "yup": "^1.4.0",
         "zustand": "^4.5.2"
     },

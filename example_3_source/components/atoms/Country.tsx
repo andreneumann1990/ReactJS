@@ -50,6 +50,7 @@ function Country1({ setFieldValue }: { setFieldValue: (value: string) => (Promis
     return (
         <div
             {...useIndexGroupItem(mainIndexGroup)}
+            // className="max-w-[310px]"
             onKeyDown={handleKeyDown}
             ref={setContainerElement}
         >
@@ -67,6 +68,7 @@ function Country1({ setFieldValue }: { setFieldValue: (value: string) => (Promis
                         InputProps={{ ...params.InputProps }}
                     />
                 )}
+                sx={{ maxWidth: 300 }}
             />
         </div>
     )
@@ -118,7 +120,6 @@ function Country2({ setFieldValue }: { setFieldValue: (value: string) => (Promis
             {...useIndexGroupItem(mainIndexGroup)}
             onKeyDown={handleKeyDown}
             ref={setContainerElement}
-        // tabIndex={layoutState.indexGroup === mainIndexGroup ? 0 : -1}
         >
             <Autocomplete
                 {...useIndexGroupContainer(localIndexGroup)}
@@ -157,7 +158,7 @@ function Country2({ setFieldValue }: { setFieldValue: (value: string) => (Promis
                     {option.label} ({option.code}) +{option.phone}
                 </Box>)
                 }
-                sx={{ width: 300 }}
+                sx={{ maxWidth: 300 }}
             />
         </div>
     )

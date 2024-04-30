@@ -1,6 +1,6 @@
 import React, { KeyboardEvent, useEffect } from 'react'
 import { useDrag } from '@use-gesture/react'
-import { defaultIndexGroup, indexEntryTypesString, isDebugEnabled, mainIndexGroup, maximumDelay, repeatDelay, sidenavTransitionDuration } from '../../constants/parameters'
+import { defaultIndexGroup, indexEntryTypesString, isDebugEnabled, mainIndexGroup, maximumDelay, maximumPullLength, refreshThreshold, repeatDelay, sidenavTransitionDuration } from '../../constants/parameters'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 import { useGlobalStore } from '../../hooks/stores'
 import { NullableHTMLElement, NullableNumber } from '../../constants/types'
@@ -8,12 +8,10 @@ import { useSearchParams } from 'next/navigation'
 import { focusNextElement, focusPreviousElement, normalizeString } from '../../constants/functions'
 import { useIndexGroupItem } from '../../hooks/indexGroup'
 import { useClick } from '../../hooks/gestures'
+import { usePullToRefresh } from '../../hooks/usePullToRefresh'
 
 export default Main
 export { handleKeyDown_Global as handleKeyDown_Main }
-
-// TODO; you can't refresh the page by scrolling up on mobile; do I want to add 
-// it?; it doesn't seem to be default;
 
 //
 // parameters and variables
@@ -256,6 +254,24 @@ function Main({ children }: React.PropsWithChildren) {
         })
     }, [searchParams])
 
+    // pull down to refresh on mobile;
+    // not sure if I like this structure; usePullToRefresh() executes code similar to 
+    // useEffect(); it also returns values like parameters and variables; hmm...; TODO;
+    const { isRefreshing, pullPosition } = usePullToRefresh({
+        onRefresh: () => {
+            if (mainState.element == null) return
+            if (mainState.element.scrollTop > 0) return
+            if (isDebugEnabled) console.log('Main: Refresh.')
+
+            // refresh() only re-renders the components?;
+            // router.refresh()
+            window.location.reload()
+        },
+        maximumPullLength,
+        refreshThreshold,
+        isDisabled: () => !mainState.isActive || mainState.element == null || mainState.element.scrollTop > 0
+    })
+
     //
     //
     //
@@ -272,7 +288,33 @@ function Main({ children }: React.PropsWithChildren) {
             className="h-[calc(100vh-var(--height-topnav))] px-5 sm:pl-16 sm:pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:transition-colors motion-safe:ease-out motion-safe:duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
             ref={initializeMainElement}
         >
+            {/* 
+                pull down to refresh; the template is copied from:
+                    https://github.com/Senbonzakura1234/use-pull-to-refresh
+            */}
+            <div
+                className="fixed inset-x-1/2 z-30 aspect-square w-fit -translate-x-1/2 rounded-full p-2 ease-in duration-0 motion-safe:duration-300"
+                style={{
+                    top: (isRefreshing ? refreshThreshold : Math.min(pullPosition, refreshThreshold)) / 3,
+                    opacity: isRefreshing ? 1 : pullPosition / maximumPullLength,
+                    transitionProperty: pullPosition > 0 ? 'none' : 'all',
+                }}
+            >
+                <div
+                    // the refresh is delayed by 500ms; match animation duration;
+                    className={`grid content-center justify-center bg-primary rounded-full shadow aspect-square w-12 ${isRefreshing ? 'animate-spin' : ''} [animation-duration:500ms]`}
+                    style={{
+                        transform: !isRefreshing ? `rotate(${pullPosition / maximumPullLength * 360}deg)` : 'rotate(0)',
+                    }}
+                >
+                    <i className="material-icons icon-medium m-auto">refresh</i>
+                </div>
+            </div>
             {children}
+            <div
+                // on mobile you need some space for the home key and such;
+                className="h-16"
+            />
         </main >
     )
 }

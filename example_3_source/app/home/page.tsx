@@ -47,20 +47,6 @@ function Page() {
 
     useIndexGroupEffect(pageElement, focusableElementSelectors)
 
-    //     useEffect(() => {
-    //         if (pageRef.current == null) return
-    //         const summaryElementArray = pageRef.current.querySelectorAll('summary')
-    // 
-    //         summaryElementArray.forEach((element: HTMLElement) => {
-    //             element.tabIndex = layoutState.indexGroup === mainIndexGroup ? 0 : -1
-    //             element.addEventListener('focus', handleFocusCapture(mainIndexGroup), true)
-    //         })
-    // 
-    //         return () => summaryElementArray.forEach((element: HTMLElement) => {
-    //             element.removeEventListener('focus', handleFocusCapture(mainIndexGroup), true)
-    //         })
-    //     }, [layoutState.indexGroup])
-
     //
     //
     //
@@ -85,7 +71,7 @@ function Page() {
                     className="group-open:border-b p-2"
                     onKeyDown={handleKeyDown}
                 >Example 1</summary>
-                <ul className="*:my-2 pl-10">
+                <ul className="*:my-2 pl-10 pr-5">
                     <li>clicking highlights links</li>
                     <li>sidenav animation</li>
                     <li>darken main element when sidenav is open</li>
@@ -104,7 +90,7 @@ function Page() {
                     className="group-open:border-b p-2"
                     onKeyDown={handleKeyDown}
                 >Example 2</summary>
-                <ul className="*:my-2 pl-10">
+                <ul className="*:my-2 pl-10 pr-5">
                     <li>switched to nextjs; no server-side-rendering (SSR); needs to be static at this point; no back-end yet;</li>
                     <li>switched to tailwindcss in most cases;</li>
                     <li>using <b>Zustand</b> for sharing data and states; less boilerplate than <b>Redux</b>?;</li>
@@ -117,6 +103,7 @@ function Page() {
                 <li>first back-end steps;</li>
                 <li>added <b>Algolia</b> search; navigation hints and behavior similar to <b>react.dev</b>;</li>
                 <li>overhaul of handling key input events; you can now hold inputs as well;</li>
+                <li>added pull-down to refresh on mobile;</li>
             </ul>
 
             <h2 className="my-2 text-2xl font-bold">TODO:</h2>

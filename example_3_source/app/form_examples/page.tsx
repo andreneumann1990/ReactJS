@@ -127,13 +127,13 @@ function Page() {
                 ref={(element) => { form1Ref.current = element }}
                 onSubmit={form1.handleSubmit}
             >
-                <div ref={normalizeHeights} className="grid grid-flow-row md:grid-cols-2 xl:grid-cols-3 border-x-[1px] items-center">
+                <div ref={normalizeHeights} className="grid grid-flow-row grid-cols-1 md:grid-cols-2 xl:grid-cols-3 border-x-[1px] items-center overflow-x-hidden">
                     <div className="grid px-5 border-x-[1px] items-center">
                         <label>
                             Button:
                             <br />
                             <input
-                                className="bg-primary border m-1 px-2 py-1 rounded-md"
+                                className="bg-primary border m-1 px-2 py-1 rounded-md text-pretty"
                                 name="button"
                                 onClick={handleClick}
                                 type="button"
@@ -190,7 +190,7 @@ function Page() {
                             <input
                                 {...form1.getFieldProps('email')}
                                 autoComplete="email"
-                                className="w-72 m-1 px-2 py-1 rounded-md"
+                                className="w-64 sm:w-72 m-1 px-2 py-1 rounded-md"
                                 placeholder="max.mustermann@mustermail.de"
                                 type="email"
                             />
@@ -322,7 +322,7 @@ function Page() {
                             Reset:
                             <br />
                             <input
-                                className="bg-primary border m-1 px-2 py-1 rounded-md"
+                                className="bg-primary border m-1 px-2 py-1 rounded-md text-pretty"
                                 name="reset"
                                 onClick={resetForm}
                                 type="reset"
@@ -350,7 +350,7 @@ function Page() {
                             }
                             <br />
                             <input
-                                className="bg-primary border m-1 px-2 py-1 rounded-md"
+                                className="bg-primary border m-1 px-2 py-1 rounded-md text-pretty"
                                 name="submit"
                                 onClick={handleClick}
                                 type="submit"
@@ -428,7 +428,7 @@ function Page() {
             {/* country select input element; */}
             <h2 className="my-1 text-xl font-bold">MUI has predefined UI elements:</h2>
             <form className="m-4" onSubmit={form2.handleSubmit}>
-                <div ref={normalizeHeights} className="grid grid-flow-row md:grid-cols-2 xl:grid-cols-3 items-center">
+                <div ref={normalizeHeights} className="grid grid-flow-row grid-cols-1 md:grid-cols-2 xl:grid-cols-3 items-center">
                     <div className="grid px-5 items-center">
                         <div>
                             First try:
@@ -442,7 +442,7 @@ function Page() {
                     </div>
                     <div className="grid px-5 items-center">
                         <div>
-                            Copied from:&nbps;
+                            Copied from:&nbsp;
                             <Link
                                 className="text-blue-300"
                                 href="https://mui.com/material-ui/react-autocomplete/"
