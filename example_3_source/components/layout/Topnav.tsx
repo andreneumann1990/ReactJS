@@ -25,8 +25,7 @@ const queryString = 'a:not([tabindex="-1"]), button:not([tabindex="-1"]), input:
 
 function focusNextElement(): void {
     const searchState = useSearchStore.getState()
-    const topnavState = useTopnavStore.getState()
-    const topnavElement = topnavState.element
+    const { element: topnavElement } = useTopnavStore.getState()
     if (topnavElement == null) return
 
     const focusedElement = document.activeElement as HTMLAnchorElement | null
@@ -40,8 +39,7 @@ function focusNextElement(): void {
 }
 
 function focusPreviousElement(): void {
-    const topnavState = useTopnavStore.getState()
-    const topnavElement = topnavState.element
+    const { element: topnavElement } = useTopnavStore.getState()
     if (topnavElement == null) return
     const focusedElement = document.activeElement as NullableHTMLElement
 
@@ -164,12 +162,20 @@ function Topnav() {
     // parameters and variables
     //
 
-    const router = useRouter()
-    const { layoutState, sidenavState, topnavState } = useGlobalStore()
-
+    const closeIconRef = useRef<NullableHTMLElement>(null)
     const homeLinkRef = useRef<HTMLAnchorElement | null>(null)
     const menuIconRef = useRef<NullableHTMLElement>(null)
-    const closeIconRef = useRef<NullableHTMLElement>(null)
+
+    const router = useRouter()
+
+    const activeIndexGroup = useLayoutStore(state => state.indexGroup)
+    const isSidenavOpen = useSidenavStore(state => state.isOpen)
+    const menuButtonElement = useTopnavStore(state => state.menuButtonElement)
+    const topnavElement = useTopnavStore(state => state.element)
+
+    const setIsSidenavOpen = useSidenavStore(state => state.setIsOpen)
+    const setMenuButtonElement = useTopnavStore(state => state.setMenuButtonElement)
+    const setTopnavElement = useTopnavStore(state => state.setElement)
 
     //
     // functions
@@ -177,13 +183,13 @@ function Topnav() {
 
     function handleClick(event: React.PointerEvent): void {
         const target = event.target as Node
-        if (topnavState.menuButtonElement == null) return
-        if (topnavState.menuButtonElement.contains(target)) return
+        if (menuButtonElement == null) return
+        if (menuButtonElement.contains(target)) return
         if (isDebugEnabled) console.log('Topnav: Clicked. Close sidenav.')
 
         event.preventDefault()
         event.stopPropagation()
-        sidenavState.setIsOpen(false)
+        setIsSidenavOpen(false)
     }
 
     function handleKeyDown_HomeLink(event: React.KeyboardEvent): void {
@@ -193,24 +199,24 @@ function Topnav() {
         if (event.key === 'Enter') {
             router.push('/home')
             triggerFlashEffect(event)
-            topnavState.element?.focus()
+            topnavElement?.focus()
             setKeyDownCooldown(maximumDelay)
             return
         }
     }
 
     const initializeMenuButtonElement = (element: HTMLButtonElement | null) => {
-        if (topnavState.menuButtonElement != null) return
+        if (menuButtonElement != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Topnav: Initialize menu element.')
-        topnavState.setMenuButtonElement(element)
+        setMenuButtonElement(element)
     }
 
     const initializeTopnavElement = (element: NullableHTMLElement) => {
-        if (topnavState.element != null) return
+        if (topnavElement != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Topnav: Initialize topnav element.')
-        topnavState.setElement(element)
+        setTopnavElement(element)
     }
 
     //
@@ -219,12 +225,11 @@ function Topnav() {
 
     // switch image for the sidenav toggle button;
     useEffect(() => {
-        const menuButtonElement = topnavState.menuButtonElement
         if (menuButtonElement == null) return
         if (menuIconRef.current == null) return
         if (closeIconRef.current == null) return
 
-        if (sidenavState.isOpen) {
+        if (isSidenavOpen) {
             menuIconRef.current.classList.add('hidden')
             closeIconRef.current.classList.remove('hidden')
             return
@@ -232,10 +237,10 @@ function Topnav() {
 
         menuIconRef.current.classList.remove('hidden')
         closeIconRef.current.classList.add('hidden')
-    }, [sidenavState.isOpen, topnavState.menuButtonElement])
+    }, [isSidenavOpen, menuButtonElement])
 
     // update tabIndex values for focusable elements;
-    useIndexGroupEffect(topnavState.element, focusableElementSelectors)
+    useIndexGroupEffect(topnavElement, focusableElementSelectors)
 
     //
     //
@@ -262,7 +267,7 @@ function Topnav() {
                         ref={initializeMenuButtonElement}
 
                         data-no-tab-index-override
-                        tabIndex={layoutState.indexGroup === topnavIndexGroup || layoutState.indexGroup === sidenavIndexGroup ? 0 : -1}
+                        tabIndex={activeIndexGroup === topnavIndexGroup || activeIndexGroup === sidenavIndexGroup ? 0 : -1}
                     >
                         <i
                             className="p-1 icon-medium material-icons"

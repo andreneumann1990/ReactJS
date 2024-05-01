@@ -92,8 +92,8 @@ export const useSidenavStore: SidenavStore = create<SidenavState>((set) => ({
 
     isPanning: false,
     setIsPanning: (isPanning) => set(() => ({ isPanning })),
-    lastActiveDropdownElement: null,
-    setLastActiveDropdownElement: (element) => set(() => ({ lastActiveDropdownElement: element })),
+    lastActiveDropdownMenuElement: null,
+    setLastActiveDropdownMenuElement: (element) => set(() => ({ lastActiveDropdownMenuElement: element })),
 
     panningOffset: 0,
     setPanningOffset: (panningOffset) => set(() => ({ panningOffset })),

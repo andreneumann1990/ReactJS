@@ -126,8 +126,8 @@ export interface SidenavState {
 
     isPanning: boolean,
     setIsPanning: (isPanning: boolean) => void,
-    lastActiveDropdownElement: NullableButtonElement,
-    setLastActiveDropdownElement: (element: NullableButtonElement) => void,
+    lastActiveDropdownMenuElement: NullableButtonElement,
+    setLastActiveDropdownMenuElement: (element: NullableButtonElement) => void,
 
     panningOffset: number,
     setPanningOffset: (panningOffset: number) => void,

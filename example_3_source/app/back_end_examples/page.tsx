@@ -20,9 +20,8 @@ function Page() {
     //
 
     const [greetingResponse, setGreetingResponse] = useState('')
-    const [postFormResponse, setPostFormResponse] = useState<{ username?: string, password?: string, }>({})
-
     const [pageElement, setPageElement] = useState<NullableDivElement>(null)
+    const [postFormResponse, setPostFormResponse] = useState<{ username?: string, password?: string, }>({})
 
     //
     // functions

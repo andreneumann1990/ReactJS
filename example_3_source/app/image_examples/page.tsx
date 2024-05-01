@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useClick } from '../../hooks/useClick'
 import { focusableElementSelectors, initialDelay, mainIndexGroup, maximumDelay, repeatDelay } from '../../constants/parameters'
-import { useGlobalStore, useLayoutStore } from '../../hooks/useStore'
+import { useLayoutStore, useSidenavStore } from '../../hooks/useStore'
 import { focusNextElement, focusPreviousElement, scrollIntoView, } from '../../constants/functions'
 import { NullableDivElement, NullableEventTarget, NullableHTMLElement, NullableImageElement } from '../../constants/types'
 import { useIndexGroupContainer, useIndexGroupEffect, useIndexGroupItem } from '../../hooks/useIndexGroup'
@@ -21,20 +21,20 @@ export default function Page() {
     // parameters and variables
     //
 
-    const { sidenavState } = useGlobalStore()
-    const indexGroup = useLayoutStore(state => state.indexGroup)
-
-    const [imageRowElement, setImageRowElement] = useState<HTMLDivElement | null>(null)
-    const [overlayElement, setOverlayElement] = useState<HTMLDivElement | null>(null)
-
-    const imageRowFirstImage = useRef<HTMLImageElement | null>(null)
-    const overlayImageRef = useRef<NullableImageElement>(null)
-    const [pageElement, setPageElement] = useState<NullableDivElement>(null)
-    const previouslyFocusedElementRef = useRef<NullableHTMLElement>(null)
-
     const imageRowIndexGroup = 'main-imageRow'
     const overlayIndexGroup = 'main-overlay'
     const queryString = 'img[tabIndex="0"]'
+
+    const imageRowFirstImage = useRef<HTMLImageElement | null>(null)
+    const overlayImageRef = useRef<NullableImageElement>(null)
+    const previouslyFocusedElementRef = useRef<NullableHTMLElement>(null)
+
+    const [pageElement, setPageElement] = useState<NullableDivElement>(null)
+    const [imageRowElement, setImageRowElement] = useState<HTMLDivElement | null>(null)
+    const [overlayElement, setOverlayElement] = useState<HTMLDivElement | null>(null)
+
+    const indexGroup = useLayoutStore(state => state.indexGroup)
+    const isSidenavOpen = useSidenavStore(state => state.isOpen)
 
     const dragAttributes: ReactDOMAttributes = useDrag(({ delta: [deltaX], event }) => {
         // don't use event.stopPropgation(); otherwise, it prevents click recognition as well;
@@ -47,7 +47,7 @@ export default function Page() {
         // maybe ChatGPT is wrong about using devicePixelRatio?;
         // currentElement.scrollBy({ left: -deltaX / window.devicePixelRatio })
         currentElement.scrollBy({ left: -deltaX })
-    }, { eventOptions: { capture: true }, enabled: !sidenavState.isOpen })()
+    }, { eventOptions: { capture: true }, enabled: !isSidenavOpen })()
 
     //
     // functions

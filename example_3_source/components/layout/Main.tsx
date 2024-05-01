@@ -2,7 +2,7 @@ import React, { KeyboardEvent, useEffect } from 'react'
 import { useDrag } from '@use-gesture/react'
 import { defaultIndexGroup, indexEntryTypesString, isDebugEnabled, mainIndexGroup, maximumDelay, maximumPullLength, refreshThreshold, repeatDelay } from '../../constants/parameters'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
-import { useGlobalStore } from '../../hooks/useStore'
+import { useGlobalStore, useMainStore, useSearchStore, useSidenavStore } from '../../hooks/useStore'
 import { NullableHTMLElement, NullableNumber } from '../../constants/types'
 import { useSearchParams } from 'next/navigation'
 import { focusNextElement, focusPreviousElement, normalizeString } from '../../constants/functions'
@@ -111,59 +111,72 @@ function Main({ children }: React.PropsWithChildren) {
     // parameters and variables
     //
 
-    // useGlobalStore() is very convenient to write; but this means that this component
-    // re-renders for every change made to globalState
-    const { mainState, searchState, sidenavState } = useGlobalStore()
-    const { setIsActive } = mainState
     const searchParams = useSearchParams()
 
+    const isMainActive = useMainStore(state => state.isActive)
+    const isSearchOpen = useSearchStore(state => state.isOpen)
+    const isSidenavOpen = useSidenavStore(state => state.isOpen)
+    const mainElement = useMainStore(state => state.element)
+
+    const sidenavElement = useSidenavStore(state => state.element)
+    const setIsMainActive = useMainStore(state => state.setIsActive)
+    const setIsPanning = useSidenavStore(state => state.setIsPanning)
+    const setIsSearchOpen = useSearchStore(state => state.setIsOpen)
+
+    const setIsSidenavOpen = useSidenavStore(state => state.setIsOpen)
+    const setMainElement = useMainStore(state => state.setElement)
+    const setPanningOffset = useSidenavStore(state => state.setPanningOffset)
+
     // close sidenav by swipe / panning gesture;
-    const dragAttributes: ReactDOMAttributes = useDrag<PointerEvent>(({ movement: [dx, dy], last }) => {
+    const dragAttributes: ReactDOMAttributes = useDrag<PointerEvent>(({ movement: [movementX,], last, event }) => {
         // `offset` does not reset when panning ends; `movement` does;
-        const sidenavElement = sidenavState.element
         if (sidenavElement == null) return
-        if (dx > -10) return
-        if (Math.abs(dy) > Math.abs(dx)) return
+
+        // stopPropagation() stops input elements from getting focused; since isOpen 
+        // means that the main element is inactive this is what we want;
+        event.preventDefault()
+        event.stopPropagation()
+        if (movementX > -10) return
 
         // pan move;
         if (!last) {
-            sidenavState.setPanningOffset(dx)
-            sidenavState.setIsPanning(true)
+            setPanningOffset(movementX)
+            setIsPanning(true)
             return
         }
 
-        // pan end;
+        // pan end; 
         if (isDebugEnabled) console.log('Main: Pan gesture has ended.')
-        if (dx < -0.5 * sidenavElement.offsetWidth) {
+        if (movementX < -0.5 * sidenavElement.offsetWidth) {
             // isOpen is not updated immediately;
-            sidenavState.setIsOpen(false)
+            setIsSidenavOpen(false)
         }
 
-        sidenavState.setPanningOffset(0)
-        sidenavState.setIsPanning(false)
-    }, { eventOptions: { capture: true }, enabled: sidenavState.isOpen })()
+        setPanningOffset(0)
+        setIsPanning(false)
+    }, { eventOptions: { capture: true }, enabled: isSidenavOpen })()
 
     //
     // functions
     //
 
-    function handleClick(event: React.PointerEvent): void {
-        if (mainState.element == null) return
-        if (mainState.element.dataset.inactive == null) return
+    function handleClick(event: React.MouseEvent | React.PointerEvent): void {
+        if (mainElement == null) return
+        if (mainElement.dataset.inactive == null) return
         event.preventDefault()
         event.stopPropagation()
 
         if (isDebugEnabled) console.log('Main: Clicked. Close search and sidenav.')
-        searchState.setIsOpen(false)
-        sidenavState.setIsOpen(false)
-        mainState.element.focus()
+        setIsSearchOpen(false)
+        setIsSidenavOpen(false)
+        mainElement.focus()
     }
 
     function initializeMainElement(element: NullableHTMLElement): void {
-        if (mainState.element != null) return
+        if (mainElement != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Main: Initialize main element.')
-        mainState.setElement(element)
+        setMainElement(element)
     }
 
     //
@@ -172,16 +185,16 @@ function Main({ children }: React.PropsWithChildren) {
 
     // update state;
     useEffect(() => {
-        if (mainState.element == null) return
-        const isActive = !sidenavState.isOpen && !searchState.isOpen
-        setIsActive(isActive)
+        if (mainElement == null) return
+        const isActive = !isSidenavOpen && !isSearchOpen
+        setIsMainActive(isActive)
 
         if (isActive) {
-            delete mainState.element.dataset.inactive
+            delete mainElement.dataset.inactive
             return
         }
-        mainState.element.dataset.inactive = ''
-    }, [mainState.element, searchState.isOpen, setIsActive, sidenavState.isOpen])
+        mainElement.dataset.inactive = ''
+    }, [isSearchOpen, isSidenavOpen, mainElement, setIsMainActive])
 
     // navigate to searched element;
     useEffect(() => {
@@ -253,12 +266,10 @@ function Main({ children }: React.PropsWithChildren) {
     }, [searchParams])
 
     // pull down to refresh on mobile;
-    // not sure if I like this structure; usePullToRefresh() executes code similar to 
-    // useEffect(); it also returns values like variables; hmm...; TODO;
     const { isRefreshing, pullPosition } = usePullToRefresh({
         onRefresh: () => {
-            if (mainState.element == null) return
-            if (mainState.element.scrollTop > 0) return
+            if (mainElement == null) return
+            if (mainElement.scrollTop > 0) return
             if (isDebugEnabled) console.log('Main: Refresh.')
 
             // refresh() only re-renders the components?;
@@ -267,7 +278,7 @@ function Main({ children }: React.PropsWithChildren) {
         },
         maximumPullLength,
         refreshThreshold,
-        isDisabled: () => !mainState.isActive || mainState.element == null || mainState.element.scrollTop > 0
+        isDisabled: () => !isMainActive || mainElement == null || mainElement.scrollTop > 0
     })
 
     //
@@ -277,16 +288,18 @@ function Main({ children }: React.PropsWithChildren) {
     return (
         <main
             // sets onKeyDownCapture and onKeyUpCapture;
-            //
-            // does not work when you have child elements; for some reason dragging gets
-            // interrupted when moving over them; TODO;
             {...dragAttributes}
             onKeyDownCapture={undefined}
             onKeyUpCapture={undefined}
 
-            {...useClick(handleClick)}
+            // onClickCapture helps with input elements like checkboxes; otherwise they can
+            // be (un)checked even when main is inactive; there is still a visual cue for
+            // but the action is ignored;
+            {...useClick(handleClick, { eventOptions: { capture: true } })}
+            onClickCapture={handleClick}
+
             {...useIndexGroupItem(defaultIndexGroup)}
-            className="h-[calc(100vh-var(--height-topnav))] px-5 sm:pl-16 sm:pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:[transition-property:opacity] ease-linear duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
+            className="group/main h-[calc(100vh-var(--height-topnav))] px-5 sm:pl-16 sm:pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:[transition-property:opacity] ease-linear duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
             ref={initializeMainElement}
         >
             {/* 

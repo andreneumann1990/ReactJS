@@ -59,11 +59,8 @@ export function getFirstChildElement(element: NullableHTMLElement, query: string
     return element.querySelector(query) as HTMLElement
 }
 
-export function handleFocusCapture(indexGroup: string): (event: React.FocusEvent) => void {
-    return (event) => {
-        scrollIntoView(event.target as HTMLElement)
-        useLayoutStore.getState().setIndexGroup(indexGroup)
-    }
+export function handleFocusCapture(indexGroup: string): void {
+    useLayoutStore.getState().setIndexGroup(indexGroup)
 }
 
 export function scrollIntoView(element: NullableHTMLElement): void {

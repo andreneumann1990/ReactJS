@@ -1,4 +1,4 @@
-import { useGesture } from '@use-gesture/react'
+import { UserGestureConfig, useGesture } from '@use-gesture/react'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 
 export { useClick }
@@ -8,7 +8,7 @@ let initialX = 0
 let initialY = 0
 let isClickCanceled = false
 
-function useClick(handleClick: (event: React.PointerEvent) => void): ReactDOMAttributes {
+function useClick(handleClick: (event: React.PointerEvent) => void, config?: UserGestureConfig): ReactDOMAttributes {
     return useGesture({
         onPointerDown: ({ event }) => {
             initialX = event.clientX
@@ -27,5 +27,5 @@ function useClick(handleClick: (event: React.PointerEvent) => void): ReactDOMAtt
             if (isClickCanceled) return
             args[0](event)
         }
-    })(handleClick)
+    }, config)(handleClick)
 }

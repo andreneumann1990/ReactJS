@@ -4,7 +4,7 @@ import DOMPurify from 'dompurify'
 import Link from 'next/link'
 import { isDebugEnabled, maximumDelay, repeatDelay, topnavIndexGroup } from '../../constants/parameters'
 import { useRouter } from 'next/navigation'
-import { useGlobalStore } from '../../hooks/useStore'
+import { useGlobalStore, useLayoutStore, useSearchStore, useSidenavStore } from '../../hooks/useStore'
 import { EntryData, NullableNumber, SearchData } from '../../constants/types'
 import { scrollIntoView } from '../../constants/functions'
 
@@ -94,17 +94,29 @@ function Search() {
     // variables and parameters
     //
 
+    const updateInputFieldTimeoutRef = useRef<NodeJS.Timeout>()
+
     const router = useRouter()
-    const { layoutState, searchState, sidenavState } = useGlobalStore()
-    const { setIsOpen } = searchState
-    const { setResultsDataArray, setResultsSelectedIndex } = searchState
 
     const [isFocused, setIsFocused] = useState<boolean>(false)
     const [isHovering, setIsHovering] = useState<boolean>(false)
     const [lastSearchQuery, setLastSearchQuery] = useState<string>('')
     const [searchQuery, setSearchQuery] = useState('')
 
-    const updateInputFieldTimeoutRef = useRef<NodeJS.Timeout>()
+    const activeIndexGroup = useLayoutStore(state => state.indexGroup)
+    const isSearchOpen = useSearchStore(state => state.isOpen)
+    const isSidenavOpen = useSidenavStore(state => state.isOpen)
+    const searchInputElement = useSearchStore(state => state.inputElement)
+
+    const searchResultsDataArray = useSearchStore(state => state.resultsDataArray)
+    const searchResultsElement = useSearchStore(state => state.resultsElement)
+    const searchResultsSelectedIndex = useSearchStore(state => state.resultsSelectedIndex)
+    const setIsSearchOpen = useSearchStore(state => state.setIsOpen)
+
+    const setSearchInputElement = useSearchStore(state => state.setInputElement)
+    const setSearchResultsDataArray = useSearchStore(state => state.setResultsDataArray)
+    const setSearchResultsElement = useSearchStore(state => state.setResultsElement)
+    const setSearchResultsSelectedIndex = useSearchStore(state => state.setResultsSelectedIndex)
 
     //
     // functions
@@ -117,30 +129,30 @@ function Search() {
     }
 
     function initializeInputElement(element: HTMLInputElement) {
-        if (searchState.inputElement != null) return
+        if (searchInputElement != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Search: Initialize search input element.')
-        searchState.setInputElement(element)
+        setSearchInputElement(element)
     }
 
     function initializeResultsElement(element: HTMLDivElement) {
-        if (searchState.resultsElement != null) return
+        if (searchResultsElement != null) return
         if (element == null) return
         if (isDebugEnabled) console.log('Search: Initialize search results element.')
-        searchState.setResultsElement(element)
+        setSearchResultsElement(element)
     }
 
     // navigate to the selected result by pressing 'enter';
     function handleSearch(event: FormEvent) {
         event.preventDefault()
-        if (Object.keys(searchState.resultsDataArray).length < 1) return
-        const [groupIndex, entryIndex] = searchState.resultsSelectedIndex
-        const href = Object.values(searchState.resultsDataArray)[groupIndex][entryIndex].href
+        if (Object.keys(searchResultsDataArray).length < 1) return
+        const [groupIndex, entryIndex] = searchResultsSelectedIndex
+        const href = Object.values(searchResultsDataArray)[groupIndex][entryIndex].href
         if (typeof href != 'string') return
 
         router.push(href)
-        if (searchState.inputElement == null) return
-        searchState.inputElement.blur()
+        if (searchInputElement == null) return
+        searchInputElement.blur()
     }
 
     function updateInputField(event: ChangeEvent): void {
@@ -177,32 +189,32 @@ function Search() {
 
     // update state;
     useEffect(() => {
-        if (sidenavState.isOpen) {
-            if (!searchState.isOpen) return
+        if (isSidenavOpen) {
+            // checking isSearchOpen reduces logging;
+            if (!isSearchOpen) return
             if (isDebugEnabled) console.log('Search: isOpen false')
-            setIsOpen(false)
+            setIsSearchOpen(false)
             return
         }
 
-        if (searchState.inputElement == null) return
-        // if (document.activeElement === searchState.inputElement || isFocused) {
-        if (document.activeElement === searchState.inputElement || isFocused || isHovering) {
-            if (searchState.isOpen) return
+        if (searchInputElement == null) return
+        if (document.activeElement === searchInputElement || isFocused || isHovering) {
+            if (isSearchOpen) return
             if (isDebugEnabled) console.log('Search: isOpen true')
-            setIsOpen(true)
+            setIsSearchOpen(true)
             return
         }
 
-        if (!searchState.isOpen) return
+        if (!isSearchOpen) return
         if (isDebugEnabled) console.log('Search: isOpen false')
-        setIsOpen(false)
-    }, [isFocused, isHovering, searchState.inputElement, searchState.isOpen, setIsOpen, sidenavState.isOpen])
+        setIsSearchOpen(false)
+    }, [isFocused, isHovering, searchInputElement, setIsSearchOpen, isSidenavOpen, isSearchOpen])
 
     // search after query is updated, i.e. onChange();
     useEffect(() => {
         if (searchQuery === '') {
-            if (Object.keys(searchState.resultsDataArray).length < 1) return
-            setResultsDataArray({})
+            if (Object.keys(searchResultsDataArray).length < 1) return
+            setSearchResultsDataArray({})
             return
         }
 
@@ -258,15 +270,15 @@ function Search() {
                     purifiedInnerHTML: DOMPurify.sanitize(innerHTML),
                 })
             })
-            setResultsDataArray(dataArray)
+            setSearchResultsDataArray(dataArray)
         })
-    }, [lastSearchQuery, searchQuery, searchState.resultsDataArray, setResultsDataArray])
+    }, [lastSearchQuery, searchQuery, searchResultsDataArray, setSearchResultsDataArray])
 
     // reset selectedHitIndex;
     useEffect(() => {
-        if (Object.keys(searchState.resultsDataArray).length > 0) return
-        setResultsSelectedIndex([0, 0])
-    }, [searchState.resultsDataArray, setResultsSelectedIndex])
+        if (Object.keys(searchResultsDataArray).length > 0) return
+        setSearchResultsSelectedIndex([0, 0])
+    }, [searchResultsDataArray, setSearchResultsSelectedIndex])
 
     //
     //
@@ -287,12 +299,12 @@ function Search() {
                     onBlurCapture={handleBlur}
                     onChange={handleChange}
                     onFocusCapture={handleFocus}
-                    tabIndex={layoutState.indexGroup === topnavIndexGroup ? undefined : -1}
+                    tabIndex={activeIndexGroup === topnavIndexGroup ? undefined : -1}
                 />
 
                 {/* search results; */}
                 <div
-                    // making hover:block conditional to searchState.isOpen does not work in all cases;
+                    // making hover:block conditional to isSearchOpen does not work in all cases;
                     // maybe a race condition?;
                     //
                     // I would like to open it like the dropdown menues but I need to dynamically 
@@ -303,10 +315,10 @@ function Search() {
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
                     style={{
-                        display: searchState.isOpen ? 'block' : 'none',
+                        display: isSearchOpen ? 'block' : 'none',
                     }}
                 >
-                    {Object.entries(searchState.resultsDataArray).map(([url_relative, entryArray], groupIndex) => {
+                    {Object.entries(searchResultsDataArray).map(([url_relative, entryArray], groupIndex) => {
                         return (
                             // a fragment would not work here unless they have an unique key as well;
                             <div
@@ -317,7 +329,7 @@ function Search() {
                                 {entryArray.map((entry, entryIndex) => {
                                     return (
                                         <Link
-                                            className={'grid items-center my-3 text-left min-h-10 p-2 px-4 mt-2 border rounded-2xl' + (groupIndex === searchState.resultsSelectedIndex[0] && entryIndex === searchState.resultsSelectedIndex[1] ? ' bg-primary-active' : ' bg-primary')}
+                                            className={'grid items-center my-3 text-left min-h-10 p-2 px-4 mt-2 border rounded-2xl' + (groupIndex === searchResultsSelectedIndex[0] && entryIndex === searchResultsSelectedIndex[1] ? ' bg-primary-active' : ' bg-primary')}
                                             href={entry.href}
                                             id={`search-results-${groupIndex}-${entryIndex}`}
                                             key={`search-results-entry-${entryIndex}`}

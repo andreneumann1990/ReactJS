@@ -2,7 +2,7 @@ import React, { ReactNode, useEffect } from 'react'
 import { triggerFlashEffect } from '../../constants/functions'
 import { isDebugEnabled, maximumDelay, repeatDelay, sidenavIndexGroup } from '../../constants/parameters'
 import { DropdownMenuState, NullableNumber } from '../../constants/types'
-import { useDropdownMenuStoreArray, useGlobalStore, useLayoutStore, useSidenavStore } from '../../hooks/useStore'
+import { useDropdownMenuStoreArray, useLayoutStore, useSidenavStore } from '../../hooks/useStore'
 
 export default DropdownMenu
 export { handleKeyDown_Global as handleKeyDown_DropdownMenu }
@@ -27,7 +27,7 @@ function toggleContent(id: number): void {
 
     dropdownMenuState.setIsOpen(true)
     dropdownMenuState.contentElement.dataset.active = ''
-    useSidenavStore.getState().setLastActiveDropdownElement(dropdownMenuState.buttonElement)
+    useSidenavStore.getState().setLastActiveDropdownMenuElement(dropdownMenuState.buttonElement)
 
     // there a trick using max-height; but that can mess with the timing of the transition;
     // it waits until max-height is the exact value even when the element is already fully
@@ -94,11 +94,25 @@ function DropdownMenu(props: {
     // parameters and variables
     //
 
-    const globalState = useGlobalStore()
-    const { sidenavState } = globalState
-    const dropdownMenuState = useDropdownMenuStoreArray[props.id]()
-
     const queryString = 'a, button'
+
+    let useDropdownMenuStore = useDropdownMenuStoreArray[props.id]
+    if (useDropdownMenuStore == null) {
+        console.log(`DropdownMenu-Warning: No store found for id ${props.id}. Use id = 0 instead.`)
+        useDropdownMenuStore = useDropdownMenuStoreArray[0]
+    }
+
+    const activeIndexGroup = useLayoutStore(state => state.indexGroup)
+    const buttonElement = useDropdownMenuStore(state => state.buttonElement)
+    const contentElement = useDropdownMenuStore(state => state.contentElement)
+
+    const isDropdownMenuOpen = useDropdownMenuStore(state => state.isOpen)
+    const lastActiveDropdownElement = useSidenavStore(state => state.lastActiveDropdownMenuElement)
+
+    const setButtonElement = useDropdownMenuStore(state => state.setButtonElement)
+    const setContentElement = useDropdownMenuStore(state => state.setContentElement)
+    const setDropdownMenuElement = useDropdownMenuStore(state => state.setElement)
+    const setIconElement = useDropdownMenuStore(state => state.setIconElement)
 
     //
     // effects
@@ -106,27 +120,24 @@ function DropdownMenu(props: {
 
     // close this one if another dropdown menu got opened;
     useEffect(() => {
-        if (!dropdownMenuState.isOpen) return
-        if (sidenavState.lastActiveDropdownElement == null) return
+        if (!isDropdownMenuOpen) return
+        if (lastActiveDropdownElement == null) return
 
-        if (dropdownMenuState.buttonElement == null) return
-        if (dropdownMenuState.buttonElement === sidenavState.lastActiveDropdownElement) return
+        if (buttonElement == null) return
+        if (buttonElement === lastActiveDropdownElement) return
         toggleContent(props.id)
-    }, [dropdownMenuState.buttonElement, dropdownMenuState.isOpen, props.id, sidenavState.lastActiveDropdownElement])
-
-    const layoutState = useLayoutStore()
+    }, [buttonElement, isDropdownMenuOpen, props.id, lastActiveDropdownElement])
 
     // update tabIndex; in contrast to useTabIndexEffect() this changes the tabIndex
     // based on a state (i.e. isOpen) rather than layoutState.activeIndexGroup;
     useEffect(() => {
-        // the layoutState.indexGroup dependency and setTimeout() are necessary; otherwise,
+        // the activeIndexGroup dependency and setTimeout() are necessary; otherwise,
         // the changes will get overriden by useIndexGroupEffect();
         setTimeout(() => {
-            if (layoutState.indexGroup !== sidenavIndexGroup) return
-            const contentElement = dropdownMenuState.contentElement
+            if (activeIndexGroup !== sidenavIndexGroup) return
             if (contentElement == null) return
 
-            if (dropdownMenuState.isOpen) {
+            if (isDropdownMenuOpen) {
                 contentElement.querySelectorAll<HTMLElement>(queryString).forEach(element => {
                     element.tabIndex = 0
                 })
@@ -137,7 +148,7 @@ function DropdownMenu(props: {
                 element.tabIndex = -1
             })
         }, 1)
-    }, [dropdownMenuState.contentElement, dropdownMenuState.isOpen, layoutState.indexGroup])
+    }, [contentElement, isDropdownMenuOpen, activeIndexGroup])
 
     //
     //
@@ -146,20 +157,20 @@ function DropdownMenu(props: {
     return (
         <div
             className={props.className}
-            ref={dropdownMenuState.setElement}
+            ref={setDropdownMenuElement}
         >
             <button
                 className="block p-5 w-full text-left text-2xl"
                 onPointerUp={() => toggleContent(props.id)}
-                ref={dropdownMenuState.setButtonElement}
+                ref={setButtonElement}
             >
                 <div className="grid [grid-template-columns:1fr_32px] items-center">
                     {props.text}
                     <i
                         className="icon-medium material-icons justify-self-end transition-none motion-safe:[transition-property:transform] ease-linear duration-300"
-                        ref={dropdownMenuState.setIconElement}
+                        ref={setIconElement}
                         style={{
-                            transform: dropdownMenuState.isOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                            transform: isDropdownMenuOpen ? 'rotate(-180deg)' : 'rotate(0)',
                         }}
                     >computer</i>
                 </div>
@@ -168,7 +179,7 @@ function DropdownMenu(props: {
                 // the height needs to be directly changed; otherwise, the transition will not 
                 // work;
                 className="bg-background transition-none motion-safe:[transition-property:height] ease-linear duration-300 overflow-y-hidden"
-                ref={dropdownMenuState.setContentElement}
+                ref={setContentElement}
                 style={{ height: 0 }}
             >
                 {props.children}

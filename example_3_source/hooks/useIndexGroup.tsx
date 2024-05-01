@@ -16,8 +16,8 @@ export function useIndexGroupEffect(rootContainerElement: NullableHTMLElement, s
     // parameters and variables
     //
 
-    const layoutState = useLayoutStore()
     const containerElementArrayRef = useRef<{ containerElement: HTMLElement, indexGroup: string }[]>([])
+    const activeIndexGroup = useLayoutStore(state => state.indexGroup)
 
     //
     // effects
@@ -45,10 +45,10 @@ export function useIndexGroupEffect(rootContainerElement: NullableHTMLElement, s
         containerElementArrayRef.current.forEach(({ containerElement, indexGroup }) => {
             containerElement.querySelectorAll<HTMLElement>(selectors).forEach((element) => {
                 if (element.dataset.noTabIndexOverride) return
-                element.tabIndex = layoutState.indexGroup === indexGroup ? 0 : -1
+                element.tabIndex = activeIndexGroup === indexGroup ? 0 : -1
             })
         })
-    }, [rootContainerElement, layoutState.indexGroup, selectors])
+    }, [rootContainerElement, activeIndexGroup, selectors])
 }
 
 // keep useIndexGroupContainer and useIndexGroupItem(s) separate; the onFocusCapture
@@ -56,13 +56,11 @@ export function useIndexGroupEffect(rootContainerElement: NullableHTMLElement, s
 export function useIndexGroupContainer(indexGroup: string) {
     return {
         'data-index-group': indexGroup,
-        onFocusCapture: handleFocusCapture(indexGroup),
+        onFocusCapture: () => handleFocusCapture(indexGroup),
     }
 }
 
 export function useIndexGroupItem(indexGroup: string) {
-    const layoutState = useLayoutStore()
-    return {
-        tabIndex: layoutState.indexGroup === indexGroup ? 0 : -1,
-    }
+    const activeIndexGroup = useLayoutStore(state => state.indexGroup)
+    return { tabIndex: activeIndexGroup === indexGroup ? 0 : -1 }
 }

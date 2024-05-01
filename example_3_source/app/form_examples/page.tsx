@@ -129,7 +129,7 @@ function Page() {
             >
                 <div ref={normalizeHeights} className="grid grid-flow-row grid-cols-1 md:grid-cols-2 xl:grid-cols-3 border-x-[1px] items-center overflow-x-hidden">
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Button:
                             <br />
                             <input
@@ -142,17 +142,17 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Checkbox:
                             <input
                                 {...form1.getFieldProps('checkbox')}
-                                className="ml-2 m-1 px-2 py-1 rounded-md"
+                                className="ml-2 m-1 px-2 py-1 rounded-md touch-none"
                                 type="checkbox"
                             />
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Color:
                             <input
                                 {...form1.getFieldProps('color')}
@@ -162,7 +162,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Date:
                             <br />
                             <input
@@ -173,7 +173,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Datetime-Local:
                             <br />
                             <input
@@ -184,7 +184,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Email:
                             <br />
                             <input
@@ -197,7 +197,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             File:
                             <br />
                             <input
@@ -237,7 +237,7 @@ function Page() {
                         }
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Month:
                             <br />
                             <input
@@ -248,7 +248,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Number:
                             <br />
                             <input
@@ -259,7 +259,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             <span className="before:content-['*'] after:content-['*'] after:ml-1 after:text-red-500">Password:</span>
                             {!form1.touched.password ? null : form1.errors.password ?
                                 <span className="ml-4 px-2 py-1 text-red-500">{form1.errors.password}</span>
@@ -277,7 +277,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Radio:
                             <br />
                             <label className="inline-flex px-2">
@@ -307,7 +307,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Range:
                             <br />
                             <input
@@ -318,7 +318,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid justify-between px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Reset:
                             <br />
                             <input
@@ -331,7 +331,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Search:
                             <br />
                             <input
@@ -342,7 +342,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Submit:
                             {!form1.touched.submit || Object.keys(form1.errors).length < 1 ?
                                 <span className="h-7" /> :
@@ -359,7 +359,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Tel:
                             <br />
                             <input
@@ -371,7 +371,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Text:
                             {!form1.touched.text || !form1.errors.text ? null : <span className="ml-4 px-2 py-1 text-red-500">{form1.errors.text}</span>}
                             <br />
@@ -385,7 +385,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Time:
                             <input
                                 {...form1.getFieldProps('time')}
@@ -395,7 +395,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             URL:
                             {!form1.touched.url || !form1.errors.url ? null : <span className="ml-4 px-2 py-1 text-red-500">{form1.errors.url}</span>}
                             <br />
@@ -408,7 +408,7 @@ function Page() {
                         </label>
                     </div>
                     <div className="grid px-5 border-x-[1px] items-center">
-                        <label>
+                        <label className="group-data-inactive/main:touch-none">
                             Week:
                             <br />
                             <input

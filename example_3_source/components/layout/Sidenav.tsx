@@ -5,7 +5,7 @@ import { focusableElementSelectors, isDebugEnabled, maximumDelay, repeatDelay, s
 import { focusNextElement, focusPreviousElement, triggerFlashEffect } from '../../constants/functions'
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import { NullableHTMLElement, NullableNumber } from '../../constants/types'
-import { useGlobalStore } from '../../hooks/useStore'
+import { useGlobalStore, useSidenavStore } from '../../hooks/useStore'
 import { useIndexGroupContainer, useIndexGroupEffect } from '../../hooks/useIndexGroup'
 
 export default Sidenav
@@ -96,8 +96,12 @@ function Sidenav() {
     // paramters and variables
     //
 
-    const globalState = useGlobalStore()
-    const { sidenavState } = globalState
+    const isPanning = useSidenavStore(state => state.isPanning)
+    const isSidenavOpen = useSidenavStore(state => state.isOpen)
+    const panningOffset = useSidenavStore(state => state.panningOffset)
+
+    const sidenavElement = useSidenavStore(state => state.element)
+    const setSidenavElement = useSidenavStore(state => state.setElement)
 
     //
     // functions
@@ -105,10 +109,10 @@ function Sidenav() {
 
     // this is called when the component mounts or unmounts; and called when it re-renders;
     const initializeSidenavElement = (element: NullableHTMLElement) => {
-        if (sidenavState.element != null) return
+        if (sidenavElement != null) return
         if (element == null) return // should never happen!! since it gets never unmounted;
         if (isDebugEnabled) console.log('Sidenav: Initialize sidenav element.')
-        sidenavState.setElement(element)
+        setSidenavElement(element)
     }
 
     //
@@ -116,7 +120,7 @@ function Sidenav() {
     //
 
     // apply {...useIndexGroupItem(...)} via script;
-    useIndexGroupEffect(sidenavState.element, focusableElementSelectors)
+    useIndexGroupEffect(sidenavElement, focusableElementSelectors)
 
     //
     //
@@ -129,8 +133,8 @@ function Sidenav() {
             className="fixed w-[min(500px,70vw)] h-[calc(100vh-var(--height-topnav))] left-0 bg-background shadow-lg shadow-neutral-950 leading-10 overflow-y-auto overflow-x-hidden scrollbar-stable z-[100] ease-linear duration-0 motion-safe:duration-300"
             ref={initializeSidenavElement}
             style={{
-                transform: sidenavState.isPanning ? `translateX(${sidenavState.panningOffset}px)` : (sidenavState.isOpen ? 'translateX(0)' : `translateX(${-(sidenavState.element?.offsetWidth ?? 1000)}px)`),
-                transitionProperty: sidenavState.isPanning ? 'none' : 'transform',
+                transform: isPanning ? `translateX(${panningOffset}px)` : (isSidenavOpen ? 'translateX(0)' : `translateX(${-(sidenavElement?.offsetWidth ?? 1000)}px)`),
+                transitionProperty: isPanning ? 'none' : 'transform',
             }}
         >
             <hr />
