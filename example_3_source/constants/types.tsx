@@ -121,12 +121,16 @@ export type SearchStore = UseBoundStore<StoreApi<SearchState>>
 export interface SidenavState {
     element: NullableHTMLElement,
     setElement: (element: NullableHTMLElement) => void,
-
     isOpen: boolean,
     setIsOpen: (isOpen: boolean) => void,
 
+    isPanning: boolean,
+    setIsPanning: (isPanning: boolean) => void,
     lastActiveDropdownElement: NullableButtonElement,
     setLastActiveDropdownElement: (element: NullableButtonElement) => void,
+
+    panningOffset: number,
+    setPanningOffset: (panningOffset: number) => void,
 }
 export type SidenavStore = UseBoundStore<StoreApi<SidenavState>>
 

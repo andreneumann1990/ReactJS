@@ -1,7 +1,10 @@
 // original code copied from:
 //      https://github.com/Senbonzakura1234/use-pull-to-refresh
 //
-// modified to make isDisabled a function;
+// modified to make isDisabled a function; I probably could have just used a state
+// variable that triggers a re-render when changed; but this way I could also 
+// change that the whole screen height is used and the interaction between scrolling 
+// and the pull-down gesture;
 //
 //
 // MIT License

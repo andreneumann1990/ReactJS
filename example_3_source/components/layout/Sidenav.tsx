@@ -1,8 +1,7 @@
-import { useEffect } from 'react'
 import DropdownMenu, { handleKeyDown_DropdownMenu } from '../atoms/DropdownMenu'
 import Link from 'next/link'
 import { useClick } from '../../hooks/gestures'
-import { focusableElementSelectors, isDebugEnabled, maximumDelay, repeatDelay, sidenavIndexGroup, sidenavTransitionDuration, topnavIndexGroup } from '../../constants/parameters'
+import { focusableElementSelectors, isDebugEnabled, maximumDelay, repeatDelay, sidenavIndexGroup, topnavIndexGroup } from '../../constants/parameters'
 import { focusNextElement, focusPreviousElement, triggerFlashEffect } from '../../constants/functions'
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import { NullableHTMLElement, NullableNumber } from '../../constants/types'
@@ -116,19 +115,6 @@ function Sidenav() {
     // effects
     //
 
-    // open / close animation;
-    useEffect(() => {
-        const sidenavElement = sidenavState.element
-        if (sidenavElement == null) return
-        sidenavElement.style.transitionDuration = sidenavTransitionDuration
-
-        if (sidenavState.isOpen) {
-            sidenavElement.style.transform = `translateX(${sidenavElement.offsetWidth}px)`
-            return
-        }
-        sidenavElement.style.transform = 'translateX(0)'
-    }, [sidenavState.element, sidenavState.isOpen])
-
     // apply {...useIndexGroupItem(...)} via script;
     useIndexGroupEffect(sidenavState.element, focusableElementSelectors)
 
@@ -138,29 +124,30 @@ function Sidenav() {
 
     return (
         <nav
+            // using `left-` with dynamic negative values can lead to unintended side-effects when resizing the window;
             {...useIndexGroupContainer(sidenavIndexGroup)}
-            className="fixed w-[min(500px,70vw)] h-[calc(100vh-var(--height-topnav))] left-[max(-500px,-70vw)] bg-background shadow-lg shadow-neutral-950 leading-10 overflow-y-auto overflow-x-hidden scrollbar-stable z-[100] transition-none motion-safe:transition-transform motion-safe:ease-out"
+            className="fixed w-[min(500px,70vw)] h-[calc(100vh-var(--height-topnav))] left-0 bg-background shadow-lg shadow-neutral-950 leading-10 overflow-y-auto overflow-x-hidden scrollbar-stable z-[100] ease-linear duration-0 motion-safe:duration-300"
             ref={initializeSidenavElement}
-            style={{ transitionDuration: sidenavTransitionDuration }}
+            style={{
+                transform: sidenavState.isPanning ? `translateX(${sidenavState.panningOffset}px)` : (sidenavState.isOpen ? 'translateX(0)' : `translateX(${-(sidenavState.element?.offsetWidth ?? 1000)}px)`),
+                transitionProperty: sidenavState.isPanning ? 'none' : 'transform',
+            }}
         >
             <hr />
             <Link
                 {...useClick(closeSidenav)}
                 className="block pl-4 py-[2px]"
                 href="/image_examples"
-            // tabIndex={sidenavState.isOpen ? undefined : -1}
             >Image Examples</Link><hr />
             <Link
                 {...useClick(closeSidenav)}
                 className="block pl-4 py-[2px]"
                 href="/form_examples"
-            // tabIndex={sidenavState.isOpen ? undefined : -1}
             >Form Examples</Link><hr />
             <Link
                 {...useClick(closeSidenav)}
                 className="block pl-4 py-[2px]"
                 href="/back_end_examples"
-            // tabIndex={sidenavState.isOpen ? undefined : -1}
             >Back-End Examples</Link><hr />
             <DropdownMenu id={0} text="Dropdown 1">
                 <Link href="#" className="block pl-8 py-[2px]">Link 3</Link>

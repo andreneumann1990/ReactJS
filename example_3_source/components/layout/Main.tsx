@@ -1,6 +1,6 @@
 import React, { KeyboardEvent, useEffect } from 'react'
 import { useDrag } from '@use-gesture/react'
-import { defaultIndexGroup, indexEntryTypesString, isDebugEnabled, mainIndexGroup, maximumDelay, maximumPullLength, refreshThreshold, repeatDelay, sidenavTransitionDuration } from '../../constants/parameters'
+import { defaultIndexGroup, indexEntryTypesString, isDebugEnabled, mainIndexGroup, maximumDelay, maximumPullLength, refreshThreshold, repeatDelay } from '../../constants/parameters'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
 import { useGlobalStore } from '../../hooks/stores'
 import { NullableHTMLElement, NullableNumber } from '../../constants/types'
@@ -127,22 +127,20 @@ function Main({ children }: React.PropsWithChildren) {
 
         // pan move;
         if (!last) {
-            sidenavElement.style.transitionDuration = '0s'
-            const currentOffset = sidenavElement.offsetWidth + dx
-            sidenavElement.style.transform = `translateX(${currentOffset}px)`
+            sidenavState.setPanningOffset(dx)
+            sidenavState.setIsPanning(true)
             return
         }
 
         // pan end;
-        if (isDebugEnabled) console.log('Sidenav: Pan gesture has ended.')
+        if (isDebugEnabled) console.log('Main: Pan gesture has ended.')
         if (dx < -0.5 * sidenavElement.offsetWidth) {
             // isOpen is not updated immediately;
             sidenavState.setIsOpen(false)
-            return
         }
 
-        sidenavElement.style.transitionDuration = sidenavTransitionDuration
-        sidenavElement.style.transform = `translateX(${sidenavElement.offsetWidth}px)`
+        sidenavState.setPanningOffset(0)
+        sidenavState.setIsPanning(false)
     }, { eventOptions: { capture: true }, enabled: sidenavState.isOpen })()
 
     //
@@ -256,7 +254,7 @@ function Main({ children }: React.PropsWithChildren) {
 
     // pull down to refresh on mobile;
     // not sure if I like this structure; usePullToRefresh() executes code similar to 
-    // useEffect(); it also returns values like parameters and variables; hmm...; TODO;
+    // useEffect(); it also returns values like variables; hmm...; TODO;
     const { isRefreshing, pullPosition } = usePullToRefresh({
         onRefresh: () => {
             if (mainState.element == null) return
@@ -285,7 +283,7 @@ function Main({ children }: React.PropsWithChildren) {
 
             {...useClick(handleClick)}
             {...useIndexGroupItem(defaultIndexGroup)}
-            className="h-[calc(100vh-var(--height-topnav))] px-5 sm:pl-16 sm:pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:transition-colors motion-safe:ease-out motion-safe:duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
+            className="h-[calc(100vh-var(--height-topnav))] px-5 sm:pl-16 sm:pr-8 text-wrap break-words overflow-y-auto overscroll-contain scrollbar-stable-both transition-none motion-safe:[transition-property:opacity] ease-linear duration-300 data-inactive:opacity-20 data-inactive:overflow-y-hidden data-inactive:select-none data-inactive:touch-none"
             ref={initializeMainElement}
         >
             {/* 
@@ -293,18 +291,23 @@ function Main({ children }: React.PropsWithChildren) {
                     https://github.com/Senbonzakura1234/use-pull-to-refresh
             */}
             <div
-                className="fixed inset-x-1/2 z-30 aspect-square w-fit -translate-x-1/2 rounded-full p-2 ease-in duration-0 motion-safe:duration-300"
+                className={'fixed inset-x-1/2 z-30 aspect-square w-fit -translate-x-1/2 rounded-full p-2 ease-linear duration-0 motion-safe:duration-300'}
                 style={{
-                    top: (isRefreshing ? refreshThreshold : Math.min(pullPosition, refreshThreshold)) / 3,
+                    // only do a transition when the position resets, i.e. the user stops pulling;
+                    // don't use `motion-safe:[transition-property:${pullPosition > 0 ? 'none' : 
+                    // 'all'}]` in className; there seems to be a race condition otherwise; set it
+                    // in style instead;
                     opacity: isRefreshing ? 1 : pullPosition / maximumPullLength,
-                    transitionProperty: pullPosition > 0 ? 'none' : 'all',
+                    top: (isRefreshing ? refreshThreshold : Math.min(pullPosition, refreshThreshold)) / 3,
+                    transitionProperty: pullPosition > 0 ? 'none' : 'opacity, top',
                 }}
             >
                 <div
                     // the refresh is delayed by 500ms; match animation duration;
-                    className={`grid content-center justify-center bg-primary rounded-full shadow aspect-square w-12 ${isRefreshing ? 'animate-spin' : ''} [animation-duration:500ms]`}
+                    className={`grid content-center justify-center bg-primary rounded-full shadow aspect-square w-12 ${isRefreshing ? 'animate-spin' : ''} [animation-duration:500ms] ease-linear duration-0 motion-safe:duration-300`}
                     style={{
                         transform: !isRefreshing ? `rotate(${pullPosition / maximumPullLength * 360}deg)` : 'rotate(0)',
+                        transitionProperty: pullPosition > 0 ? 'none' : 'transform',
                     }}
                 >
                     <i className="material-icons icon-medium m-auto">refresh</i>

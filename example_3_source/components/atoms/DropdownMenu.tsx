@@ -17,29 +17,26 @@ function toggleContent(id: number): void {
     if (dropdownMenuState.contentElement == null) return
     if (dropdownMenuState.iconElement == null) return
     if (isDebugEnabled) console.log('DropdownMenu: Toggle menu.')
-    // if (isDebugEnabled) console.log(`DropdownMenu: isOpen ${!dropdownMenuState.isOpen}`)
 
     if (dropdownMenuState.isOpen) {
         dropdownMenuState.setIsOpen(false)
         delete dropdownMenuState.contentElement.dataset.active
-
         dropdownMenuState.contentElement.style.height = '0'
-        dropdownMenuState.iconElement.style.transform = 'rotate(0deg)'
         return
     }
 
     dropdownMenuState.setIsOpen(true)
     dropdownMenuState.contentElement.dataset.active = ''
+    useSidenavStore.getState().setLastActiveDropdownElement(dropdownMenuState.buttonElement)
 
+    // there a trick using max-height; but that can mess with the timing of the transition;
+    // it waits until max-height is the exact value even when the element is already fully
+    // visible;
     let contentHeight = 0
-    dropdownMenuState.contentElement.childNodes.forEach((element: Node) => {
-        if (!(element instanceof HTMLAnchorElement)) return
+    dropdownMenuState.contentElement.querySelectorAll<HTMLAnchorElement>('a').forEach((element) => {
         contentHeight += element.offsetHeight
     })
-
     dropdownMenuState.contentElement.style.height = `${contentHeight}px`
-    dropdownMenuState.iconElement.style.transform = 'rotate(-180deg)'
-    useSidenavStore.getState().setLastActiveDropdownElement(dropdownMenuState.buttonElement)
 }
 
 function handleKeyDown_Global(id: number, event: React.KeyboardEvent): NullableNumber {
@@ -100,16 +97,7 @@ function DropdownMenu(props: {
     const globalState = useGlobalStore()
     const { sidenavState } = globalState
     const dropdownMenuState = useDropdownMenuStoreArray[props.id]()
-    // const dropdownMenuState = props.dropdownMenuState
 
-    // const sidenavState = useSidenavStore()
-
-    // const buttonRef = useRef<HTMLButtonElement | null>(null)
-    // const contentRef = useRef<HTMLDivElement | null>(null)
-    // const dropdownRef = useRef<HTMLDivElement | null>(null)
-    // const iconRef = useRef<NullableHTMLElement>(null)
-
-    // const [dropdownMenuState.isOpen, dropdownMenuState.setIsOpen] = useState<boolean>(false)
     const queryString = 'a, button'
 
     //
@@ -167,13 +155,19 @@ function DropdownMenu(props: {
             >
                 <div className="grid [grid-template-columns:1fr_32px] items-center">
                     {props.text}
-                    <i ref={dropdownMenuState.setIconElement} className="icon-medium material-icons justify-self-end motion-safe:transition-transform motion-safe:ease-out motion-safe:duration-300">computer</i>
+                    <i
+                        className="icon-medium material-icons justify-self-end transition-none motion-safe:[transition-property:transform] ease-linear duration-300"
+                        ref={dropdownMenuState.setIconElement}
+                        style={{
+                            transform: dropdownMenuState.isOpen ? 'rotate(-180deg)' : 'rotate(0)',
+                        }}
+                    >computer</i>
                 </div>
             </button>
             <div
                 // the height needs to be directly changed; otherwise, the transition will not 
                 // work;
-                className="bg-background transition-none motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-out overflow-y-hidden"
+                className="bg-background transition-none motion-safe:[transition-property:height] ease-linear duration-300 overflow-y-hidden"
                 ref={dropdownMenuState.setContentElement}
                 style={{ height: 0 }}
             >

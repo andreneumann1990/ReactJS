@@ -90,8 +90,13 @@ export const useSidenavStore: SidenavStore = create<SidenavState>((set) => ({
     isOpen: false,
     setIsOpen: (isOpen) => set(() => ({ isOpen })),
 
+    isPanning: false,
+    setIsPanning: (isPanning) => set(() => ({ isPanning })),
     lastActiveDropdownElement: null,
     setLastActiveDropdownElement: (element) => set(() => ({ lastActiveDropdownElement: element })),
+
+    panningOffset: 0,
+    setPanningOffset: (panningOffset) => set(() => ({ panningOffset })),
 }))
 
 export const useTopnavStore: TopnavStore = create<TopnavState>(set => ({

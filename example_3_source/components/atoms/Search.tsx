@@ -102,10 +102,6 @@ function Search() {
     const [isFocused, setIsFocused] = useState<boolean>(false)
     const [isHovering, setIsHovering] = useState<boolean>(false)
     const [lastSearchQuery, setLastSearchQuery] = useState<string>('')
-    // const [previouslyFocusedElement, setPreviouslyFocusedElement] = useState<NullableHTMLElement>(null)
-
-    // const [searchState.resultsDataArray, searchState.setResultsDataArray] = useState<SearchData>({})
-    // const [searchState.resultsSelectedIndex, searchState.setResultsSelectedIndex] = useState<[number, number]>([0, 0])
     const [searchQuery, setSearchQuery] = useState('')
 
     const updateInputFieldTimeoutRef = useRef<NodeJS.Timeout>()
@@ -201,16 +197,6 @@ function Search() {
         if (isDebugEnabled) console.log('Search: isOpen false')
         setIsOpen(false)
     }, [isFocused, isHovering, searchState.inputElement, searchState.isOpen, setIsOpen, sidenavState.isOpen])
-
-    // show / hide resultsElement;
-    useEffect(() => {
-        if (searchState.resultsElement == null) return
-        if (searchState.isOpen) {
-            searchState.resultsElement.style.display = 'block'
-            return
-        }
-        searchState.resultsElement.style.display = 'none'
-    }, [searchState.isOpen, searchState.resultsElement])
 
     // search after query is updated, i.e. onChange();
     useEffect(() => {
@@ -308,17 +294,23 @@ function Search() {
                 <div
                     // making hover:block conditional to searchState.isOpen does not work in all cases;
                     // maybe a race condition?;
-                    className={'absolute w-full lg:min-w-[600px] max-h-[calc(100vh-var(--height-topnav))] mt-1 bg-secondary shadow-md text-center overflow-y-scroll scrollbar-stable-both'}
+                    //
+                    // I would like to open it like the dropdown menues but I need to dynamically 
+                    // calculate the height; some elements can be side by side or be responsive;
+                    // TODO;
+                    className={'absolute w-full lg:min-w-[600px] max-h-[calc(100vh-var(--height-topnav))] mt-1 bg-secondary shadow-md text-center overflow-y-scroll scrollbar-stable-both transition-none motion-safe:[transition-property:transform] ease-linear duration-300'}
                     ref={initializeResultsElement}
                     onMouseEnter={handleMouseEnter}
                     onMouseLeave={handleMouseLeave}
-                    style={{ display: 'none' }}
+                    style={{
+                        display: searchState.isOpen ? 'block' : 'none',
+                    }}
                 >
                     {Object.entries(searchState.resultsDataArray).map(([url_relative, entryArray], groupIndex) => {
                         return (
                             // a fragment would not work here unless they have an unique key as well;
                             <div
-                                className="text-left p-2 pl-5 text-xl break-all"
+                                className="text-left px-5 py-2 text-xl break-all"
                                 key={`search-results-group-${groupIndex}`}
                             >
                                 <header>{url_relative}</header>
