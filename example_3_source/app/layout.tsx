@@ -7,12 +7,12 @@ import { ThemeProvider } from '@mui/material/styles'
 import { darkTheme, initialDelay, defaultIndexGroup } from '../constants/parameters'
 import { handleInput_Sidenav as handleKeyDown_Sidenav } from '../components/layout/Sidenav'
 import { useRouter } from 'next/navigation'
-import { useLayoutStore } from '../hooks/stores'
+import { useLayoutStore } from '../hooks/useStore'
 import { handleKeyInput_Topnav as handleKeyDown_Topnav } from '../components/layout/Topnav'
 import { handleKeyDown_Main } from '../components/layout/Main'
 import { NullableNumber } from '../constants/types'
 import { clearKeyDownTimeout } from '../constants/functions'
-import { useIndexGroupContainer } from '../hooks/indexGroup'
+import { useIndexGroupContainer } from '../hooks/useIndexGroup'
 
 export default RootLayout
 

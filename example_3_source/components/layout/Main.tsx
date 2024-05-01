@@ -2,12 +2,12 @@ import React, { KeyboardEvent, useEffect } from 'react'
 import { useDrag } from '@use-gesture/react'
 import { defaultIndexGroup, indexEntryTypesString, isDebugEnabled, mainIndexGroup, maximumDelay, maximumPullLength, refreshThreshold, repeatDelay } from '../../constants/parameters'
 import { ReactDOMAttributes } from '@use-gesture/react/dist/declarations/src/types'
-import { useGlobalStore } from '../../hooks/stores'
+import { useGlobalStore } from '../../hooks/useStore'
 import { NullableHTMLElement, NullableNumber } from '../../constants/types'
 import { useSearchParams } from 'next/navigation'
 import { focusNextElement, focusPreviousElement, normalizeString } from '../../constants/functions'
-import { useIndexGroupItem } from '../../hooks/indexGroup'
-import { useClick } from '../../hooks/gestures'
+import { useIndexGroupItem } from '../../hooks/useIndexGroup'
+import { useClick } from '../../hooks/useClick'
 import { usePullToRefresh } from '../../hooks/usePullToRefresh'
 
 export default Main
@@ -277,6 +277,9 @@ function Main({ children }: React.PropsWithChildren) {
     return (
         <main
             // sets onKeyDownCapture and onKeyUpCapture;
+            //
+            // does not work when you have child elements; for some reason dragging gets
+            // interrupted when moving over them; TODO;
             {...dragAttributes}
             onKeyDownCapture={undefined}
             onKeyUpCapture={undefined}
@@ -298,7 +301,7 @@ function Main({ children }: React.PropsWithChildren) {
                     // 'all'}]` in className; there seems to be a race condition otherwise; set it
                     // in style instead;
                     opacity: isRefreshing ? 1 : pullPosition / maximumPullLength,
-                    top: (isRefreshing ? refreshThreshold : Math.min(pullPosition, refreshThreshold)) / 3,
+                    top: (isRefreshing ? refreshThreshold : Math.min(pullPosition, refreshThreshold)) / 2,
                     transitionProperty: pullPosition > 0 ? 'none' : 'opacity, top',
                 }}
             >

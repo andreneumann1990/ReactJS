@@ -2,7 +2,7 @@ import React, { ReactNode, useEffect } from 'react'
 import { triggerFlashEffect } from '../../constants/functions'
 import { isDebugEnabled, maximumDelay, repeatDelay, sidenavIndexGroup } from '../../constants/parameters'
 import { DropdownMenuState, NullableNumber } from '../../constants/types'
-import { useDropdownMenuStoreArray, useGlobalStore, useLayoutStore, useSidenavStore } from '../../hooks/stores'
+import { useDropdownMenuStoreArray, useGlobalStore, useLayoutStore, useSidenavStore } from '../../hooks/useStore'
 
 export default DropdownMenu
 export { handleKeyDown_Global as handleKeyDown_DropdownMenu }

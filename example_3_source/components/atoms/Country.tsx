@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { FormikErrors } from 'formik'
 import { NullableDivElement, StringStringObject } from '../../constants/types'
 import { focusFirstChildElement } from '../../constants/functions'
-import { useIndexGroupItem, useIndexGroupContainer } from '../../hooks/indexGroup'
+import { useIndexGroupItem, useIndexGroupContainer } from '../../hooks/useIndexGroup'
 
 export { Country1 }
 export { Country2 }

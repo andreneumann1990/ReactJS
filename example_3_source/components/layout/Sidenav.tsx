@@ -1,12 +1,12 @@
 import DropdownMenu, { handleKeyDown_DropdownMenu } from '../atoms/DropdownMenu'
 import Link from 'next/link'
-import { useClick } from '../../hooks/gestures'
+import { useClick } from '../../hooks/useClick'
 import { focusableElementSelectors, isDebugEnabled, maximumDelay, repeatDelay, sidenavIndexGroup, topnavIndexGroup } from '../../constants/parameters'
 import { focusNextElement, focusPreviousElement, triggerFlashEffect } from '../../constants/functions'
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime'
 import { NullableHTMLElement, NullableNumber } from '../../constants/types'
-import { useGlobalStore } from '../../hooks/stores'
-import { useIndexGroupContainer, useIndexGroupEffect } from '../../hooks/indexGroup'
+import { useGlobalStore } from '../../hooks/useStore'
+import { useIndexGroupContainer, useIndexGroupEffect } from '../../hooks/useIndexGroup'
 
 export default Sidenav
 export { handleKeyDown_Global as handleInput_Sidenav }

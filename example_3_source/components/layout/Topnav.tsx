@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { isDebugEnabled, defaultIndexGroup, sidenavIndexGroup, topnavIndexGroup, focusableElementSelectors, maximumDelay, repeatDelay } from '../../constants/parameters'
 import { triggerFlashEffect } from '../../constants/functions'
 import { NullableHTMLElement, NullableNumber } from '../../constants/types'
-import { useGlobalStore, useLayoutStore, useSearchStore, useSidenavStore, useTopnavStore } from '../../hooks/stores'
+import { useGlobalStore, useLayoutStore, useSearchStore, useSidenavStore, useTopnavStore } from '../../hooks/useStore'
 import Search, { handleKeyDown_Search } from '../atoms/Search'
 import { useRouter } from 'next/navigation'
-import { useIndexGroupContainer, useIndexGroupEffect, useIndexGroupItem } from '../../hooks/indexGroup'
-import { useClick } from '../../hooks/gestures'
+import { useIndexGroupContainer, useIndexGroupEffect, useIndexGroupItem } from '../../hooks/useIndexGroup'
+import { useClick } from '../../hooks/useClick'
 
 export default Topnav
 export { handleKeyDown_Global as handleKeyInput_Topnav }

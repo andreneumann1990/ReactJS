@@ -1,7 +1,7 @@
 import tinycolor from 'tinycolor2'
 import { maximumDelay } from './parameters'
 import { NullableHTMLElement } from './types'
-import { useLayoutStore } from '../hooks/stores'
+import { useLayoutStore } from '../hooks/useStore'
 
 //
 // functions

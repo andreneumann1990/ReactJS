@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { NullableHTMLElement } from '../constants/types'
-import { useLayoutStore } from './stores'
+import { useLayoutStore } from './useStore'
 import { handleFocusCapture } from '../constants/functions'
 
 //

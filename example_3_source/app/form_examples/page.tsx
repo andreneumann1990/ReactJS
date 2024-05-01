@@ -7,7 +7,7 @@ import { Country1, Country2 } from '../../components/atoms/Country'
 import Link from 'next/link'
 import { Button } from '@mui/material'
 import { focusableElementSelectors, mainIndexGroup } from '../../constants/parameters'
-import { useIndexGroupEffect, useIndexGroupContainer } from '../../hooks/indexGroup'
+import { useIndexGroupEffect, useIndexGroupContainer } from '../../hooks/useIndexGroup'
 import { NullableDivElement, NullableFormElement } from '../../constants/types'
 
 function Page() {

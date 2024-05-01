@@ -6,7 +6,7 @@ import React, { Suspense, useEffect } from 'react'
 import Main from './Main'
 import { triggerFlashEffect } from '../../constants/functions'
 import { NullableHTMLElement, NullableNumber } from '../../constants/types'
-import { useGlobalStore } from '../../hooks/stores'
+import { useGlobalStore } from '../../hooks/useStore'
 import { maximumDelay } from '../../constants/parameters'
 
 export default Layout

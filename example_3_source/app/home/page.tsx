@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { focusableElementSelectors, mainIndexGroup } from '../../constants/parameters'
 import { NullableDivElement } from '../../constants/types'
-import { useIndexGroupContainer, useIndexGroupEffect } from '../../hooks/indexGroup'
+import { useIndexGroupContainer, useIndexGroupEffect } from '../../hooks/useIndexGroup'
 
 export default Page
 

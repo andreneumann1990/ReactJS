@@ -4,7 +4,7 @@ import DOMPurify from 'dompurify'
 import Link from 'next/link'
 import { isDebugEnabled, maximumDelay, repeatDelay, topnavIndexGroup } from '../../constants/parameters'
 import { useRouter } from 'next/navigation'
-import { useGlobalStore } from '../../hooks/stores'
+import { useGlobalStore } from '../../hooks/useStore'
 import { EntryData, NullableNumber, SearchData } from '../../constants/types'
 import { scrollIntoView } from '../../constants/functions'
 
