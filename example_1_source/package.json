@@ -1,6 +1,6 @@
 {
     "name": "example_1",
-    "version": "0.0.6",
+    "version": "0.0.7",
     "private": true,
     "homepage": "https://andreneumann1990.github.io/reactjs/example_1",
     "dependencies": {
@@ -23,11 +23,12 @@
         "web-vitals": "^2.1.4"
     },
     "scripts": {
+        "preinstall": "npx npm-force-resolutions",
         "start": "react-scripts start",
         "build": "react-scripts build",
         "test": "react-scripts test",
         "eject": "react-scripts eject",
-        "deploy": "gh-pages -d build",
+        "deploy": "gh-pages -d build --git \"commit -S -m 'Deploy to GitHub Pages'\"",
         "updateAlgoliaIndex": "node indexToAlgolia.js"
     },
     "eslintConfig": {
@@ -92,8 +93,13 @@
         "@types/hammerjs": "^2.0.45",
         "@types/tinycolor2": "^1.4.6",
         "gh-pages": "^6.1.1",
-        "node-sass": "^9.0.0",
+        "npm-force-resolutions": "^0.0.10",
         "sass": "^1.72.0",
         "tinycolor2": "^1.6.0"
+    },
+    "overrides": {
+        "postcss": "^8.4.47",
+        "svgo": "^2.8.0",
+        "ws": "^8.8.18"
     }
 }

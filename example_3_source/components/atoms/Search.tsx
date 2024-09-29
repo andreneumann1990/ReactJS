@@ -1,5 +1,5 @@
 import React, { ChangeEvent, FormEvent, useEffect, useRef, useState } from 'react'
-import algoliasearch from 'algoliasearch/lite'
+import { algoliasearch } from 'algoliasearch';
 import DOMPurify from 'dompurify'
 import Link from 'next/link'
 import { isDebugEnabled, maximumDelay, repeatDelay, topnavIndexGroup } from '../../constants/parameters'
@@ -15,7 +15,7 @@ export { handleKeyDown_Global as handleKeyDown_Search }
 // parameters and variables
 //
 
-const algoliaIndex = algoliasearch('2QYN25VL0K', 'ba0b8a970db7843753c13218f38ae4e2').initIndex('example_3')
+const algoliaClient = algoliasearch('2QYN25VL0K', 'ba0b8a970db7843753c13218f38ae4e2')
 
 //
 // functions
@@ -222,9 +222,15 @@ function Search() {
         setLastSearchQuery(searchQuery)
         if (isDebugEnabled) console.log(`Search: Search for ${searchQuery}`)
 
-        algoliaIndex.search(searchQuery).then((response) => {
+        algoliaClient.searchSingleIndex({
+            indexName: 'example_3',
+            searchParams: {
+                query: searchQuery,
+                typoTolerance: false,
+            }
+        }).then((response) => {
             let dataArray: SearchData = {}
-            response.hits.forEach((hit: any, index) => {
+            response.hits.forEach((hit: any, index: number) => {
                 //
                 // example of the structure:
                 //   hit: { 

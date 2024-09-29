@@ -1,14 +1,13 @@
 {
     "name": "example_3_source",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "private": true,
     "homepage": "https://andreneumann1990.github.io/reactjs/example_3",
     "scripts": {
         "dev": "next dev",
         "build": "next build && next-sitemap",
         "start": "next start",
-        "lint": "next lint",
-        "export": "next build && next export"
+        "lint": "next lint"
     },
     "dependencies": {
         "@emotion/react": "^11.11.4",
