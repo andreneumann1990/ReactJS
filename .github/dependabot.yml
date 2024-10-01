@@ -5,24 +5,28 @@ updates:
     schedule:
       interval: "weekly"
     target-branch: "vercel"
+    open-pull-requests-limit: 0
 
   - package-ecosystem: "npm"
     directory: "/example_1_source"
     schedule:
       interval: "weekly"
     target-branch: "gh-pages"
+    open-pull-requests-limit: 0
 
   - package-ecosystem: "npm"
     directory: "/example_2_source"
     schedule:
       interval: "weekly"
     target-branch: "gh-pages"
+    open-pull-requests-limit: 0
 
   - package-ecosystem: "npm"
     directory: "/example_3_source"
     schedule:
       interval: "weekly"
     target-branch: "gh-pages"
+    open-pull-requests-limit: 0
 
   - package-ecosystem: "gradle"
     directory: "/"
