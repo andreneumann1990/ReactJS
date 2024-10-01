@@ -1,3 +1,9 @@
-# https://www.robotstxt.org/robotstxt.html
+# *
 User-agent: *
-Disallow:
+Allow: /
+
+# Host
+Host: https://andreneumann1990.github.io/reactjs/example_3
+
+# Sitemaps
+Sitemap: https://andreneumann1990.github.io/reactjs/example_3/sitemap.xml

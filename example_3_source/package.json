@@ -1,33 +1,38 @@
 {
     "name": "example_3_source",
-    "version": "0.0.1",
+    "version": "0.0.4",
     "private": true,
     "scripts": {
         "dev": "next dev",
         "build": "next build",
         "start": "next start",
-        "lint": "next lint",
-        "export": "next build && next export"
+        "lint": "next lint"
     },
     "dependencies": {
         "@emotion/react": "^11.11.4",
         "@emotion/styled": "^11.11.5",
         "@mui/material": "^5.15.15",
         "@use-gesture/react": "^10.3.1",
+        "dompurify": "^3.1.0",
         "formik": "^2.4.5",
-        "next": "^14.1.4",
+        "next": "^14.2.1",
+        "next-sitemap": "^4.2.3",
+        "puppeteer": "^22.6.3",
         "react": "^18",
         "react-dom": "^18",
         "react-instantsearch": "^7.7.1",
+        "react-instantsearch-core": "^7.7.1",
         "react-router-dom": "^6.22.3",
         "sass": "^1.72.0",
         "timers-promises": "^1.0.1",
         "tinycolor2": "^1.6.0",
+        "use-pull-to-refresh": "^2.2.1",
         "yup": "^1.4.0",
         "zustand": "^4.5.2"
     },
     "devDependencies": {
         "@babel/core": "^7.24.3",
+        "@types/dompurify": "^3.0.5",
         "@types/node": "^20",
         "@types/react": "^18",
         "@types/react-dom": "^18",
@@ -56,6 +61,17 @@
             "next",
             "next/core-web-vitals",
             "plugin:@typescript-eslint/recommended"
+        ],
+        "overrides": [
+            {
+                "files": [
+                    "*.ts",
+                    "*.tsx"
+                ],
+                "rules": {
+                    "no-undef": "off"
+                }
+            }
         ],
         "rules": {
             "@next/next/no-img-element": "off",
@@ -86,7 +102,7 @@
             "prefer-const": "off",
             "prefer-rest-params": "error",
             "prefer-spread": "error",
-            "prefer-template": "error",
+            "prefer-template": "off",
             "arrow-spacing": "error",
             "generator-star-spacing": "error",
             "no-duplicate-imports": "error",

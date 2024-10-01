@@ -1,77 +1,32 @@
-import TextField from '@mui/material/TextField'
-import { Autocomplete, Box } from '@mui/material'
-
-export { InputCountry1 }
-export { InputCountry2 }
+import { createTheme } from '@mui/material'
 
 //
 //
 //
 
-const InputCountry1 = (props: { [field: string]: any }) => {
-    const options = ['England', 'France', 'Germany', 'Musterland']
+export const darkTheme = createTheme({
+    palette: {
+        mode: 'dark',
+    },
+})
 
-    return (
-        <Autocomplete
-            {...props}
-            id="country1"
-            autoHighlight
-            options={options.map((option) => option)}
-            renderInput={(params) => (
-                <TextField
-                    {...params}
-                    label="Country"
-                    InputProps={{ ...params.InputProps }}
-                />
-            )}
-        />
-    )
-}
+export const indexEntryTypesString = 'h1, h2, h3, li, label'
+export const isDebugEnabled = true
+export const isProduction = process.env.NODE_ENV === 'production'
+export const backEndHRef = isProduction ? 'https://example-3-b52da596edfb.herokuapp.com' : 'http://localhost:8080'
 
-// From: https://mui.com/material-ui/react-autocomplete/
-function InputCountry2(props: { [field: string]: any }) {
-    return (
-        <Autocomplete
-            {...props}
-            id="country2"
-            sx={{ width: 300 }}
-            options={countries}
-            autoHighlight
-            getOptionLabel={(option) => option.label}
-            renderOption={(props, option, state) => (<Box component="li" sx={{ '& > img': { mr: 2, flexShrink: 0 } }} {...props} key={`${state.index}a`}>
-                {/*
-                    so both need a key -- the Box and the img element; probably the <></> fragment 
-                    as well if it is being used(?);
-                    
-                    it complains that I should use <Image> but the elements have different heights
-                    and <Image> seems to require a known height; 
-                */}
-                <img key={`${state.index}b`}
-                    loading="lazy"
-                    width="20"
-                    srcSet={`https://flagcdn.com/w40/${option.code.toLowerCase()}.png 2x`}
-                    src={`https://flagcdn.com/w20/${option.code.toLowerCase()}.png`}
-                    alt=""
-                />
-                {option.label} ({option.code}) +{option.phone}
-            </Box>)
-            }
-            renderInput={(params) => (
-                <TextField
-                    {...params}
-                    label="Choose a country"
-                    inputProps={{
-                        ...params.inputProps,
-                        autoComplete: 'new-password', // disable autocomplete and autofill
-                    }}
-                />
-            )}
-        />
-    )
-}
+// used to group focusable elements;
+export const defaultIndexGroup = 'default'
+export const mainIndexGroup = 'main'
+export const topnavIndexGroup = 'topnav'
+export const sidenavIndexGroup = 'sidenav'
+
+export const initialDelay = 400
+export const maximumDelay = 2147483647
+export const repeatDelay = 100
 
 // From: https://bitbucket.org/atlassian/atlaskit-mk-2/raw/4ad0e56649c3e6c973e226b7efaeb28cb240ccb0/packages/core/select/src/data/countries.js
-const countries = [
+export const countries = [
     { code: 'AD', label: 'Andorra', phone: '376' },
     {
         code: 'AE',
@@ -495,3 +450,8 @@ const countries = [
     { code: 'ZM', label: 'Zambia', phone: '260' },
     { code: 'ZW', label: 'Zimbabwe', phone: '263' },
 ]
+
+export const focusableElementSelectors = 'a, button, input, summary'
+
+export const maximumPullLength = 180
+export const refreshThreshold = 160
