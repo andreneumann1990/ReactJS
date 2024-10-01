@@ -1,0 +1,31 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/example_3_source"
+    schedule:
+      interval: "weekly"
+    target-branch: "vercel"
+
+  - package-ecosystem: "npm"
+    directory: "/example_1_source"
+    schedule:
+      interval: "weekly"
+    target-branch: "gh-pages"
+
+  - package-ecosystem: "npm"
+    directory: "/example_2_source"
+    schedule:
+      interval: "weekly"
+    target-branch: "gh-pages"
+
+  - package-ecosystem: "npm"
+    directory: "/example_3_source"
+    schedule:
+      interval: "weekly"
+    target-branch: "gh-pages"
+
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    target-branch: "example-3-b52da596edfb.herokuapp.com"
